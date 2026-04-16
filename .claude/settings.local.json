@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//c/Users/hoang.nguyenxuan/.claude/projects/c--Users-hoang-nguyenxuan-Documents-Side-Projects-brotato-hackathon/memory/**)",
+      "Skill(claude-api)",
+      "Skill(claude-api:*)"
+    ]
+  }
+}
