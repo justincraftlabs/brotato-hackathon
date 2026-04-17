@@ -7,7 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/cn";
 import { formatCo2, formatKwh, formatVnd } from "@/lib/format";
 import { CO2_PER_TREE_PER_YEAR } from "@/lib/constants";
-import { SIMULATOR_LABELS } from "@/lib/simulator-constants";
+import { useT } from "@/hooks/use-t";
 
 interface ImpactSummaryProps {
   savingsKwh: number;
@@ -50,31 +50,32 @@ export function ImpactSummary({
   savingsVnd,
   savingsCo2Kg,
 }: ImpactSummaryProps) {
+  const t = useT();
   const treesEquivalent = Math.round(
     (savingsCo2Kg / CO2_PER_TREE_PER_YEAR) * 10
   ) / 10;
 
   const cards: SummaryCardData[] = [
     {
-      label: SIMULATOR_LABELS.KWH_SAVED,
+      label: t.SIMULATOR_KWH_SAVED,
       value: formatKwh(savingsKwh),
       subtitle: null,
       icon: Zap,
       delta: savingsKwh,
     },
     {
-      label: SIMULATOR_LABELS.VND_SAVED,
+      label: t.SIMULATOR_VND_SAVED,
       value: formatVnd(savingsVnd),
       subtitle: null,
       icon: TrendingDown,
       delta: savingsVnd,
     },
     {
-      label: SIMULATOR_LABELS.CO2_SAVED,
+      label: t.SIMULATOR_CO2_SAVED,
       value: formatCo2(savingsCo2Kg),
       subtitle:
         treesEquivalent > ZERO_DELTA
-          ? `~${treesEquivalent} ${SIMULATOR_LABELS.TREE_EQUIVALENT_SUFFIX}`
+          ? `~${treesEquivalent} ${t.SIMULATOR_TREE_EQUIVALENT_SUFFIX}`
           : null,
       icon: Leaf,
       delta: savingsCo2Kg,

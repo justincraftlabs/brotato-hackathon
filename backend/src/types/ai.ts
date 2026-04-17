@@ -21,6 +21,7 @@ export interface ApplianceEstimate {
   estimatedWattage: number;
   estimatedStandbyWattage: number;
   commonBrands: string[];
+  suggestedUsageHabit: string;
 }
 
 export interface ImageRecognitionResult {

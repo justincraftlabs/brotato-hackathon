@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/cn";
 import { formatCo2, formatVnd } from "@/lib/format";
-import { SIMULATOR_LABELS } from "@/lib/simulator-constants";
+import { useT } from "@/hooks/use-t";
 
 interface ComparisonBarProps {
   originalCost: number;
@@ -25,6 +25,7 @@ export function ComparisonBar({
   adjustedCo2,
   onReset,
 }: ComparisonBarProps) {
+  const t = useT();
   const costDelta = originalCost - adjustedCost;
   const co2Delta = originalCo2 - adjustedCo2;
 
@@ -34,7 +35,7 @@ export function ComparisonBar({
         <div className="grid grid-cols-2 gap-3">
           <div className="flex flex-col items-center gap-1">
             <span className="text-xs font-medium text-muted-foreground">
-              {SIMULATOR_LABELS.CURRENT_LABEL}
+              {t.SIMULATOR_CURRENT_LABEL}
             </span>
             <p className="text-sm font-bold">{formatVnd(originalCost)}</p>
             <p className="text-xs text-muted-foreground">
@@ -44,7 +45,7 @@ export function ComparisonBar({
 
           <div className="flex flex-col items-center gap-1">
             <span className="text-xs font-medium text-muted-foreground">
-              {SIMULATOR_LABELS.ADJUSTED_LABEL}
+              {t.SIMULATOR_ADJUSTED_LABEL}
             </span>
             <p className="text-sm font-bold">{formatVnd(adjustedCost)}</p>
             <p className="text-xs text-muted-foreground">
@@ -55,12 +56,12 @@ export function ComparisonBar({
 
         <div className="flex items-center justify-center gap-4">
           <DeltaIndicator
-            label={SIMULATOR_LABELS.MONTHLY_COST}
+            label={t.SIMULATOR_MONTHLY_COST}
             value={formatVnd(Math.abs(costDelta))}
             delta={costDelta}
           />
           <DeltaIndicator
-            label={SIMULATOR_LABELS.MONTHLY_CO2}
+            label={t.SIMULATOR_MONTHLY_CO2}
             value={formatCo2(Math.abs(co2Delta))}
             delta={co2Delta}
           />
@@ -73,7 +74,7 @@ export function ComparisonBar({
           className="w-full"
         >
           <RotateCcw className="mr-2 h-3 w-3" />
-          {SIMULATOR_LABELS.RESET_BUTTON}
+          {t.SIMULATOR_RESET_BUTTON}
         </Button>
       </CardContent>
     </Card>

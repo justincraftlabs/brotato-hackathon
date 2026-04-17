@@ -6,6 +6,7 @@ import { RECOMMENDATION_SYSTEM_PROMPT, RECOMMENDATION_RETRY_PROMPT } from '../pr
 import { CHAT_ASSISTANT_SYSTEM_PROMPT } from '../prompts/chat-assistant';
 import { APPLIANCE_ESTIMATOR_PROMPT } from '../prompts/appliance-estimator';
 import { IMAGE_RECOGNIZER_PROMPT } from '../prompts/image-recognizer';
+import { USAGE_HABIT_PARSER_PROMPT } from '../prompts/usage-habit-parser';
 
 let _client: Anthropic | null = null;
 
@@ -20,6 +21,7 @@ function getClient(): Anthropic {
 const MODEL_SONNET = 'claude-sonnet-4-6';
 const MAX_TOKENS_STANDARD = 16000;
 const MAX_TOKENS_STREAMING = 64000;
+const MAX_TOKENS_HABIT_PARSER = 512;
 const MAX_CHAT_HISTORY = 20;
 const WATTS_PER_KW = 1000;
 const HOURS_PER_DAY_FOR_DISPLAY = 1;
@@ -158,8 +160,11 @@ export function buildHomeContext(home: Home): string {
 
     for (const appliance of room.appliances) {
       const costFormatted = appliance.monthlyCost.toLocaleString('vi-VN');
+      const habitNote = appliance.usageHabit
+        ? ` [Thoi quen: ${appliance.usageHabit}]`
+        : '';
       lines.push(
-        `- ${appliance.name}: ${appliance.wattage}W, ${appliance.dailyUsageHours}h/ngay, standby ${appliance.standbyWattage}W => ${appliance.monthlyKwh.toFixed(1)} kWh/thang (~${costFormatted}d)`
+        `- ${appliance.name}: ${appliance.wattage}W, ${appliance.dailyUsageHours}h/ngay, standby ${appliance.standbyWattage}W => ${appliance.monthlyKwh.toFixed(1)} kWh/thang (~${costFormatted}d)${habitNote}`
       );
       totalKwh += appliance.monthlyKwh;
     }
@@ -225,6 +230,7 @@ interface RawApplianceEstimate {
   estimatedWattage: number;
   estimatedStandbyWattage: number;
   commonBrands: string[];
+  suggestedUsageHabit: string;
 }
 
 export async function estimateAppliance(
@@ -252,6 +258,7 @@ export async function estimateAppliance(
     estimatedWattage: parsed.estimatedWattage,
     estimatedStandbyWattage: parsed.estimatedStandbyWattage,
     commonBrands: parsed.commonBrands ?? [],
+    suggestedUsageHabit: parsed.suggestedUsageHabit ?? '',
   };
 }
 
@@ -327,5 +334,58 @@ export async function recognizeAppliance(
     };
   } catch {
     return FALLBACK_RECOGNITION_RESULT;
+  }
+}
+
+export interface UsageHabitInput {
+  index: number;
+  name: string;
+  wattage: number;
+  usageHabit: string;
+  currentDailyHours: number;
+}
+
+interface RawHabitResult {
+  index: number;
+  effectiveDailyHours: number;
+}
+
+const MIN_DAILY_HOURS = 0;
+const MAX_DAILY_HOURS = 24;
+
+export async function parseUsageHabits(
+  inputs: UsageHabitInput[]
+): Promise<number[]> {
+  const defaults = inputs.map((i) => i.currentDailyHours);
+
+  const hasNonEmptyHabit = inputs.some((i) => i.usageHabit.trim().length > 0);
+  if (!hasNonEmptyHabit) {
+    return defaults;
+  }
+
+  try {
+    const response = await getClient().messages.create({
+      model: MODEL_SONNET,
+      max_tokens: MAX_TOKENS_HABIT_PARSER,
+      system: USAGE_HABIT_PARSER_PROMPT,
+      messages: [{ role: 'user', content: JSON.stringify(inputs) }],
+    });
+
+    const text = extractTextFromResponse(response);
+    const cleaned = stripMarkdownJsonWrapper(text);
+    const results = JSON.parse(cleaned) as RawHabitResult[];
+
+    const effective = [...defaults];
+    for (const result of results) {
+      if (result.index >= 0 && result.index < effective.length) {
+        effective[result.index] = Math.max(
+          MIN_DAILY_HOURS,
+          Math.min(MAX_DAILY_HOURS, result.effectiveDailyHours)
+        );
+      }
+    }
+    return effective;
+  } catch {
+    return defaults;
   }
 }

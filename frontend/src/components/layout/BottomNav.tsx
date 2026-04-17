@@ -1,12 +1,13 @@
 "use client";
 
-import { Home, MessageCircle, Settings, Sliders } from "lucide-react";
+import { Home, Lightbulb, MessageCircle, Settings, Sliders } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ComponentType } from "react";
 
 import { cn } from "@/lib/utils";
-import { NAV_LABELS, NAV_ROUTES } from "@/lib/constants";
+import { NAV_ROUTES } from "@/lib/constants";
+import { useT } from "@/hooks/use-t";
 
 interface NavItem {
   href: string;
@@ -14,15 +15,17 @@ interface NavItem {
   icon: ComponentType<{ className?: string }>;
 }
 
-const NAV_ITEMS: NavItem[] = [
-  { href: NAV_ROUTES.DASHBOARD, label: NAV_LABELS.OVERVIEW, icon: Home },
-  { href: NAV_ROUTES.CHAT, label: NAV_LABELS.CHAT, icon: MessageCircle },
-  { href: NAV_ROUTES.SIMULATOR, label: NAV_LABELS.SIMULATOR, icon: Sliders },
-  { href: NAV_ROUTES.SETUP, label: NAV_LABELS.SETUP, icon: Settings },
-];
-
 export function BottomNav() {
+  const t = useT();
   const pathname = usePathname();
+
+  const NAV_ITEMS: NavItem[] = [
+    { href: NAV_ROUTES.DASHBOARD, label: t.NAV_OVERVIEW, icon: Home },
+    { href: NAV_ROUTES.CHAT, label: t.NAV_CHAT, icon: MessageCircle },
+    { href: NAV_ROUTES.SIMULATOR, label: t.NAV_SIMULATOR, icon: Sliders },
+    { href: NAV_ROUTES.SETUP, label: t.NAV_SETUP, icon: Settings },
+    { href: NAV_ROUTES.SUGGESTIONS, label: t.NAV_SUGGESTIONS, icon: Lightbulb },
+  ];
 
   return (
     <nav className="fixed bottom-0 left-0 z-50 w-full border-t border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">

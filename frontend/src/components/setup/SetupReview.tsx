@@ -21,20 +21,8 @@ import {
   calculateMonthlyCost,
   calculateMonthlyKwh,
 } from "@/lib/calculations";
-import { ROOM_SIZE_LABELS, ROOM_TYPE_LABELS } from "@/lib/constants";
 import { formatCo2, formatKwh, formatVnd } from "@/lib/format";
-import {
-  BUTTON_BACK,
-  BUTTON_CONFIRM,
-  LABEL_APPLIANCE_COUNT,
-  LABEL_CO2,
-  LABEL_MONTHLY_COST,
-  LABEL_MONTHLY_KWH,
-  LABEL_REVIEW_TITLE,
-  LABEL_ROOM_COUNT,
-  LABEL_SUBMITTING,
-  LABEL_TOTAL,
-} from "@/lib/setup-constants";
+import { useT } from "@/hooks/use-t";
 import type { Appliance, Room, RoomType } from "@/lib/types";
 
 interface SetupReviewProps {
@@ -61,6 +49,7 @@ export function SetupReview({
   onConfirm,
   onBack,
 }: SetupReviewProps) {
+  const t = useT();
   const [expandedRooms, setExpandedRooms] = useState<Set<string>>(new Set());
 
   function toggleExpand(roomId: string) {
@@ -100,7 +89,7 @@ export function SetupReview({
   return (
     <div className="flex flex-col gap-4">
       <p className="text-center text-sm text-muted-foreground">
-        {LABEL_REVIEW_TITLE}
+        {t.LABEL_REVIEW_TITLE}
       </p>
 
       {roomSummaries.map(({ room, appliances, roomKwh, roomCost }) => {
@@ -126,15 +115,15 @@ export function SetupReview({
                 <div className="flex items-center gap-2">
                   <Icon className="h-5 w-5 text-primary" />
                   <CardTitle className="text-sm">
-                    {ROOM_TYPE_LABELS[room.type]}
+                    {t.ROOM_TYPE_LABELS[room.type]}
                   </CardTitle>
                   <span className="text-xs text-muted-foreground">
-                    {ROOM_SIZE_LABELS[room.size]}
+                    {t.ROOM_SIZE_LABELS[room.size]}
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="text-xs text-muted-foreground">
-                    {appliances.length} {LABEL_APPLIANCE_COUNT}
+                    {appliances.length} {t.LABEL_APPLIANCE_COUNT}
                   </span>
                   {isExpanded ? (
                     <ChevronUp className="h-4 w-4 text-muted-foreground" />
@@ -179,27 +168,27 @@ export function SetupReview({
 
       <Card className="border-primary">
         <CardContent className="p-4">
-          <h3 className="mb-3 text-sm font-semibold">{LABEL_TOTAL}</h3>
+          <h3 className="mb-3 text-sm font-semibold">{t.LABEL_TOTAL}</h3>
           <div className="grid grid-cols-2 gap-3">
             <SummaryItem
-              label={LABEL_ROOM_COUNT}
-              value={`${rooms.length} ${LABEL_ROOM_COUNT}`}
+              label={t.LABEL_ROOM_COUNT}
+              value={`${rooms.length} ${t.LABEL_ROOM_COUNT}`}
             />
             <SummaryItem
-              label={LABEL_APPLIANCE_COUNT}
-              value={`${totalAppliances} ${LABEL_APPLIANCE_COUNT}`}
+              label={t.LABEL_APPLIANCE_COUNT}
+              value={`${totalAppliances} ${t.LABEL_APPLIANCE_COUNT}`}
             />
             <SummaryItem
-              label={LABEL_MONTHLY_KWH}
+              label={t.LABEL_MONTHLY_KWH}
               value={formatKwh(totalKwh)}
             />
             <SummaryItem
-              label={LABEL_MONTHLY_COST}
+              label={t.LABEL_MONTHLY_COST}
               value={formatVnd(totalCost)}
               highlight
             />
             <SummaryItem
-              label={LABEL_CO2}
+              label={t.LABEL_CO2}
               value={formatCo2(totalCo2)}
             />
           </div>
@@ -214,7 +203,7 @@ export function SetupReview({
             onClick={onBack}
             disabled={isSubmitting}
           >
-            {BUTTON_BACK}
+            {t.BUTTON_BACK}
           </Button>
           <Button
             className="h-12 flex-1 bg-primary text-primary-foreground hover:bg-primary/90"
@@ -224,10 +213,10 @@ export function SetupReview({
             {isSubmitting ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                {LABEL_SUBMITTING}
+                {t.LABEL_SUBMITTING}
               </>
             ) : (
-              BUTTON_CONFIRM
+              t.BUTTON_CONFIRM
             )}
           </Button>
         </div>

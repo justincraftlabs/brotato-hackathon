@@ -6,14 +6,13 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   APP_DESCRIPTION,
-  APP_DESCRIPTION_VI,
-  CTA_BACK_TO_DASHBOARD,
-  CTA_GET_STARTED,
   LOCAL_STORAGE_HOME_ID_KEY,
   NAV_ROUTES,
 } from "@/lib/constants";
+import { useT } from "@/hooks/use-t";
 
 export default function HomePage() {
+  const t = useT();
   const [hasExistingHome, setHasExistingHome] = useState(false);
 
   useEffect(() => {
@@ -32,17 +31,17 @@ export default function HomePage() {
 
         <p className="text-lg text-muted-foreground">{APP_DESCRIPTION}</p>
 
-        <p className="text-sm text-muted-foreground">{APP_DESCRIPTION_VI}</p>
+        <p className="text-sm text-muted-foreground">{t.APP_DESCRIPTION_VI}</p>
 
         <div className="flex flex-col gap-3 pt-4">
           <Button asChild size="lg" className="bg-primary hover:bg-primary-mid">
-            <Link href={NAV_ROUTES.SETUP}>{CTA_GET_STARTED}</Link>
+            <Link href={NAV_ROUTES.SETUP}>{t.CTA_GET_STARTED}</Link>
           </Button>
 
           {hasExistingHome && (
             <Button asChild variant="outline" size="lg">
               <Link href={NAV_ROUTES.DASHBOARD}>
-                {CTA_BACK_TO_DASHBOARD}
+                {t.CTA_BACK_TO_DASHBOARD}
               </Link>
             </Button>
           )}

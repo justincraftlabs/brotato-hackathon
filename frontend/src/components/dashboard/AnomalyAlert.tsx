@@ -2,7 +2,7 @@
 
 import { AlertTriangle } from "lucide-react";
 
-import { DASHBOARD_LABELS } from "@/lib/constants";
+import { useT } from "@/hooks/use-t";
 import type { Anomaly } from "@/lib/types";
 
 interface AnomalyAlertProps {
@@ -12,6 +12,8 @@ interface AnomalyAlertProps {
 const FIRST_ANOMALY_INDEX = 0;
 
 export function AnomalyAlert({ anomalies }: AnomalyAlertProps) {
+  const t = useT();
+
   if (anomalies.length === 0) {
     return null;
   }
@@ -26,7 +28,7 @@ export function AnomalyAlert({ anomalies }: AnomalyAlertProps) {
       <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-accent" />
       <div className="flex flex-col gap-0.5">
         <p className="text-sm font-semibold text-accent-dark dark:text-accent">
-          {DASHBOARD_LABELS.ANOMALY_TITLE}
+          {t.DASHBOARD_ANOMALY_TITLE}
         </p>
         <p className="text-xs text-foreground/80">
           <span className="font-medium">{firstAnomaly.name}</span>

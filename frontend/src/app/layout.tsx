@@ -27,7 +27,7 @@ export default function RootLayout({
       <head>
         <meta name="color-scheme" content="dark light" />
       </head>
-      <body className="min-h-screen bg-background font-sans text-foreground antialiased">
+      <body className="min-h-screen bg-background font-sans text-foreground antialiased" suppressHydrationWarning>
         <ThemeProvider>
           <LanguageProvider>{children}</LanguageProvider>
         </ThemeProvider>

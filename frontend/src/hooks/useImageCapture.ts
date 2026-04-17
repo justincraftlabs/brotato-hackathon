@@ -4,7 +4,7 @@ import { useCallback, useState } from "react";
 
 import { recognizeAppliance } from "@/lib/api";
 import { IMAGE_LABELS } from "@/lib/image-constants";
-import { isFileSizeValid, resizeImageToBase64 } from "@/lib/image";
+import { base64ToFile, resizeImageToBase64 } from "@/lib/image";
 import type { ImageRecognitionResult } from "@/lib/types";
 
 interface UseImageCaptureReturn {
@@ -26,19 +26,14 @@ export function useImageCapture(): UseImageCaptureReturn {
   const handleFileSelect = useCallback(async (file: File) => {
     setError(null);
     setRecognitionResult(null);
-
-    if (!isFileSizeValid(file)) {
-      setError(IMAGE_LABELS.FILE_TOO_LARGE);
-      return;
-    }
-
     setIsProcessing(true);
 
     try {
       const base64 = await resizeImageToBase64(file);
       setCapturedImage(base64);
 
-      const result = await recognizeAppliance(file);
+      const compressedFile = base64ToFile(base64);
+      const result = await recognizeAppliance(compressedFile);
 
       if (!result.success) {
         setError(result.error);

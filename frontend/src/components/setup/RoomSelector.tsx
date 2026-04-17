@@ -14,11 +14,8 @@ import type { ComponentType } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { ROOM_SIZE_LABELS, ROOM_TYPE_LABELS } from "@/lib/constants";
-import {
-  BUTTON_NEXT,
-  LABEL_SELECT_ROOMS,
-} from "@/lib/setup-constants";
+import { useT } from "@/hooks/use-t";
+import type { Translations } from "@/lib/translations";
 import type { Room, RoomSize, RoomType } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -39,9 +36,6 @@ const ICON_MAP: Record<RoomType, ComponentType<{ className?: string }>> = {
   other: MoreHorizontal,
 };
 
-const ROOM_TYPES = Object.keys(ROOM_TYPE_LABELS) as RoomType[];
-const ROOM_SIZES = Object.keys(ROOM_SIZE_LABELS) as RoomSize[];
-
 export function RoomSelector({
   rooms,
   onAddRoom,
@@ -49,6 +43,9 @@ export function RoomSelector({
   onChangeSize,
   onNext,
 }: RoomSelectorProps) {
+  const t = useT();
+  const ROOM_TYPES = Object.keys(t.ROOM_TYPE_LABELS) as RoomType[];
+  const ROOM_SIZES = Object.keys(t.ROOM_SIZE_LABELS) as RoomSize[];
   const hasRooms = rooms.length > 0;
 
   function getRoomCountForType(type: RoomType): number {
@@ -62,7 +59,7 @@ export function RoomSelector({
   return (
     <div className="flex flex-col gap-6">
       <p className="text-center text-sm text-muted-foreground">
-        {LABEL_SELECT_ROOMS}
+        {t.LABEL_SELECT_ROOMS}
       </p>
 
       <div className="grid grid-cols-2 gap-3">
@@ -81,7 +78,7 @@ export function RoomSelector({
               onClick={() => onAddRoom(type)}
               role="button"
               tabIndex={0}
-              aria-label={ROOM_TYPE_LABELS[type]}
+              aria-label={t.ROOM_TYPE_LABELS[type]}
               onKeyDown={(e) => {
                 if (e.key !== "Enter" && e.key !== " ") {
                   return;
@@ -100,7 +97,7 @@ export function RoomSelector({
                   )}
                 </div>
                 <span className="text-sm font-medium">
-                  {ROOM_TYPE_LABELS[type]}
+                  {t.ROOM_TYPE_LABELS[type]}
                 </span>
               </CardContent>
             </Card>
@@ -124,6 +121,7 @@ export function RoomSelector({
                 totalCount={typeRooms.length}
                 onChangeSize={onChangeSize}
                 onRemove={onRemoveRoom}
+                t={t}
               />
             ));
           })}
@@ -137,7 +135,7 @@ export function RoomSelector({
             disabled={!hasRooms}
             onClick={onNext}
           >
-            {BUTTON_NEXT}
+            {t.BUTTON_NEXT}
           </Button>
         </div>
       </div>
@@ -151,6 +149,7 @@ interface RoomSizeRowProps {
   totalCount: number;
   onChangeSize: (roomId: string, size: RoomSize) => void;
   onRemove: (roomId: string) => void;
+  t: Translations;
 }
 
 function RoomSizeRow({
@@ -159,9 +158,11 @@ function RoomSizeRow({
   totalCount,
   onChangeSize,
   onRemove,
+  t,
 }: RoomSizeRowProps) {
   const Icon = ICON_MAP[room.type];
   const displayIndex = totalCount > 1 ? ` ${index + 1}` : "";
+  const ROOM_SIZES = Object.keys(t.ROOM_SIZE_LABELS) as RoomSize[];
 
   return (
     <Card className="p-3">
@@ -169,7 +170,7 @@ function RoomSizeRow({
         <div className="flex items-center gap-2">
           <Icon className="h-4 w-4 text-primary" />
           <span className="text-sm font-medium">
-            {ROOM_TYPE_LABELS[room.type]}{displayIndex}
+            {t.ROOM_TYPE_LABELS[room.type]}{displayIndex}
           </span>
         </div>
         <Button
@@ -177,7 +178,7 @@ function RoomSizeRow({
           size="icon"
           className="h-7 w-7"
           onClick={() => onRemove(room.id)}
-          aria-label={`Xoa ${ROOM_TYPE_LABELS[room.type]}`}
+          aria-label={`${t.LABEL_DELETE} ${t.ROOM_TYPE_LABELS[room.type]}`}
         >
           <X className="h-4 w-4" />
         </Button>
@@ -194,7 +195,7 @@ function RoomSizeRow({
             )}
             onClick={() => onChangeSize(room.id, size)}
           >
-            {ROOM_SIZE_LABELS[size]}
+            {t.ROOM_SIZE_LABELS[size]}
           </Button>
         ))}
       </div>

@@ -2,7 +2,7 @@
 
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { CHAT_LABELS } from "@/lib/constants";
+import { useT } from "@/hooks/use-t";
 import { formatVnd } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import type { Recommendation, RecommendationPriority } from "@/lib/types";
@@ -25,6 +25,8 @@ export function RecommendationCards({
   recommendations,
   onSelect,
 }: RecommendationCardsProps) {
+  const t = useT();
+
   if (recommendations.length === 0) {
     return null;
   }
@@ -32,7 +34,7 @@ export function RecommendationCards({
   return (
     <div className="mb-4">
       <p className="mb-2 text-xs font-medium text-muted-foreground">
-        {CHAT_LABELS.RECOMMENDATIONS_TITLE}
+        {t.CHAT_RECOMMENDATIONS_TITLE}
       </p>
       <div className="flex gap-2 overflow-x-auto pb-2">
         {recommendations.map((rec) => (
@@ -64,7 +66,7 @@ export function RecommendationCards({
                     }
                     className="text-[10px]"
                   >
-                    {CHAT_LABELS.SAVINGS_LABEL}: {formatVnd(rec.savingsVnd)}
+                    {t.CHAT_SAVINGS_LABEL}: {formatVnd(rec.savingsVnd)}
                   </Badge>
                 </div>
               </CardContent>

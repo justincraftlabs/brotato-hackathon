@@ -45,6 +45,7 @@ export const NAV_ROUTES = {
   DASHBOARD: "/dashboard",
   CHAT: "/chat",
   SIMULATOR: "/simulator",
+  SUGGESTIONS: "/suggestions",
 } as const;
 
 export const NAV_LABELS = {

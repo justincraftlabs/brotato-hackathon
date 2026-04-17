@@ -10,6 +10,7 @@ import { ImpactSummary } from "@/components/simulator/ImpactSummary";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
+import { useT } from "@/hooks/use-t";
 import { getHome } from "@/lib/api";
 import {
   calculateCo2,
@@ -17,7 +18,7 @@ import {
   calculateMonthlyKwh,
 } from "@/lib/calculations";
 import { LOCAL_STORAGE_HOME_ID_KEY, NAV_ROUTES } from "@/lib/constants";
-import { SIMULATOR_LABELS } from "@/lib/simulator-constants";
+import type { Translations } from "@/lib/translations";
 import type { Home } from "@/lib/types";
 
 interface ApplianceAdjustment {
@@ -93,19 +94,23 @@ function SimulatorSkeleton() {
   );
 }
 
-function EmptyState() {
+interface EmptyStateProps {
+  t: Translations;
+}
+
+function EmptyState({ t }: EmptyStateProps) {
   return (
     <Card>
       <CardContent className="flex flex-col items-center gap-3 p-6 text-center">
         <p className="text-lg font-semibold">
-          {SIMULATOR_LABELS.EMPTY_STATE_TITLE}
+          {t.SIMULATOR_EMPTY_STATE_TITLE}
         </p>
         <p className="text-sm text-muted-foreground">
-          {SIMULATOR_LABELS.EMPTY_STATE_MESSAGE}
+          {t.SIMULATOR_EMPTY_STATE_MESSAGE}
         </p>
         <Button asChild>
           <Link href={NAV_ROUTES.SETUP}>
-            {SIMULATOR_LABELS.EMPTY_STATE_CTA}
+            {t.SIMULATOR_EMPTY_STATE_CTA}
           </Link>
         </Button>
       </CardContent>
@@ -116,18 +121,19 @@ function EmptyState() {
 interface ErrorBannerProps {
   message: string;
   onRetry: () => void;
+  t: Translations;
 }
 
-function ErrorBanner({ message, onRetry }: ErrorBannerProps) {
+function ErrorBanner({ message, onRetry, t }: ErrorBannerProps) {
   return (
     <Card className="border-destructive">
       <CardContent className="flex flex-col items-center gap-3 p-6 text-center">
         <p className="text-sm font-semibold text-destructive">
-          {SIMULATOR_LABELS.ERROR_TITLE}
+          {t.SIMULATOR_ERROR_TITLE}
         </p>
         <p className="text-xs text-muted-foreground">{message}</p>
         <Button variant="outline" size="sm" onClick={onRetry}>
-          {SIMULATOR_LABELS.RETRY}
+          {t.SIMULATOR_RETRY}
         </Button>
       </CardContent>
     </Card>
@@ -135,6 +141,7 @@ function ErrorBanner({ message, onRetry }: ErrorBannerProps) {
 }
 
 export default function SimulatorPage() {
+  const t = useT();
   const [homeId] = useLocalStorage(LOCAL_STORAGE_HOME_ID_KEY);
   const [pageState, setPageState] = useState<PageState>(INITIAL_STATE);
   const [adjustments, setAdjustments] = useState<
@@ -176,7 +183,7 @@ export default function SimulatorPage() {
   }, []);
 
   if (!homeId) {
-    return <EmptyState />;
+    return <EmptyState t={t} />;
   }
 
   if (pageState.status === "loading" || pageState.status === "idle") {
@@ -193,6 +200,7 @@ export default function SimulatorPage() {
       <ErrorBanner
         message={pageState.message}
         onRetry={() => fetchHomeData(homeId)}
+        t={t}
       />
     );
   }

@@ -1,7 +1,8 @@
 "use client";
 
 import { Card, CardContent } from "@/components/ui/card";
-import { DASHBOARD_LABELS, EVN_TIERS } from "@/lib/constants";
+import { useT } from "@/hooks/use-t";
+import { EVN_TIERS } from "@/lib/constants";
 import { formatVnd } from "@/lib/format";
 
 interface EvnTierProgressProps {
@@ -20,24 +21,31 @@ const TIER_COLORS = [
   "bg-red-500",
 ];
 
-function getTierDescription(evnTier: number, totalKwh: number): string {
+interface TierLabels {
+  evnTierMax: string;
+  evnTierPrefix: string;
+  evnTierPriceSuffix: string;
+  evnTierNextWarning: string;
+}
+
+function getTierDescription(evnTier: number, totalKwh: number, labels: TierLabels): string {
   const currentTierData = EVN_TIERS[evnTier - TIER_INDEX_OFFSET];
   if (!currentTierData) {
-    return DASHBOARD_LABELS.EVN_TIER_MAX;
+    return labels.evnTierMax;
   }
 
   const priceFormatted = formatVnd(currentTierData.pricePerKwh);
-  const tierLabel = `${DASHBOARD_LABELS.EVN_TIER_PREFIX} ${evnTier}: ${priceFormatted}${DASHBOARD_LABELS.EVN_TIER_PRICE_SUFFIX}`;
+  const tierLabel = `${labels.evnTierPrefix} ${evnTier}: ${priceFormatted}${labels.evnTierPriceSuffix}`;
 
   const nextTierIndex = evnTier;
   if (nextTierIndex >= EVN_TIERS.length) {
-    return `${tierLabel} — ${DASHBOARD_LABELS.EVN_TIER_MAX}`;
+    return `${tierLabel} — ${labels.evnTierMax}`;
   }
 
   const remaining = Math.max(currentTierData.maxKwh - totalKwh, 0);
   const nextTierNumber = evnTier + TIER_INDEX_OFFSET;
 
-  const warning = DASHBOARD_LABELS.EVN_TIER_NEXT_WARNING.replace(
+  const warning = labels.evnTierNextWarning.replace(
     "{remaining}",
     String(Math.round(remaining))
   ).replace("{nextTier}", String(nextTierNumber));
@@ -46,6 +54,14 @@ function getTierDescription(evnTier: number, totalKwh: number): string {
 }
 
 export function EvnTierProgress({ evnTier, totalKwh }: EvnTierProgressProps) {
+  const t = useT();
+  const tierLabels: TierLabels = {
+    evnTierMax: t.DASHBOARD_EVN_TIER_MAX,
+    evnTierPrefix: t.DASHBOARD_EVN_TIER_PREFIX,
+    evnTierPriceSuffix: t.DASHBOARD_EVN_TIER_PRICE_SUFFIX,
+    evnTierNextWarning: t.DASHBOARD_EVN_TIER_NEXT_WARNING,
+  };
+
   return (
     <Card>
       <CardContent className="flex flex-col gap-2 p-3">
@@ -78,7 +94,7 @@ export function EvnTierProgress({ evnTier, totalKwh }: EvnTierProgressProps) {
           })}
         </div>
         <p className="text-xs text-muted-foreground">
-          {getTierDescription(evnTier, totalKwh)}
+          {getTierDescription(evnTier, totalKwh, tierLabels)}
         </p>
       </CardContent>
     </Card>

@@ -6,7 +6,7 @@ import { type FormEvent, type KeyboardEvent, useRef } from "react";
 import { VoiceInputButton } from "@/components/setup/VoiceInputButton";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { CHAT_LABELS } from "@/lib/constants";
+import { useT } from "@/hooks/use-t";
 
 interface ChatInputProps {
   value: string;
@@ -18,6 +18,7 @@ interface ChatInputProps {
 const ENTER_KEY = "Enter";
 
 export function ChatInput({ value, onChange, onSend, disabled }: ChatInputProps) {
+  const t = useT();
   const inputRef = useRef<HTMLInputElement>(null);
 
   function handleSubmit(e: FormEvent) {
@@ -59,17 +60,17 @@ export function ChatInput({ value, onChange, onSend, disabled }: ChatInputProps)
         value={value}
         onChange={(e) => onChange(e.target.value)}
         onKeyDown={handleKeyDown}
-        placeholder={CHAT_LABELS.INPUT_PLACEHOLDER}
+        placeholder={t.CHAT_INPUT_PLACEHOLDER}
         disabled={disabled}
         className="flex-1"
-        aria-label={CHAT_LABELS.INPUT_PLACEHOLDER}
+        aria-label={t.CHAT_INPUT_PLACEHOLDER}
       />
       <Button
         type="submit"
         size="icon"
         disabled={isDisabled}
         className="shrink-0 bg-primary hover:bg-primary/90"
-        aria-label={CHAT_LABELS.SEND_BUTTON}
+        aria-label={t.CHAT_SEND_BUTTON}
       >
         <SendHorizontal className="h-4 w-4" />
       </Button>

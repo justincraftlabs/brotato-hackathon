@@ -7,13 +7,14 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/cn";
+import { useT } from "@/hooks/use-t";
 import { useImageCapture } from "@/hooks/useImageCapture";
 import {
   ACCEPTED_CAMERA_TYPES,
   CONFIDENCE_LEVEL_HIGH,
   CONFIDENCE_LEVEL_MEDIUM,
-  IMAGE_LABELS,
 } from "@/lib/image-constants";
+import type { Translations } from "@/lib/translations";
 import type { ImageRecognitionResult } from "@/lib/types";
 
 interface ImageCaptureButtonProps {
@@ -23,14 +24,14 @@ interface ImageCaptureButtonProps {
 
 type ConfidenceLevel = ImageRecognitionResult["confidence"];
 
-function getConfidenceLabel(confidence: ConfidenceLevel): string {
+function getConfidenceLabel(confidence: ConfidenceLevel, t: Translations): string {
   if (confidence === CONFIDENCE_LEVEL_HIGH) {
-    return IMAGE_LABELS.CONFIDENCE_HIGH;
+    return t.IMAGE_CONFIDENCE_HIGH;
   }
   if (confidence === CONFIDENCE_LEVEL_MEDIUM) {
-    return IMAGE_LABELS.CONFIDENCE_MEDIUM;
+    return t.IMAGE_CONFIDENCE_MEDIUM;
   }
-  return IMAGE_LABELS.CONFIDENCE_LOW;
+  return t.IMAGE_CONFIDENCE_LOW;
 }
 
 function getConfidenceColor(confidence: ConfidenceLevel): string {
@@ -43,10 +44,13 @@ function getConfidenceColor(confidence: ConfidenceLevel): string {
   return "bg-destructive text-destructive-foreground";
 }
 
+const WATTAGE_SUFFIX = "W";
+
 export function ImageCaptureButton({
   onResult,
   className,
 }: ImageCaptureButtonProps) {
+  const t = useT();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const {
     capturedImage,
@@ -96,7 +100,7 @@ export function ImageCaptureButton({
                 <div className="absolute inset-0 flex items-center justify-center bg-black/50">
                   <Loader2 className="h-6 w-6 animate-spin text-primary" />
                   <span className="ml-2 text-xs text-white">
-                    {IMAGE_LABELS.PROCESSING}
+                    {t.IMAGE_PROCESSING}
                   </span>
                 </div>
               )}
@@ -115,22 +119,22 @@ export function ImageCaptureButton({
                     getConfidenceColor(recognitionResult.confidence)
                   )}
                 >
-                  {getConfidenceLabel(recognitionResult.confidence)}
+                  {getConfidenceLabel(recognitionResult.confidence, t)}
                 </Badge>
               </div>
               <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground">
                 <span>
                   {recognitionResult.estimatedWattage}
-                  {IMAGE_LABELS.WATTAGE_SUFFIX}
+                  {WATTAGE_SUFFIX}
                 </span>
                 {recognitionResult.brand && (
                   <span>
-                    {IMAGE_LABELS.BRAND_LABEL}: {recognitionResult.brand}
+                    {t.IMAGE_BRAND_LABEL}: {recognitionResult.brand}
                   </span>
                 )}
                 {recognitionResult.model && (
                   <span>
-                    {IMAGE_LABELS.MODEL_LABEL}: {recognitionResult.model}
+                    {t.IMAGE_MODEL_LABEL}: {recognitionResult.model}
                   </span>
                 )}
               </div>
@@ -143,7 +147,7 @@ export function ImageCaptureButton({
                   onClick={handleRetry}
                 >
                   <RotateCcw className="mr-1 h-3 w-3" />
-                  {IMAGE_LABELS.RETRY}
+                  {t.IMAGE_RETRY}
                 </Button>
                 <Button
                   type="button"
@@ -151,7 +155,7 @@ export function ImageCaptureButton({
                   className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90"
                   onClick={handleUseResult}
                 >
-                  {IMAGE_LABELS.USE_RESULT}
+                  {t.IMAGE_USE_RESULT}
                 </Button>
               </div>
             </div>
@@ -167,7 +171,7 @@ export function ImageCaptureButton({
                 onClick={handleRetry}
               >
                 <RotateCcw className="mr-1 h-3 w-3" />
-                {IMAGE_LABELS.RETRY}
+                {t.IMAGE_RETRY}
               </Button>
             </div>
           )}
@@ -194,7 +198,7 @@ export function ImageCaptureButton({
         size="icon"
         onClick={() => fileInputRef.current?.click()}
         className={cn("shrink-0", className)}
-        aria-label={IMAGE_LABELS.CAMERA_BUTTON}
+        aria-label={t.IMAGE_CAMERA_BUTTON}
       >
         <Camera className="h-4 w-4 text-primary" />
       </Button>

@@ -10,38 +10,32 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useChat, type ChatMessage } from "@/hooks/useChat";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
+import { useT } from "@/hooks/use-t";
 import { getRecommendations } from "@/lib/api";
-import {
-  CHAT_LABELS,
-  LOCAL_STORAGE_HOME_ID_KEY,
-  NAV_ROUTES,
-} from "@/lib/constants";
+import { LOCAL_STORAGE_HOME_ID_KEY, NAV_ROUTES } from "@/lib/constants";
+import type { Translations } from "@/lib/translations";
 import type { Recommendation } from "@/lib/types";
 
 const ROLE_ASSISTANT = "assistant" as const;
 
-function createWelcomeMessage(): ChatMessage {
-  return {
-    id: "welcome",
-    role: ROLE_ASSISTANT,
-    content: CHAT_LABELS.WELCOME_MESSAGE,
-  };
+interface EmptyStateProps {
+  t: Translations;
 }
 
-function EmptyState() {
+function EmptyState({ t }: EmptyStateProps) {
   return (
     <div className="flex h-[calc(100vh-8rem)] items-center justify-center">
       <Card>
         <CardContent className="flex flex-col items-center gap-3 p-6 text-center">
           <p className="text-lg font-semibold">
-            {CHAT_LABELS.EMPTY_STATE_TITLE}
+            {t.CHAT_EMPTY_STATE_TITLE}
           </p>
           <p className="text-sm text-muted-foreground">
-            {CHAT_LABELS.EMPTY_STATE_MESSAGE}
+            {t.CHAT_EMPTY_STATE_MESSAGE}
           </p>
           <Button asChild>
             <Link href={NAV_ROUTES.SETUP}>
-              {CHAT_LABELS.EMPTY_STATE_CTA}
+              {t.CHAT_EMPTY_STATE_CTA}
             </Link>
           </Button>
         </CardContent>
@@ -51,6 +45,7 @@ function EmptyState() {
 }
 
 export default function ChatPage() {
+  const t = useT();
   const [homeId] = useLocalStorage(LOCAL_STORAGE_HOME_ID_KEY);
   const [input, setInput] = useState("");
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
@@ -65,7 +60,7 @@ export default function ChatPage() {
       return;
     }
 
-    setMessages([createWelcomeMessage()]);
+    setMessages([{ id: "welcome", role: ROLE_ASSISTANT, content: t.CHAT_WELCOME_MESSAGE }]);
 
     async function loadRecommendations() {
       const result = await getRecommendations(homeId as string);
@@ -76,7 +71,7 @@ export default function ChatPage() {
     }
 
     loadRecommendations();
-  }, [homeId, setMessages]);
+  }, [homeId, setMessages, t.CHAT_WELCOME_MESSAGE]);
 
   useEffect(() => {
     scrollRef.current?.scrollTo({
@@ -101,7 +96,7 @@ export default function ChatPage() {
   );
 
   if (!homeId) {
-    return <EmptyState />;
+    return <EmptyState t={t} />;
   }
 
   const lastMessageIndex = messages.length - 1;

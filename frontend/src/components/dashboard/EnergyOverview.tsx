@@ -3,7 +3,7 @@
 import { DollarSign, Leaf, Zap } from "lucide-react";
 
 import { Card, CardContent } from "@/components/ui/card";
-import { DASHBOARD_LABELS } from "@/lib/constants";
+import { useT } from "@/hooks/use-t";
 import { formatCo2, formatKwh, formatVnd } from "@/lib/format";
 import type { DashboardData } from "@/lib/types";
 
@@ -31,23 +31,25 @@ function SummaryCard({ icon, label, value, colorClass }: SummaryCardProps) {
 }
 
 export function EnergyOverview({ data }: EnergyOverviewProps) {
+  const t = useT();
+
   return (
     <div className="grid grid-cols-3 gap-2">
       <SummaryCard
         icon={<Zap className="h-5 w-5" />}
-        label={DASHBOARD_LABELS.TOTAL_KWH}
+        label={t.DASHBOARD_TOTAL_KWH}
         value={formatKwh(data.totalMonthlyKwh)}
         colorClass="text-primary"
       />
       <SummaryCard
         icon={<DollarSign className="h-5 w-5" />}
-        label={DASHBOARD_LABELS.TOTAL_COST}
+        label={t.DASHBOARD_TOTAL_COST}
         value={formatVnd(data.totalMonthlyCost)}
         colorClass="text-accent"
       />
       <SummaryCard
         icon={<Leaf className="h-5 w-5" />}
-        label={DASHBOARD_LABELS.TOTAL_CO2}
+        label={t.DASHBOARD_TOTAL_CO2}
         value={formatCo2(data.co2.totalKg)}
         colorClass="text-primary"
       />

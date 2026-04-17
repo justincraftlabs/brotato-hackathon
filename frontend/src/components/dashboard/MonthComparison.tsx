@@ -3,7 +3,7 @@
 import { TrendingDown, TrendingUp } from "lucide-react";
 
 import { Card, CardContent } from "@/components/ui/card";
-import { DASHBOARD_LABELS } from "@/lib/constants";
+import { useT } from "@/hooks/use-t";
 import { formatPercent } from "@/lib/format";
 import type { ComparisonData } from "@/lib/types";
 
@@ -14,12 +14,13 @@ interface MonthComparisonProps {
 const ZERO_THRESHOLD = 0;
 
 export function MonthComparison({ comparison }: MonthComparisonProps) {
+  const t = useT();
   const isIncrease = comparison.percentDifference > ZERO_THRESHOLD;
   const percentText = formatPercent(comparison.percentDifference);
 
   const template = isIncrease
-    ? DASHBOARD_LABELS.MONTH_COMPARISON_UP
-    : DASHBOARD_LABELS.MONTH_COMPARISON_DOWN;
+    ? t.DASHBOARD_MONTH_COMPARISON_UP
+    : t.DASHBOARD_MONTH_COMPARISON_DOWN;
 
   const description = template.replace("{percent}", percentText);
 

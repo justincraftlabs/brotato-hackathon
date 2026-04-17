@@ -13,8 +13,8 @@ import {
 import type { Props as LabelProps } from "recharts/types/component/Label";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useT } from "@/hooks/use-t";
 import {
-  DASHBOARD_LABELS,
   HIGH_CONSUMER_THRESHOLD_PERCENT,
   TOP_CONSUMERS_CHART_HEIGHT,
 } from "@/lib/constants";
@@ -76,13 +76,14 @@ function renderPercentLabel(props: LabelProps): ReactElement {
 }
 
 export function TopConsumersChart({ consumers }: TopConsumersChartProps) {
+  const t = useT();
   const chartData = toChartData(consumers);
 
   return (
     <Card>
       <CardHeader className="p-3 pb-0">
         <CardTitle className="text-sm">
-          {DASHBOARD_LABELS.TOP_CONSUMERS_TITLE}
+          {t.DASHBOARD_TOP_CONSUMERS_TITLE}
         </CardTitle>
       </CardHeader>
       <CardContent className="p-3 pt-2">

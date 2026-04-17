@@ -3,7 +3,8 @@
 import { TreePine } from "lucide-react";
 
 import { Card, CardContent } from "@/components/ui/card";
-import { DASHBOARD_LABELS, MAX_TREE_ICONS } from "@/lib/constants";
+import { useT } from "@/hooks/use-t";
+import { MAX_TREE_ICONS } from "@/lib/constants";
 import { formatCo2 } from "@/lib/format";
 import type { Co2Data } from "@/lib/types";
 
@@ -12,11 +13,12 @@ interface Co2TreeVisualProps {
 }
 
 export function Co2TreeVisual({ co2 }: Co2TreeVisualProps) {
+  const t = useT();
   const treeCount = co2.treesEquivalent;
   const visibleTrees = Math.min(treeCount, MAX_TREE_ICONS);
   const hasOverflow = treeCount > MAX_TREE_ICONS;
 
-  const equivalentText = DASHBOARD_LABELS.CO2_TREE_EQUIVALENT.replace(
+  const equivalentText = t.DASHBOARD_CO2_TREE_EQUIVALENT.replace(
     "{count}",
     String(Math.round(treeCount))
   );
@@ -26,7 +28,7 @@ export function Co2TreeVisual({ co2 }: Co2TreeVisualProps) {
       <CardContent className="flex flex-col gap-2 p-3">
         <div className="flex items-center justify-between">
           <p className="text-sm font-semibold">
-            {DASHBOARD_LABELS.CO2_TREE_TITLE}
+            {t.DASHBOARD_CO2_TREE_TITLE}
           </p>
           <p className="text-sm font-bold text-primary">
             {formatCo2(co2.totalKg)}
@@ -42,7 +44,7 @@ export function Co2TreeVisual({ co2 }: Co2TreeVisualProps) {
           ))}
           {hasOverflow && (
             <span className="text-sm font-medium text-muted-foreground">
-              {DASHBOARD_LABELS.CO2_TREE_OVERFLOW}
+              {t.DASHBOARD_CO2_TREE_OVERFLOW}
             </span>
           )}
         </div>

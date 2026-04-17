@@ -12,14 +12,12 @@ import { MonthComparison } from "@/components/dashboard/MonthComparison";
 import { TopConsumersChart } from "@/components/dashboard/TopConsumersChart";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { useT } from "@/hooks/use-t";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
-import {
-  DASHBOARD_LABELS,
-  LOCAL_STORAGE_HOME_ID_KEY,
-  NAV_ROUTES,
-} from "@/lib/constants";
+import { LOCAL_STORAGE_HOME_ID_KEY, NAV_ROUTES } from "@/lib/constants";
 import { getDashboard } from "@/lib/api";
 import type { DashboardData } from "@/lib/types";
+import type { Translations } from "@/lib/translations";
 
 type PageState =
   | { status: "idle" }
@@ -44,18 +42,22 @@ function DashboardSkeleton() {
   );
 }
 
-function EmptyState() {
+interface EmptyStateProps {
+  t: Translations;
+}
+
+function EmptyState({ t }: EmptyStateProps) {
   return (
     <Card>
       <CardContent className="flex flex-col items-center gap-3 p-6 text-center">
         <p className="text-lg font-semibold">
-          {DASHBOARD_LABELS.EMPTY_STATE_TITLE}
+          {t.DASHBOARD_EMPTY_STATE_TITLE}
         </p>
         <p className="text-sm text-muted-foreground">
-          {DASHBOARD_LABELS.EMPTY_STATE_MESSAGE}
+          {t.DASHBOARD_EMPTY_STATE_MESSAGE}
         </p>
         <Button asChild>
-          <Link href={NAV_ROUTES.SETUP}>{DASHBOARD_LABELS.EMPTY_STATE_CTA}</Link>
+          <Link href={NAV_ROUTES.SETUP}>{t.DASHBOARD_EMPTY_STATE_CTA}</Link>
         </Button>
       </CardContent>
     </Card>
@@ -65,18 +67,19 @@ function EmptyState() {
 interface ErrorBannerProps {
   message: string;
   onRetry: () => void;
+  t: Translations;
 }
 
-function ErrorBanner({ message, onRetry }: ErrorBannerProps) {
+function ErrorBanner({ message, onRetry, t }: ErrorBannerProps) {
   return (
     <Card className="border-destructive">
       <CardContent className="flex flex-col items-center gap-3 p-6 text-center">
         <p className="text-sm font-semibold text-destructive">
-          {DASHBOARD_LABELS.ERROR_TITLE}
+          {t.DASHBOARD_ERROR_TITLE}
         </p>
         <p className="text-xs text-muted-foreground">{message}</p>
         <Button variant="outline" size="sm" onClick={onRetry}>
-          {DASHBOARD_LABELS.RETRY}
+          {t.DASHBOARD_RETRY}
         </Button>
       </CardContent>
     </Card>
@@ -84,6 +87,7 @@ function ErrorBanner({ message, onRetry }: ErrorBannerProps) {
 }
 
 export default function DashboardPage() {
+  const t = useT();
   const [homeId] = useLocalStorage(LOCAL_STORAGE_HOME_ID_KEY);
   const [pageState, setPageState] = useState<PageState>(INITIAL_STATE);
 
@@ -109,7 +113,7 @@ export default function DashboardPage() {
   }, [homeId, fetchDashboard]);
 
   if (!homeId) {
-    return <EmptyState />;
+    return <EmptyState t={t} />;
   }
 
   if (pageState.status === "loading" || pageState.status === "idle") {
@@ -126,6 +130,7 @@ export default function DashboardPage() {
       <ErrorBanner
         message={pageState.message}
         onRetry={() => fetchDashboard(homeId)}
+        t={t}
       />
     );
   }
@@ -143,12 +148,12 @@ export default function DashboardPage() {
       <div className="flex flex-col gap-2">
         <Button asChild>
           <Link href={NAV_ROUTES.CHAT}>
-            {DASHBOARD_LABELS.CTA_VIEW_SUGGESTIONS}
+            {t.DASHBOARD_CTA_VIEW_SUGGESTIONS}
           </Link>
         </Button>
         <Button variant="outline" asChild>
           <Link href={NAV_ROUTES.SIMULATOR}>
-            {DASHBOARD_LABELS.CTA_SIMULATE}
+            {t.DASHBOARD_CTA_SIMULATE}
           </Link>
         </Button>
       </div>

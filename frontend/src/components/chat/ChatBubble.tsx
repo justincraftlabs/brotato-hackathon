@@ -1,7 +1,9 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { CHAT_LABELS } from "@/lib/constants";
+
+const POTATO_AVATAR = "🥔";
+const TYPING_INDICATOR = "...";
 
 type ChatRole = "user" | "assistant";
 
@@ -30,7 +32,7 @@ export function ChatBubble({ role, content, isStreaming }: ChatBubbleProps) {
       >
         {!isUser && (
           <span className="mt-1 shrink-0 text-lg" aria-hidden="true">
-            {CHAT_LABELS.POTATO_AVATAR}
+            {POTATO_AVATAR}
           </span>
         )}
         <div
@@ -43,7 +45,7 @@ export function ChatBubble({ role, content, isStreaming }: ChatBubbleProps) {
         >
           {showTypingIndicator ? (
             <span className="inline-flex animate-pulse">
-              {CHAT_LABELS.TYPING_INDICATOR}
+              {TYPING_INDICATOR}
             </span>
           ) : (
             <span className="whitespace-pre-wrap break-words">{content}</span>

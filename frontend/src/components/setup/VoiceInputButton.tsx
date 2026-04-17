@@ -4,13 +4,9 @@ import { Mic, MicOff } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/cn";
+import { useT } from "@/hooks/use-t";
 import { useSpeech } from "@/hooks/useSpeech";
-import {
-  VOICE_BUTTON_LABEL,
-  VOICE_LISTENING_LABEL,
-  type SpeechLang,
-  SPEECH_LANG_VI,
-} from "@/lib/speech-constants";
+import { type SpeechLang, SPEECH_LANG_VI } from "@/lib/speech-constants";
 
 interface VoiceInputButtonProps {
   onTranscript: (text: string) => void;
@@ -23,6 +19,7 @@ export function VoiceInputButton({
   lang = SPEECH_LANG_VI,
   className,
 }: VoiceInputButtonProps) {
+  const t = useT();
   const { isListening, transcript, startListening, stopListening, isSupported } =
     useSpeech(lang);
 
@@ -54,7 +51,7 @@ export function VoiceInputButton({
           isListening && "animate-pulse border-destructive bg-destructive/10",
           className
         )}
-        aria-label={isListening ? VOICE_LISTENING_LABEL : VOICE_BUTTON_LABEL}
+        aria-label={isListening ? t.VOICE_LISTENING_LABEL : t.VOICE_BUTTON_LABEL}
       >
         {isListening ? (
           <MicOff className="h-4 w-4 text-destructive" />

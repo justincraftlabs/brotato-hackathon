@@ -61,7 +61,7 @@ export function ApplianceCard({ appliance, onDelete, onEdit }: ApplianceCardProp
             size="icon"
             className="h-7 w-7"
             onClick={() => onDelete(appliance.id)}
-            aria-label={`Xóa ${appliance.name}`}
+            aria-label={`${t.LABEL_DELETE} ${appliance.name}`}
           >
             <X className="h-4 w-4" />
           </Button>

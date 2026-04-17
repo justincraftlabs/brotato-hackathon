@@ -52,9 +52,10 @@ export const TRANSLATIONS = {
 
   // Navigation
   NAV_OVERVIEW: { vi: "Tổng quan", en: "Overview" },
-  NAV_CHAT: { vi: "Khoai Tây", en: "Potato" },
+  NAV_CHAT: { vi: "Trợ lý", en: "Assistant" },
   NAV_SIMULATOR: { vi: "Mô phỏng", en: "Simulate" },
   NAV_SETUP: { vi: "Thiết lập", en: "Setup" },
+  NAV_SUGGESTIONS: { vi: "Gợi ý", en: "Tips" },
 
   // App
   APP_DESCRIPTION_VI: {
@@ -68,6 +69,24 @@ export const TRANSLATIONS = {
   },
 
   // Dashboard
+  DASHBOARD_EVN_TIER_PRICE_SUFFIX: { vi: "/kWh", en: "/kWh" },
+  DASHBOARD_EVN_TIER_NEXT_WARNING: {
+    vi: "Còn {remaining} kWh nữa sẽ lên bậc {nextTier}",
+    en: "{remaining} kWh until Tier {nextTier}",
+  },
+  DASHBOARD_CO2_TREE_EQUIVALENT: {
+    vi: "Tương đương {count} cây xanh trưởng thành/năm",
+    en: "Equivalent to {count} mature trees/year",
+  },
+  DASHBOARD_CO2_TREE_OVERFLOW: { vi: "+", en: "+" },
+  DASHBOARD_MONTH_COMPARISON_UP: {
+    vi: "{percent} so với trung bình cả nước",
+    en: "{percent} vs national average",
+  },
+  DASHBOARD_MONTH_COMPARISON_DOWN: {
+    vi: "{percent} so với trung bình cả nước",
+    en: "{percent} vs national average",
+  },
   DASHBOARD_EMPTY_STATE_TITLE: { vi: "Chưa có dữ liệu", en: "No data yet" },
   DASHBOARD_EMPTY_STATE_MESSAGE: {
     vi: "Hãy thiết lập nhà trước",
@@ -124,6 +143,76 @@ export const TRANSLATIONS = {
     vi: "Có lỗi xảy ra, vui lòng thử lại.",
     en: "An error occurred, please try again.",
   },
+  CHAT_SEND_BUTTON: { vi: "Gửi", en: "Send" },
+
+  // Simulator
+  SIMULATOR_PAGE_TITLE: { vi: "Mô phỏng tiết kiệm", en: "Savings Simulator" },
+  SIMULATOR_EMPTY_STATE_TITLE: { vi: "Chưa có dữ liệu", en: "No data yet" },
+  SIMULATOR_EMPTY_STATE_MESSAGE: {
+    vi: "Hãy thiết lập nhà trước",
+    en: "Please set up your home first",
+  },
+  SIMULATOR_EMPTY_STATE_CTA: { vi: "Thiết lập ngay", en: "Set up now" },
+  SIMULATOR_ERROR_TITLE: {
+    vi: "Không thể tải dữ liệu",
+    en: "Failed to load data",
+  },
+  SIMULATOR_RETRY: { vi: "Thử lại", en: "Retry" },
+  SIMULATOR_LOADING: { vi: "Đang tải dữ liệu...", en: "Loading data..." },
+  SIMULATOR_KWH_SAVED: { vi: "kWh tiết kiệm", en: "kWh saved" },
+  SIMULATOR_VND_SAVED: { vi: "Tiền tiết kiệm", en: "Money saved" },
+  SIMULATOR_CO2_SAVED: { vi: "CO\u2082 giảm", en: "CO\u2082 reduced" },
+  SIMULATOR_TREE_EQUIVALENT_SUFFIX: { vi: "cây/năm", en: "trees/year" },
+  SIMULATOR_CURRENT_LABEL: { vi: "Hiện tại", en: "Current" },
+  SIMULATOR_ADJUSTED_LABEL: { vi: "Sau điều chỉnh", en: "After adjustment" },
+  SIMULATOR_MONTHLY_COST: { vi: "Chi phí/tháng", en: "Cost/month" },
+  SIMULATOR_MONTHLY_CO2: { vi: "CO\u2082/tháng", en: "CO\u2082/month" },
+  SIMULATOR_RESET_BUTTON: { vi: "Đặt lại", en: "Reset" },
+  SIMULATOR_DAILY_HOURS_LABEL: { vi: "Giờ sử dụng/ngày", en: "Hours/day" },
+  SIMULATOR_TEMPERATURE_LABEL: { vi: "Nhiệt độ", en: "Temperature" },
+  SIMULATOR_HOURS_SUFFIX: { vi: "giờ", en: "h" },
+  SIMULATOR_PER_MONTH_SUFFIX: { vi: "/tháng", en: "/month" },
+
+  // Voice
+  VOICE_BUTTON_LABEL: { vi: "Nhận dạng giọng nói", en: "Voice input" },
+  VOICE_LISTENING_LABEL: { vi: "Đang nghe...", en: "Listening..." },
+
+  // General labels
+  LABEL_DELETE: { vi: "Xóa", en: "Delete" },
+
+  // Suggestions page
+  SUGGESTIONS_PAGE_TITLE: { vi: "Gợi ý tiết kiệm", en: "Savings Tips" },
+  SUGGESTIONS_ANALYZE_BUTTON: { vi: "Phân tích lại", en: "Re-analyze" },
+  SUGGESTIONS_ANALYZE_FIRST_BUTTON: { vi: "Phân tích ngay", en: "Analyze now" },
+  SUGGESTIONS_ANALYZING: { vi: "Đang phân tích...", en: "Analyzing..." },
+  SUGGESTIONS_TOTAL_SAVINGS: {
+    vi: "Tổng tiết kiệm ước tính/tháng",
+    en: "Total estimated savings/month",
+  },
+  SUGGESTIONS_EMPTY_STATE_TITLE: { vi: "Chưa có gợi ý", en: "No suggestions yet" },
+  SUGGESTIONS_EMPTY_STATE_MESSAGE: {
+    vi: "Nhấn 'Phân tích ngay' để bắt đầu",
+    en: "Click 'Analyze now' to get started",
+  },
+  SUGGESTIONS_ERROR_TITLE: {
+    vi: "Không thể tải gợi ý",
+    en: "Failed to load suggestions",
+  },
+  SUGGESTIONS_RETRY: { vi: "Thử lại", en: "Retry" },
+  SUGGESTIONS_NO_HOME_TITLE: { vi: "Chưa có dữ liệu nhà", en: "No home data" },
+  SUGGESTIONS_NO_HOME_MESSAGE: {
+    vi: "Hãy thiết lập nhà trước",
+    en: "Please set up your home first",
+  },
+  SUGGESTIONS_NO_HOME_CTA: { vi: "Thiết lập ngay", en: "Set up now" },
+  SUGGESTIONS_PRIORITY_HIGH: { vi: "Ưu tiên cao", en: "High" },
+  SUGGESTIONS_PRIORITY_MEDIUM: { vi: "Ưu tiên vừa", en: "Medium" },
+  SUGGESTIONS_PRIORITY_LOW: { vi: "Ưu tiên thấp", en: "Low" },
+  SUGGESTIONS_DIFFICULTY_EASY: { vi: "Dễ làm", en: "Easy" },
+  SUGGESTIONS_DIFFICULTY_MEDIUM: { vi: "Vừa phải", en: "Moderate" },
+  SUGGESTIONS_DIFFICULTY_HARD: { vi: "Khó", en: "Challenging" },
+  SUGGESTIONS_SAVINGS_PER_MONTH: { vi: "tiết kiệm/tháng", en: "saved/month" },
+  SUGGESTIONS_TIPS_SUFFIX: { vi: "gợi ý", en: "tips" },
 
   // Image recognition
   IMAGE_CAMERA_BUTTON: { vi: "Chụp ảnh thiết bị", en: "Take appliance photo" },

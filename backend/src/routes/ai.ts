@@ -208,6 +208,7 @@ router.post(
         estimatedWattage: FALLBACK_WATTAGE,
         estimatedStandbyWattage: FALLBACK_STANDBY_WATTAGE,
         commonBrands: [],
+        suggestedUsageHabit: '',
       };
 
       const response: ApiSuccessResponse<ApplianceEstimate> = {

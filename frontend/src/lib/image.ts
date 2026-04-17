@@ -79,6 +79,16 @@ export function isFileSizeValid(file: File): boolean {
   return file.size <= MAX_FILE_SIZE_BYTES;
 }
 
+export function base64ToFile(base64: string, fileName: string = "image.jpg"): File {
+  const byteString = atob(base64);
+  const byteArray = new Uint8Array(byteString.length);
+  for (let i = 0; i < byteString.length; i++) {
+    byteArray[i] = byteString.charCodeAt(i);
+  }
+  const blob = new Blob([byteArray], { type: MEDIA_TYPE_JPEG });
+  return new File([blob], fileName, { type: MEDIA_TYPE_JPEG });
+}
+
 export function getMediaType(file: File): SupportedMediaType {
   if (file.type === MEDIA_TYPE_PNG) {
     return MEDIA_TYPE_PNG;

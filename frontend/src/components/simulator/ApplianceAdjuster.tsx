@@ -13,15 +13,15 @@ import type { ComponentType } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Slider } from "@/components/ui/slider";
 import { cn } from "@/lib/cn";
-import { ROOM_TYPE_LABELS } from "@/lib/constants";
 import { formatKwh } from "@/lib/format";
 import {
   COOLING_TYPE,
   HEATING_TYPE,
-  SIMULATOR_LABELS,
   SIMULATOR_SLIDER,
 } from "@/lib/simulator-constants";
+import type { Translations } from "@/lib/translations";
 import type { Appliance, RoomType, RoomWithAppliances } from "@/lib/types";
+import { useT } from "@/hooks/use-t";
 
 interface ApplianceAdjustment {
   newDailyHours?: number;
@@ -67,9 +67,10 @@ interface ApplianceRowProps {
   appliance: Appliance;
   adjustment: ApplianceAdjustment | undefined;
   onAdjust: (applianceId: string, adjustment: ApplianceAdjustment) => void;
+  t: Translations;
 }
 
-function ApplianceRow({ appliance, adjustment, onAdjust }: ApplianceRowProps) {
+function ApplianceRow({ appliance, adjustment, onAdjust, t }: ApplianceRowProps) {
   const currentHours = adjustment?.newDailyHours ?? appliance.dailyUsageHours;
   const dotColor = getStatusDotColor(appliance.dailyUsageHours, currentHours);
   const showTempSlider = isTemperatureAdjustable(appliance.type);
@@ -89,10 +90,10 @@ function ApplianceRow({ appliance, adjustment, onAdjust }: ApplianceRowProps) {
       <div className="flex flex-col gap-1">
         <div className="flex items-center justify-between">
           <span className="text-xs text-muted-foreground">
-            {SIMULATOR_LABELS.DAILY_HOURS_LABEL}
+            {t.SIMULATOR_DAILY_HOURS_LABEL}
           </span>
           <span className="text-xs font-semibold text-primary">
-            {currentHours} {SIMULATOR_LABELS.HOURS_SUFFIX}
+            {currentHours} {t.SIMULATOR_HOURS_SUFFIX}
           </span>
         </div>
         <Slider
@@ -106,7 +107,7 @@ function ApplianceRow({ appliance, adjustment, onAdjust }: ApplianceRowProps) {
               newDailyHours: val,
             })
           }
-          aria-label={`${appliance.name} ${SIMULATOR_LABELS.DAILY_HOURS_LABEL}`}
+          aria-label={`${appliance.name} ${t.SIMULATOR_DAILY_HOURS_LABEL}`}
         />
       </div>
 
@@ -114,11 +115,11 @@ function ApplianceRow({ appliance, adjustment, onAdjust }: ApplianceRowProps) {
         <div className="flex flex-col gap-1">
           <div className="flex items-center justify-between">
             <span className="text-xs text-muted-foreground">
-              {SIMULATOR_LABELS.TEMPERATURE_LABEL}
+              {t.SIMULATOR_TEMPERATURE_LABEL}
             </span>
             <span className="text-xs font-semibold text-primary">
               {adjustment?.newTemperature ?? 24}
-              {SIMULATOR_LABELS.CELSIUS_SUFFIX}
+              {"°C"}
             </span>
           </div>
           <Slider
@@ -132,7 +133,7 @@ function ApplianceRow({ appliance, adjustment, onAdjust }: ApplianceRowProps) {
                 newTemperature: val,
               })
             }
-            aria-label={`${appliance.name} ${SIMULATOR_LABELS.TEMPERATURE_LABEL}`}
+            aria-label={`${appliance.name} ${t.SIMULATOR_TEMPERATURE_LABEL}`}
           />
         </div>
       )}
@@ -145,6 +146,8 @@ export function ApplianceAdjuster({
   adjustments,
   onAdjust,
 }: ApplianceAdjusterProps) {
+  const t = useT();
+
   return (
     <div className="flex flex-col gap-4">
       {rooms.map((room) => {
@@ -155,7 +158,7 @@ export function ApplianceAdjuster({
               <div className="flex items-center gap-2">
                 <Icon className="h-4 w-4 text-primary" />
                 <span className="text-sm font-semibold">
-                  {ROOM_TYPE_LABELS[room.type]}
+                  {t.ROOM_TYPE_LABELS[room.type]}
                 </span>
               </div>
               {room.appliances.map((appliance) => (
@@ -164,6 +167,7 @@ export function ApplianceAdjuster({
                   appliance={appliance}
                   adjustment={adjustments[appliance.id]}
                   onAdjust={onAdjust}
+                  t={t}
                 />
               ))}
             </CardContent>

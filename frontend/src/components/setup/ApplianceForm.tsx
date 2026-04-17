@@ -1,14 +1,16 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   Bath,
   Bed,
+  Camera,
   CookingPot,
   Loader2,
   Monitor,
   MoreHorizontal,
   Plus,
+  RotateCcw,
   Sofa,
   Sparkles,
 } from "lucide-react";
@@ -16,6 +18,7 @@ import type { ComponentType } from "react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -41,6 +44,14 @@ import {
 } from "@/components/ui/dialog";
 import { estimateAppliance } from "@/lib/api";
 import { useT } from "@/hooks/use-t";
+import { useImageCapture } from "@/hooks/useImageCapture";
+import { cn } from "@/lib/cn";
+import {
+  ACCEPTED_CAMERA_TYPES,
+  CONFIDENCE_LEVEL_HIGH,
+  CONFIDENCE_LEVEL_MEDIUM,
+  IMAGE_LABELS,
+} from "@/lib/image-constants";
 import {
   APPLIANCE_PRESETS,
   DEFAULT_DAILY_HOURS,
@@ -50,10 +61,9 @@ import {
   SLIDER_STEP,
   type ApplianceType,
 } from "@/lib/setup-constants";
-import type { Appliance, ImageRecognitionResult, Room, RoomType } from "@/lib/types";
+import type { Appliance, Room, RoomType } from "@/lib/types";
 
 import { ApplianceCard } from "./ApplianceCard";
-import { ImageCaptureButton } from "./ImageCaptureButton";
 import { VoiceInputButton } from "./VoiceInputButton";
 
 interface ApplianceFormProps {
@@ -95,6 +105,20 @@ const INITIAL_FORM_STATE: FormState = {
   usageHabit: "",
 };
 
+type ConfidenceLevel = "high" | "medium" | "low";
+
+function getConfidenceLabel(confidence: ConfidenceLevel): string {
+  if (confidence === CONFIDENCE_LEVEL_HIGH) return IMAGE_LABELS.CONFIDENCE_HIGH;
+  if (confidence === CONFIDENCE_LEVEL_MEDIUM) return IMAGE_LABELS.CONFIDENCE_MEDIUM;
+  return IMAGE_LABELS.CONFIDENCE_LOW;
+}
+
+function getConfidenceColor(confidence: ConfidenceLevel): string {
+  if (confidence === CONFIDENCE_LEVEL_HIGH) return "bg-primary text-primary-foreground";
+  if (confidence === CONFIDENCE_LEVEL_MEDIUM) return "bg-accent text-white";
+  return "bg-destructive text-destructive-foreground";
+}
+
 export function ApplianceFormStep({
   rooms,
   appliancesByRoom,
@@ -115,6 +139,22 @@ export function ApplianceFormStep({
   const [aiSuggestion, setAiSuggestion] = useState<string | null>(null);
   const [isEstimating, setIsEstimating] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
+
+  const {
+    capturedImage,
+    recognitionResult,
+    isProcessing: isCapturing,
+    error: captureError,
+    handleFileSelect,
+    clear: clearCapture,
+  } = useImageCapture();
+
+  useEffect(() => {
+    if (!dialogOpen) {
+      clearCapture();
+    }
+  }, [dialogOpen, clearCapture]);
 
   const allRoomsHaveAppliances = rooms.every(
     (room) => (appliancesByRoom[room.id]?.length ?? 0) > 0
@@ -177,16 +217,70 @@ export function ApplianceFormStep({
     const estimate = result.data;
     setAiSuggestion(`${estimate.estimatedWattage}W`);
 
-    if (!form.wattage) {
+    setForm((prev) => ({
+      ...prev,
+      ...(prev.wattage
+        ? {}
+        : {
+            wattage: String(estimate.estimatedWattage),
+            type: (APPLIANCE_TYPES.includes(estimate.type as ApplianceType)
+              ? estimate.type
+              : "other") as ApplianceType,
+          }),
+      ...(prev.usageHabit || !estimate.suggestedUsageHabit
+        ? {}
+        : { usageHabit: estimate.suggestedUsageHabit }),
+    }));
+  }, [form.name, APPLIANCE_TYPES]);
+
+  function handleCameraFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const firstFileIndex = 0;
+    const file = e.target.files?.[firstFileIndex];
+    if (!file) {
+      return;
+    }
+    handleFileSelect(file);
+    e.target.value = "";
+  }
+
+  async function handleUseDetectedResult() {
+    if (!recognitionResult) {
+      return;
+    }
+
+    const applianceType = APPLIANCE_TYPES.includes(recognitionResult.type as ApplianceType)
+      ? (recognitionResult.type as ApplianceType)
+      : "other";
+
+    setForm((prev) => ({
+      ...prev,
+      name: recognitionResult.name,
+      type: applianceType,
+      wattage: String(recognitionResult.estimatedWattage),
+      standbyWattage: String(recognitionResult.estimatedStandbyWattage),
+    }));
+
+    setIsEstimating(true);
+    const estimate = await estimateAppliance(recognitionResult.name);
+    setIsEstimating(false);
+
+    if (estimate.success) {
+      setAiSuggestion(`${estimate.data.estimatedWattage}W`);
       setForm((prev) => ({
         ...prev,
-        wattage: String(estimate.estimatedWattage),
-        type: (APPLIANCE_TYPES.includes(estimate.type as ApplianceType)
-          ? estimate.type
-          : "other") as ApplianceType,
+        ...(prev.usageHabit || !estimate.data.suggestedUsageHabit
+          ? {}
+          : { usageHabit: estimate.data.suggestedUsageHabit }),
       }));
     }
-  }, [form.name, form.wattage, APPLIANCE_TYPES]);
+
+    clearCapture();
+  }
+
+  function handleRetryCapture() {
+    clearCapture();
+    cameraInputRef.current?.click();
+  }
 
   function handleSave() {
     const wattageNum = Number(form.wattage);
@@ -218,6 +312,8 @@ export function ApplianceFormStep({
   const isFormValid =
     form.name.trim().length > 0 &&
     Number(form.wattage) > 0;
+
+  const showCaptureCard = capturedImage || isCapturing || recognitionResult || captureError;
 
   return (
     <div className="flex flex-col gap-4">
@@ -343,20 +439,121 @@ export function ApplianceFormStep({
                     setForm((prev) => ({ ...prev, name: text }));
                   }}
                 />
-                <ImageCaptureButton
-                  onResult={(result: ImageRecognitionResult) => {
-                    setForm((prev) => ({
-                      ...prev,
-                      name: result.name,
-                      type: (APPLIANCE_TYPES.includes(result.type as ApplianceType)
-                        ? result.type
-                        : "other") as ApplianceType,
-                      wattage: String(result.estimatedWattage),
-                      standbyWattage: String(result.estimatedStandbyWattage),
-                    }));
-                  }}
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  className="shrink-0"
+                  onClick={() => cameraInputRef.current?.click()}
+                  aria-label={IMAGE_LABELS.CAMERA_BUTTON}
+                >
+                  <Camera className="h-4 w-4 text-primary" />
+                </Button>
+                <input
+                  ref={cameraInputRef}
+                  type="file"
+                  accept={ACCEPTED_CAMERA_TYPES}
+                  capture="environment"
+                  onChange={handleCameraFileChange}
+                  className="hidden"
+                  aria-hidden="true"
                 />
               </div>
+
+              {showCaptureCard && (
+                <Card>
+                  <CardContent className="flex flex-col gap-3 p-3">
+                    {capturedImage && (
+                      <div className="relative overflow-hidden rounded-md">
+                        {/* eslint-disable-next-line @next/next/no-img-element -- base64 data URL */}
+                        <img
+                          src={`data:image/jpeg;base64,${capturedImage}`}
+                          alt="Captured appliance"
+                          className="h-32 w-full object-cover"
+                        />
+                        {isCapturing && (
+                          <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+                            <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                            <span className="ml-2 text-xs text-white">
+                              {IMAGE_LABELS.PROCESSING}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {recognitionResult && (
+                      <div className="flex flex-col gap-2">
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm font-semibold">
+                            {recognitionResult.name}
+                          </span>
+                          <Badge
+                            className={cn(
+                              "text-[10px]",
+                              getConfidenceColor(recognitionResult.confidence)
+                            )}
+                          >
+                            {getConfidenceLabel(recognitionResult.confidence)}
+                          </Badge>
+                        </div>
+                        <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground">
+                          <span>
+                            {recognitionResult.estimatedWattage}
+                            {IMAGE_LABELS.WATTAGE_SUFFIX}
+                          </span>
+                          {recognitionResult.brand && (
+                            <span>
+                              {IMAGE_LABELS.BRAND_LABEL}: {recognitionResult.brand}
+                            </span>
+                          )}
+                          {recognitionResult.model && (
+                            <span>
+                              {IMAGE_LABELS.MODEL_LABEL}: {recognitionResult.model}
+                            </span>
+                          )}
+                        </div>
+                        <div className="flex gap-2">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            className="flex-1"
+                            onClick={handleRetryCapture}
+                          >
+                            <RotateCcw className="mr-1 h-3 w-3" />
+                            {IMAGE_LABELS.RETRY}
+                          </Button>
+                          <Button
+                            type="button"
+                            size="sm"
+                            className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90"
+                            onClick={handleUseDetectedResult}
+                          >
+                            {IMAGE_LABELS.USE_RESULT}
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+
+                    {captureError && !recognitionResult && (
+                      <div className="flex flex-col items-center gap-2">
+                        <p className="text-xs text-destructive">{captureError}</p>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={handleRetryCapture}
+                        >
+                          <RotateCcw className="mr-1 h-3 w-3" />
+                          {IMAGE_LABELS.RETRY}
+                        </Button>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              )}
+
               {aiSuggestion && (
                 <p className="flex items-center gap-1 text-xs text-accent">
                   <Sparkles className="h-3 w-3" />

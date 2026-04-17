@@ -7,6 +7,7 @@ import {
   calculateApplianceMonthlyKwh,
   calculateMonthlyCost,
 } from './evn-pricing-service';
+import { parseUsageHabits, UsageHabitInput } from './ai-service';
 
 const ZERO_KWH = 0;
 const ZERO_COST = 0;
@@ -97,11 +98,18 @@ export async function addAppliances(
     ZERO_KWH
   );
 
-  const newApplianceDocs = appliances.map((input) => {
-    const monthlyKwh = calculateApplianceMonthlyKwh(
-      input.wattage,
-      input.dailyUsageHours
-    );
+  const habitInputs: UsageHabitInput[] = appliances.map((input, index) => ({
+    index,
+    name: input.name,
+    wattage: input.wattage,
+    usageHabit: input.usageHabit ?? '',
+    currentDailyHours: input.dailyUsageHours,
+  }));
+  const effectiveHours = await parseUsageHabits(habitInputs);
+
+  const newApplianceDocs = appliances.map((input, index) => {
+    const dailyUsageHours = effectiveHours[index] ?? input.dailyUsageHours;
+    const monthlyKwh = calculateApplianceMonthlyKwh(input.wattage, dailyUsageHours);
 
     return {
       applianceId: uuidv4(),
@@ -110,7 +118,7 @@ export async function addAppliances(
       name: input.name,
       type: input.type,
       wattage: input.wattage,
-      dailyUsageHours: input.dailyUsageHours,
+      dailyUsageHours,
       standbyWattage: input.standbyWattage ?? 0,
       usageHabit: input.usageHabit ?? '',
       monthlyKwh,
@@ -210,7 +218,23 @@ export async function updateAppliance(
   }
 
   const newWattage = updates.wattage ?? existing.wattage;
-  const newDailyUsageHours = updates.dailyUsageHours ?? existing.dailyUsageHours;
+  const newUsageHabit = updates.usageHabit ?? existing.usageHabit ?? '';
+  const sliderDailyHours = updates.dailyUsageHours ?? existing.dailyUsageHours;
+
+  const habitIsUpdated = updates.usageHabit !== undefined && updates.usageHabit.trim().length > 0;
+  let newDailyUsageHours = sliderDailyHours;
+
+  if (habitIsUpdated) {
+    const [parsed] = await parseUsageHabits([{
+      index: 0,
+      name: existing.name,
+      wattage: newWattage,
+      usageHabit: newUsageHabit,
+      currentDailyHours: sliderDailyHours,
+    }]);
+    newDailyUsageHours = parsed ?? sliderDailyHours;
+  }
+
   const monthlyKwh = calculateApplianceMonthlyKwh(newWattage, newDailyUsageHours);
 
   const otherAppliances = await ApplianceModel.find({
@@ -229,7 +253,7 @@ export async function updateAppliance(
 
   const updated = await ApplianceModel.findOneAndUpdate(
     { applianceId, homeId },
-    { ...updates, monthlyKwh, monthlyCost },
+    { ...updates, dailyUsageHours: newDailyUsageHours, monthlyKwh, monthlyCost },
     { new: true }
   ).lean();
 
