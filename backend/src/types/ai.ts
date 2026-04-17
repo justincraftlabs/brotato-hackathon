@@ -42,3 +42,29 @@ export interface ChatMessage {
   content: string;
   timestamp: Date;
 }
+
+export type SuggestionPriority = 'high' | 'medium' | 'low';
+
+export interface DeviceSuggestion {
+  applianceName: string;
+  tip: string;
+  savingsKwh: number;
+  savingsVnd: number;
+  priority: SuggestionPriority;
+}
+
+export interface RoomSuggestion {
+  roomName: string;
+  roomType: string;
+  summary: string;
+  totalSavingsKwh: number;
+  totalSavingsVnd: number;
+  devices: DeviceSuggestion[];
+}
+
+export interface SavingsSuggestionsResult {
+  rooms: RoomSuggestion[];
+  grandTotalSavingsKwh: number;
+  grandTotalSavingsVnd: number;
+  analyzedAt: string;
+}
