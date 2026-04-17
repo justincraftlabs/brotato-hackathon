@@ -61,6 +61,7 @@ export const TRANSLATIONS = {
   NAV_SETUP: { vi: "Thiết lập", en: "Setup" },
   NAV_SUGGESTIONS: { vi: "Gợi ý", en: "Tips" },
   NAV_TIPS: { vi: "Gợi ý", en: "Tips" },
+  NAV_SCHEDULES: { vi: "Lịch", en: "Schedules" },
   NAV_ASSISTANT: { vi: "Trợ lý", en: "Assistant" },
 
   // App

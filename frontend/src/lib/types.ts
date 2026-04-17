@@ -158,6 +158,51 @@ export type ApiResponse<T> =
   | { success: true; data: T }
   | { success: false; error: string };
 
+export type ScheduleStatus = "active" | "paused" | "completed";
+export type ScheduleType = "behavior" | "upgrade" | "schedule" | "vampire";
+
+export interface Schedule {
+  scheduleId: string;
+  homeId: string;
+  applianceName: string;
+  roomName: string;
+  type: ScheduleType;
+  title: string;
+  description: string;
+  scheduledTime: string;
+  savingsKwh: number;
+  savingsVnd: number;
+  status: ScheduleStatus;
+  lastFiredAt?: string;
+  createdAt: string;
+}
+
+export interface SavingsTotals {
+  totalSavingsVnd: number;
+  totalSavingsKwh: number;
+  treesEquivalent: number;
+  completionCount: number;
+}
+
+export interface ActivateAllItem {
+  applianceName: string;
+  roomName: string;
+  type: ScheduleType;
+  title: string;
+  description?: string;
+  savingsKwh: number;
+  savingsVnd: number;
+}
+
+export interface ScheduleFiredEvent {
+  scheduleId: string;
+  title: string;
+  applianceName: string;
+  roomName: string;
+  savingsVnd: number;
+  savingsKwh: number;
+}
+
 export type SuggestionPriority = 'high' | 'medium' | 'low';
 
 export interface DeviceSuggestion {

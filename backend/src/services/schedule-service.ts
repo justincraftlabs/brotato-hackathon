@@ -75,6 +75,10 @@ export async function deleteSchedule(scheduleId: string): Promise<void> {
   if (result.deletedCount === 0) throw new ScheduleNotFoundError(scheduleId);
 }
 
+export async function deleteAllByHome(homeId: string): Promise<void> {
+  await ScheduleModel.deleteMany({ homeId });
+}
+
 export async function fireSchedule(scheduleId: string): Promise<void> {
   const doc = await ScheduleModel.findOne({ scheduleId });
   if (!doc) throw new ScheduleNotFoundError(scheduleId);

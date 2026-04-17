@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  Bell,
   LayoutDashboard,
   Lightbulb,
   MessageCircle,
@@ -37,7 +38,7 @@ const NEXT_LANGUAGE: Record<Language, Language> = {
 
 interface NavItemDef {
   href: string;
-  labelKey: "NAV_OVERVIEW" | "NAV_SETUP" | "NAV_TIPS" | "NAV_ASSISTANT";
+  labelKey: "NAV_OVERVIEW" | "NAV_SETUP" | "NAV_TIPS" | "NAV_ASSISTANT" | "NAV_SCHEDULES";
   icon: ComponentType<{ className?: string }>;
 }
 
@@ -45,6 +46,7 @@ const NAV_ITEMS: NavItemDef[] = [
   { href: NAV_ROUTES.DASHBOARD, labelKey: "NAV_OVERVIEW", icon: LayoutDashboard },
   { href: NAV_ROUTES.SETUP, labelKey: "NAV_SETUP", icon: Settings },
   { href: NAV_ROUTES.TIPS, labelKey: "NAV_TIPS", icon: Lightbulb },
+  { href: NAV_ROUTES.SCHEDULES, labelKey: "NAV_SCHEDULES", icon: Bell },
   { href: NAV_ROUTES.ASSISTANT, labelKey: "NAV_ASSISTANT", icon: MessageCircle },
 ];
 

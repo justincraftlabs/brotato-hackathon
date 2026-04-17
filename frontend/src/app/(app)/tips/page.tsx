@@ -7,6 +7,7 @@ import { useCallback, useEffect, useState } from "react";
 import { ApplianceAdjuster } from "@/components/simulator/ApplianceAdjuster";
 import { ComparisonBar } from "@/components/simulator/ComparisonBar";
 import { ImpactSummary } from "@/components/simulator/ImpactSummary";
+import { ActivateAllButton } from "@/components/recommendations/ActivateAllButton";
 import { RoomAccordionItem } from "@/components/savings/RoomAccordionItem";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -22,7 +23,8 @@ import {
 import { LOCAL_STORAGE_HOME_ID_KEY, NAV_ROUTES } from "@/lib/constants";
 import { formatKwh, formatVnd } from "@/lib/format";
 import type { Translations } from "@/lib/translations";
-import type { Home, SavingsSuggestionsResult } from "@/lib/types";
+import type { ActivateAllItem, Home, SavingsSuggestionsResult } from "@/lib/types";
+import { useSchedules } from "@/contexts/schedules-context";
 
 /* ---------- Types ---------- */
 
@@ -115,6 +117,7 @@ function NoHomeState({ t }: NoHomeProps) {
 export default function TipsPage() {
   const t = useT();
   const [homeId] = useLocalStorage(LOCAL_STORAGE_HOME_ID_KEY);
+  const { clearAll } = useSchedules();
 
   // Suggestions state
   const [suggestionsState, setSuggestionsState] =
@@ -156,6 +159,13 @@ export default function TipsPage() {
     fetchSuggestions(homeId, false);
     fetchHome(homeId);
   }, [homeId, fetchSuggestions, fetchHome]);
+
+  const handleReanalyze = useCallback(async () => {
+    if (!homeId) return;
+    // Clear all schedules via context (updates shared state + backend)
+    await clearAll();
+    fetchSuggestions(homeId, true);
+  }, [homeId, clearAll, fetchSuggestions]);
 
   const handleAdjust = useCallback(
     (applianceId: string, adjustment: ApplianceAdjustment) => {
@@ -200,7 +210,7 @@ export default function TipsPage() {
           <SuggestionsContent
             state={suggestionsState}
             homeId={homeId}
-            onRefresh={() => fetchSuggestions(homeId, true)}
+            onRefresh={handleReanalyze}
             t={t}
           />
         </TabsContent>
@@ -237,6 +247,17 @@ function SuggestionsContent({
   onRefresh,
   t,
 }: SuggestionsContentProps) {
+  // Read shared schedule state from context — always in sync with schedules page
+  const { activatedKeys, activate } = useSchedules();
+
+  const handleDeviceActivated = useCallback(
+    async (_roomName: string, _applianceName: string, _item: ActivateAllItem) => {
+      // activate is already called inside DeviceSuggestionCard via context;
+      // this callback exists only for potential future side effects
+    },
+    []
+  );
+
   if (state.status === "loading" || state.status === "idle") {
     return (
       <div className="flex flex-col items-center gap-4 py-10">
@@ -264,6 +285,21 @@ function SuggestionsContent({
 
   const { data } = state;
 
+  const activateItems: ActivateAllItem[] = data.rooms.flatMap((room) =>
+    room.devices.map((device) => ({
+      applianceName: device.applianceName,
+      roomName: room.roomName,
+      type: "behavior" as const,
+      title: device.tip,
+      savingsKwh: device.savingsKwh,
+      savingsVnd: device.savingsVnd,
+    }))
+  );
+
+  const pendingItems = activateItems.filter(
+    (item) => !activatedKeys.has(`${item.roomName}:${item.applianceName}`)
+  );
+
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between gap-3">
@@ -288,10 +324,19 @@ function SuggestionsContent({
         </Button>
       </div>
 
+      <ActivateAllButton
+        homeId={homeId}
+        items={pendingItems}
+        totalActivated={activatedKeys.size}
+      />
+
       {data.rooms.map((room, index) => (
         <RoomAccordionItem
           key={`room-${index}`}
           room={room}
+          homeId={homeId}
+          activatedKeys={activatedKeys}
+          onActivated={handleDeviceActivated}
           defaultOpen={index === FIRST_ROOM_INDEX}
           t={t}
         />

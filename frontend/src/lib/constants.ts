@@ -47,6 +47,7 @@ export const NAV_ROUTES = {
   CHAT: "/chat",
   SIMULATOR: "/simulator",
   SUGGESTIONS: "/suggestions",
+  SCHEDULES: "/schedules",
   TIPS: "/tips",
   ASSISTANT: "/chat",
 } as const;

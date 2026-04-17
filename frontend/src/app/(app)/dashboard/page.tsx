@@ -17,6 +17,7 @@ import { CarbonWaterfallChart } from "@/components/dashboard/CarbonWaterfallChar
 import { Co2TreeVisual } from "@/components/dashboard/Co2TreeVisual";
 import { EvnTierProgress } from "@/components/dashboard/EvnTierProgress";
 import { MonthComparison } from "@/components/dashboard/MonthComparison";
+import { SavingsCounter } from "@/components/dashboard/SavingsCounter";
 import { SavingsForecastChart } from "@/components/dashboard/SavingsForecastChart";
 import { TopConsumersChart } from "@/components/dashboard/TopConsumersChart";
 import { WasteHotspotChart } from "@/components/dashboard/WasteHotspotChart";
@@ -267,11 +268,12 @@ function ErrorBanner({ message, onRetry, t }: ErrorBannerProps) {
 /* ---------- Dashboard Content ---------- */
 
 interface DashboardContentProps {
+  homeId: string;
   data: DashboardData;
   t: Translations;
 }
 
-function DashboardContent({ data, t }: DashboardContentProps) {
+function DashboardContent({ homeId, data, t }: DashboardContentProps) {
   return (
     <div className="flex flex-col gap-6">
       {/* Stat Cards — staggered slide-up */}
@@ -330,6 +332,9 @@ function DashboardContent({ data, t }: DashboardContentProps) {
             <EvnTierProgress evnTier={data.evnTier} totalKwh={data.totalMonthlyKwh} />
             <Co2TreeVisual co2={data.co2} />
           </div>
+        </FadeSlide>
+        <FadeSlide className="md:col-span-2">
+          <SavingsCounter homeId={homeId} />
         </FadeSlide>
         <FadeSlide className="md:col-span-2">
           <CarbonWaterfallChart co2TotalKg={data.co2.totalKg} consumers={data.topConsumers} />
@@ -391,7 +396,7 @@ export default function DashboardPage() {
           />
         )}
         {pageState.status === "success" && (
-          <DashboardContent data={pageState.data} t={t} />
+          <DashboardContent homeId={homeId} data={pageState.data} t={t} />
         )}
       </CrossFade>
     </div>

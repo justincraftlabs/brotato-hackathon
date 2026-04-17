@@ -6,6 +6,7 @@ import { useCallback, useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { ActivateAllButton } from "@/components/recommendations/ActivateAllButton";
 import { RoomAccordionItem } from "@/components/savings/RoomAccordionItem";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { useT } from "@/hooks/use-t";
@@ -13,7 +14,7 @@ import { getSavingsSuggestions } from "@/lib/api";
 import { LOCAL_STORAGE_HOME_ID_KEY, NAV_ROUTES } from "@/lib/constants";
 import { formatKwh, formatVnd } from "@/lib/format";
 import type { Translations } from "@/lib/translations";
-import type { SavingsSuggestionsResult } from "@/lib/types";
+import type { ActivateAllItem, SavingsSuggestionsResult } from "@/lib/types";
 
 type PageState =
   | { status: "idle" }
@@ -80,6 +81,23 @@ function TotalSavingsCard({ data, t }: TotalSavingsCardProps) {
       </CardContent>
     </Card>
   );
+}
+
+function toActivateAllItems(data: SavingsSuggestionsResult): ActivateAllItem[] {
+  const items: ActivateAllItem[] = [];
+  for (const room of data.rooms) {
+    for (const device of room.devices) {
+      items.push({
+        applianceName: device.applianceName,
+        roomName: room.roomName,
+        type: "behavior",
+        title: device.tip,
+        savingsKwh: device.savingsKwh,
+        savingsVnd: device.savingsVnd,
+      });
+    }
+  }
+  return items;
 }
 
 export default function SuggestionsPage() {
@@ -154,10 +172,16 @@ export default function SuggestionsPage() {
 
       <TotalSavingsCard data={data} t={t} />
 
+      <ActivateAllButton
+        homeId={homeId}
+        items={toActivateAllItems(data)}
+      />
+
       {data.rooms.map((room, index) => (
         <RoomAccordionItem
           key={`room-${index}`}
           room={room}
+          homeId={homeId}
           defaultOpen={index === FIRST_ROOM_INDEX}
           t={t}
         />

@@ -9,6 +9,7 @@ import {
   listSchedules,
   pauseSchedule,
   deleteSchedule,
+  deleteAllByHome,
   fireSchedule,
   completeSched,
   getSavingsTotals,
@@ -255,6 +256,26 @@ router.patch(
         res.status(HTTP_NOT_FOUND).json(r);
         return;
       }
+      next(err);
+    }
+  }
+);
+
+// DELETE /api/schedules?homeId= — clear all schedules for a home
+router.delete(
+  '/',
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const homeId = req.query.homeId as string;
+      if (!homeId) {
+        const r: ApiErrorResponse = { success: false, error: 'homeId query param required' };
+        res.status(400).json(r);
+        return;
+      }
+      await deleteAllByHome(homeId);
+      const r: ApiSuccessResponse<null> = { success: true, data: null };
+      res.status(HTTP_OK).json(r);
+    } catch (err) {
       next(err);
     }
   }
