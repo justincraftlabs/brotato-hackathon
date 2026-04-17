@@ -16,15 +16,14 @@ interface DeviceSuggestionCardProps {
   t: Translations;
 }
 
-const PRIORITY_LABEL_MAP: Record<SuggestionPriority, keyof Translations> = {
-  high: "SUGGESTIONS_PRIORITY_HIGH",
-  medium: "SUGGESTIONS_PRIORITY_MEDIUM",
-  low: "SUGGESTIONS_PRIORITY_LOW",
-};
+function getPriorityLabel(priority: SuggestionPriority, t: Translations): string {
+  if (priority === 'high') return t.SUGGESTIONS_PRIORITY_HIGH;
+  if (priority === 'medium') return t.SUGGESTIONS_PRIORITY_MEDIUM;
+  return t.SUGGESTIONS_PRIORITY_LOW;
+}
 
 export function DeviceSuggestionCard({ device, t }: DeviceSuggestionCardProps) {
-  const labelKey = PRIORITY_LABEL_MAP[device.priority];
-  const priorityLabel = t[labelKey] as string;
+  const priorityLabel = getPriorityLabel(device.priority, t);
 
   return (
     <div className="flex flex-col gap-1 rounded-md border border-border bg-card p-3">
