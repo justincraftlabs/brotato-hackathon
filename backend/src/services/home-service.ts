@@ -276,6 +276,41 @@ export async function updateAppliance(
   };
 }
 
+export async function deleteAppliance(
+  homeId: string,
+  applianceId: string
+): Promise<void> {
+  const existing = await ApplianceModel.findOne({ applianceId, homeId }).lean();
+  if (!existing) {
+    throw new ApplianceNotFoundError(applianceId);
+  }
+
+  await ApplianceModel.deleteOne({ applianceId, homeId });
+
+  const remainingAppliances = await ApplianceModel.find({ homeId }).lean();
+
+  const totalKwh = remainingAppliances.reduce(
+    (sum, a) => sum + a.monthlyKwh,
+    ZERO_KWH
+  );
+
+  if (totalKwh <= ZERO_KWH) {
+    return;
+  }
+
+  const totalCost = calculateMonthlyCost(totalKwh);
+
+  for (const appliance of remainingAppliances) {
+    const newCost = Math.round(
+      (appliance.monthlyKwh / totalKwh) * totalCost
+    );
+    await ApplianceModel.updateOne(
+      { applianceId: appliance.applianceId },
+      { monthlyCost: newCost }
+    );
+  }
+}
+
 export class HomeNotFoundError extends Error {
   constructor(homeId: string) {
     super(`Home not found: ${homeId}`);
