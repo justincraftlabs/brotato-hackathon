@@ -3,7 +3,7 @@
 import { ChevronDown, ChevronRight } from "lucide-react";
 import { useState } from "react";
 
-import { formatVnd } from "@/lib/format";
+import { formatKwh, formatVnd } from "@/lib/format";
 import type { RoomSuggestion } from "@/lib/types";
 import type { Translations } from "@/lib/translations";
 import { DeviceSuggestionCard } from "./DeviceSuggestionCard";
@@ -35,6 +35,10 @@ export function RoomAccordionItem({ room, defaultOpen = false, t }: RoomAccordio
           <span className="text-sm font-medium text-primary">
             ~{formatVnd(room.totalSavingsVnd)}
           </span>
+          {/* Show kWh savings on desktop alongside VND */}
+          <span className="hidden text-xs text-muted-foreground lg:inline">
+            · {formatKwh(room.totalSavingsKwh)}
+          </span>
           {isOpen ? (
             <ChevronDown className="h-4 w-4 text-muted-foreground" />
           ) : (
@@ -46,9 +50,16 @@ export function RoomAccordionItem({ room, defaultOpen = false, t }: RoomAccordio
       {isOpen && (
         <div className="flex flex-col gap-2 bg-background px-4 pb-4 pt-2">
           <p className="text-xs text-muted-foreground italic">{room.summary}</p>
-          {room.devices.map((device, index) => (
-            <DeviceSuggestionCard key={`${device.applianceName}-${index}`} device={device} t={t} />
-          ))}
+          {/* Desktop: 2-column grid; mobile: single column */}
+          <div className="grid grid-cols-1 gap-2 lg:grid-cols-2">
+            {room.devices.map((device, index) => (
+              <DeviceSuggestionCard
+                key={`${device.applianceName}-${index}`}
+                device={device}
+                t={t}
+              />
+            ))}
+          </div>
         </div>
       )}
     </div>

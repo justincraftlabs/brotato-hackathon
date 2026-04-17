@@ -11,10 +11,15 @@ import {
   Comparison,
   Anomaly,
   Co2Data,
+  VampireData,
+  VampireAppliance,
 } from '../types/energy';
 import { Appliance, Room } from '../types/home';
 
 const TOP_CONSUMERS_LIMIT = 5;
+const TOP_VAMPIRES_LIMIT = 5;
+const HOURS_PER_DAY = 24;
+const DAYS_PER_MONTH = 30;
 const ANOMALY_THRESHOLD_MULTIPLIER = 1.2;
 const MONTHS_PER_YEAR = 12;
 const PERCENT_MULTIPLIER = 100;
@@ -118,6 +123,50 @@ function buildCo2(totalMonthlyKwh: number): Co2Data {
   };
 }
 
+function buildVampireData(
+  appliancesWithRoom: ApplianceWithRoom[],
+  totalMonthlyKwh: number
+): VampireData {
+  const vampireList: VampireAppliance[] = appliancesWithRoom
+    .filter(({ appliance }) => appliance.standbyWattage > 0)
+    .map(({ appliance, roomName }) => {
+      const monthlyStandbyKwh =
+        (appliance.standbyWattage / 1000) * HOURS_PER_DAY * DAYS_PER_MONTH;
+      const monthlyStandbyCost = calculateMonthlyCost(monthlyStandbyKwh);
+      const standbyRatio =
+        appliance.monthlyKwh > 0 ? monthlyStandbyKwh / appliance.monthlyKwh : 0;
+      return {
+        applianceId: appliance.applianceId,
+        name: appliance.name,
+        roomName,
+        standbyWattage: appliance.standbyWattage,
+        monthlyStandbyKwh:
+          Math.round(monthlyStandbyKwh * PERCENT_MULTIPLIER) / PERCENT_MULTIPLIER,
+        monthlyStandbyCost: Math.round(monthlyStandbyCost),
+        standbyRatio: Math.round(standbyRatio * 1000) / 1000,
+      };
+    })
+    .sort((a, b) => b.monthlyStandbyKwh - a.monthlyStandbyKwh);
+
+  const totalStandbyKwh = vampireList.reduce(
+    (sum, v) => sum + v.monthlyStandbyKwh,
+    ZERO_KWH
+  );
+  const totalStandbyCost = Math.round(calculateMonthlyCost(totalStandbyKwh));
+  const vampirePercent =
+    totalMonthlyKwh > 0
+      ? Math.round((totalStandbyKwh / totalMonthlyKwh) * PERCENT_MULTIPLIER * 10) / 10
+      : 0;
+
+  return {
+    topVampires: vampireList.slice(0, TOP_VAMPIRES_LIMIT),
+    totalStandbyKwh:
+      Math.round(totalStandbyKwh * PERCENT_MULTIPLIER) / PERCENT_MULTIPLIER,
+    totalStandbyCost,
+    vampirePercent,
+  };
+}
+
 export async function getDashboard(
   homeId: string
 ): Promise<DashboardData | null> {
@@ -140,6 +189,7 @@ export async function getDashboard(
   const comparison = buildComparison(totalMonthlyKwh);
   const anomalies = buildAnomalies(appliancesWithRoom);
   const co2 = buildCo2(totalMonthlyKwh);
+  const vampireData = buildVampireData(appliancesWithRoom, totalMonthlyKwh);
 
   return {
     totalMonthlyKwh,
@@ -149,5 +199,6 @@ export async function getDashboard(
     comparison,
     anomalies,
     co2,
+    vampireData,
   };
 }

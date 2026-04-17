@@ -1,6 +1,6 @@
 "use client";
 
-import { Lightbulb, Loader2, Sliders } from "lucide-react";
+import { Lightbulb, Loader2, RotateCcw, Sliders } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
@@ -9,6 +9,7 @@ import { ApplianceAdjuster } from "@/components/simulator/ApplianceAdjuster";
 import { ComparisonBar } from "@/components/simulator/ComparisonBar";
 import { ImpactSummary } from "@/components/simulator/ImpactSummary";
 import { RoomAccordionItem } from "@/components/savings/RoomAccordionItem";
+import { IotActionCard } from "@/components/chat/IotActionCard";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
@@ -30,6 +31,7 @@ import type { Home, SavingsSuggestionsResult } from "@/lib/types";
 interface ApplianceAdjustment {
   newDailyHours?: number;
   newTemperature?: number;
+  standbyOff?: boolean;
 }
 
 interface SimulationSnapshot {
@@ -55,8 +57,14 @@ const INITIAL_HOME: HomeState = { status: "idle" };
 const TAB_SUGGESTIONS = "suggestions";
 const TAB_SIMULATOR = "simulator";
 const FIRST_ROOM_INDEX = 0;
+const STANDBY_HOURS_PER_DAY = 24;
+const STANDBY_DAYS_PER_MONTH = 30;
 
 /* ---------- Simulation helpers ---------- */
+
+function calcStandbyKwh(standbyWattage: number): number {
+  return (standbyWattage / 1000) * STANDBY_HOURS_PER_DAY * STANDBY_DAYS_PER_MONTH;
+}
 
 function recalculate(
   homeData: Home,
@@ -72,7 +80,9 @@ function recalculate(
           ? calculateTemperatureFactor(appliance.type, adj.newTemperature)
           : 1;
       const effectiveWattage = appliance.wattage * tempFactor;
-      totalKwh += calculateMonthlyKwh(effectiveWattage, hours);
+      const activeKwh = calculateMonthlyKwh(effectiveWattage, hours);
+      const standbyKwh = adj?.standbyOff ? 0 : calcStandbyKwh(appliance.standbyWattage);
+      totalKwh += activeKwh + standbyKwh;
     }
   }
   return {
@@ -119,11 +129,9 @@ export default function TipsPage() {
   const searchParams = useSearchParams();
   const initialTab = searchParams.get("tab") === TAB_SIMULATOR ? TAB_SIMULATOR : TAB_SUGGESTIONS;
 
-  // Suggestions state
   const [suggestionsState, setSuggestionsState] =
     useState<SuggestionsState>(INITIAL_SUGGESTIONS);
 
-  // Simulator state
   const [homeState, setHomeState] = useState<HomeState>(INITIAL_HOME);
   const [adjustments, setAdjustments] = useState<
     Record<string, ApplianceAdjustment>
@@ -175,8 +183,22 @@ export default function TipsPage() {
     return <NoHomeState t={t} />;
   }
 
+  // Derive simulator values when home data is ready
+  const original =
+    homeState.status === "success"
+      ? calculateOriginal(homeState.data)
+      : null;
+  const adjusted =
+    homeState.status === "success" && original
+      ? recalculate(homeState.data, adjustments)
+      : null;
+
+  const savingsKwh = original && adjusted ? original.totalKwh - adjusted.totalKwh : 0;
+  const savingsVnd = original && adjusted ? original.totalCost - adjusted.totalCost : 0;
+  const savingsCo2Kg = original && adjusted ? original.totalCo2Kg - adjusted.totalCo2Kg : 0;
+
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-4">
       <div>
         <h1 className="text-2xl font-bold lg:text-3xl">
           {t.TIPS_PAGE_TITLE}
@@ -186,60 +208,120 @@ export default function TipsPage() {
         </p>
       </div>
 
-      <Tabs defaultValue={initialTab}>
-        <TabsList className="glass w-full rounded-xl p-1 sm:w-auto">
-          <TabsTrigger value={TAB_SUGGESTIONS} className="flex-1 gap-1.5 rounded-lg data-[state=active]:bg-primary/15 data-[state=active]:text-primary data-[state=active]:shadow-none sm:flex-initial">
-            <Lightbulb className="h-4 w-4" />
-            {t.TIPS_TAB_SUGGESTIONS}
-          </TabsTrigger>
-          <TabsTrigger value={TAB_SIMULATOR} className="flex-1 gap-1.5 rounded-lg data-[state=active]:bg-primary/15 data-[state=active]:text-primary data-[state=active]:shadow-none sm:flex-initial">
-            <Sliders className="h-4 w-4" />
-            {t.TIPS_TAB_SIMULATOR}
-          </TabsTrigger>
-        </TabsList>
+      {/* Mobile: tabs */}
+      <div className="lg:hidden">
+        <Tabs defaultValue={initialTab}>
+          <TabsList className="glass rounded-xl p-1">
+            <TabsTrigger
+              value={TAB_SUGGESTIONS}
+              className="gap-1.5 rounded-lg data-[state=active]:bg-primary/15 data-[state=active]:text-primary data-[state=active]:shadow-none"
+            >
+              <Lightbulb className="h-4 w-4" />
+              {t.TIPS_TAB_SUGGESTIONS}
+            </TabsTrigger>
+            <TabsTrigger
+              value={TAB_SIMULATOR}
+              className="gap-1.5 rounded-lg data-[state=active]:bg-primary/15 data-[state=active]:text-primary data-[state=active]:shadow-none"
+            >
+              <Sliders className="h-4 w-4" />
+              {t.TIPS_TAB_SIMULATOR}
+            </TabsTrigger>
+          </TabsList>
 
-        {/* Suggestions Tab */}
-        <TabsContent value={TAB_SUGGESTIONS} className="mt-4">
+          <TabsContent value={TAB_SUGGESTIONS} className="mt-4">
+            <SuggestionsContent
+              state={suggestionsState}
+              onRefresh={() => fetchSuggestions(homeId, true)}
+              t={t}
+            />
+          </TabsContent>
+
+          <TabsContent value={TAB_SIMULATOR} className="mt-4">
+            <SimulatorContent
+              homeState={homeState}
+              adjustments={adjustments}
+              onAdjust={handleAdjust}
+              onReset={handleReset}
+              onRetry={() => fetchHome(homeId)}
+              t={t}
+              savingsKwh={savingsKwh}
+              savingsVnd={savingsVnd}
+              savingsCo2Kg={savingsCo2Kg}
+              original={original}
+              adjusted={adjusted}
+            />
+          </TabsContent>
+        </Tabs>
+      </div>
+
+      {/* Desktop: side-by-side split */}
+      <div className="hidden lg:grid lg:grid-cols-2 lg:gap-6">
+        {/* Left — Suggestions */}
+        <div className="flex flex-col gap-3">
+          <div className="flex items-center gap-2">
+            <Lightbulb className="h-4 w-4 text-primary" />
+            <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+              {t.TIPS_TAB_SUGGESTIONS}
+            </h2>
+          </div>
           <SuggestionsContent
             state={suggestionsState}
-            homeId={homeId}
             onRefresh={() => fetchSuggestions(homeId, true)}
             t={t}
           />
-        </TabsContent>
+        </div>
 
-        {/* Simulator Tab */}
-        <TabsContent value={TAB_SIMULATOR} className="mt-4">
+        {/* Right — Simulator */}
+        <div className="flex flex-col gap-3">
+          <div className="flex items-center gap-2">
+            <Sliders className="h-4 w-4 text-primary" />
+            <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+              {t.TIPS_TAB_SIMULATOR}
+            </h2>
+          </div>
           <SimulatorContent
             homeState={homeState}
             adjustments={adjustments}
             onAdjust={handleAdjust}
             onReset={handleReset}
-            homeId={homeId}
             onRetry={() => fetchHome(homeId)}
             t={t}
+            savingsKwh={savingsKwh}
+            savingsVnd={savingsVnd}
+            savingsCo2Kg={savingsCo2Kg}
+            original={original}
+            adjusted={adjusted}
           />
-        </TabsContent>
-      </Tabs>
+        </div>
+      </div>
     </div>
   );
 }
 
 /* ---------- Suggestions Tab Content ---------- */
 
+const STANDBY_KEYWORDS = ["standby", "rút phích", "điện chờ", "vô hình", "điện ma", "tiêu thụ ngầm", "hút điện", "kẻ hút"];
+
+function hasAnyStandbyTip(data: SavingsSuggestionsResult): boolean {
+  const lower = data.rooms
+    .flatMap((r) => r.devices.map((d) => d.tip))
+    .join(" ")
+    .toLowerCase();
+  return STANDBY_KEYWORDS.some((kw) => lower.includes(kw));
+}
+
 interface SuggestionsContentProps {
   state: SuggestionsState;
-  homeId: string;
   onRefresh: () => void;
   t: Translations;
 }
 
 function SuggestionsContent({
   state,
-  homeId,
   onRefresh,
   t,
 }: SuggestionsContentProps) {
+
   if (state.status === "loading" || state.status === "idle") {
     return (
       <div className="flex flex-col items-center gap-4 py-10">
@@ -269,26 +351,26 @@ function SuggestionsContent({
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex items-center justify-between gap-3">
-        <div className="stat-card-primary flex-1 rounded-2xl p-4">
-          <p className="text-xs text-white/70">
-            {t.SUGGESTIONS_TOTAL_SAVINGS}
-          </p>
-          <p className="mt-1 text-2xl font-bold text-white">
-            {formatVnd(data.grandTotalSavingsVnd)}
-          </p>
-          <p className="text-sm text-white/60">
-            {formatKwh(data.grandTotalSavingsKwh)}
-          </p>
+      <div className="stat-card-primary rounded-2xl p-4">
+        <div className="flex items-start justify-between gap-2">
+          <div>
+            <p className="text-xs text-white/70">{t.SUGGESTIONS_TOTAL_SAVINGS}</p>
+            <p className="mt-1 text-2xl font-bold text-white">
+              {formatVnd(data.grandTotalSavingsVnd)}
+            </p>
+            <p className="text-sm text-white/60">
+              {formatKwh(data.grandTotalSavingsKwh)}
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={onRefresh}
+            title={t.SUGGESTIONS_ANALYZE_BUTTON}
+            className="mt-0.5 rounded-lg p-1.5 text-white/60 transition-colors hover:bg-white/10 hover:text-white"
+          >
+            <RotateCcw className="h-4 w-4" />
+          </button>
         </div>
-        <Button
-          variant="outline"
-          size="sm"
-          className="shrink-0 rounded-xl border-border/60 hover:bg-primary/10 hover:text-primary hover:border-primary/40"
-          onClick={onRefresh}
-        >
-          {t.SUGGESTIONS_ANALYZE_BUTTON}
-        </Button>
       </div>
 
       {data.rooms.map((room, index) => (
@@ -299,20 +381,28 @@ function SuggestionsContent({
           t={t}
         />
       ))}
+
+      {hasAnyStandbyTip(data) && (
+        <IotActionCard className="ml-0 mt-0" />
+      )}
     </div>
   );
 }
 
-/* ---------- Simulator Tab Content ---------- */
+/* ---------- Simulator Tab/Column Content ---------- */
 
 interface SimulatorContentProps {
   homeState: HomeState;
   adjustments: Record<string, ApplianceAdjustment>;
   onAdjust: (applianceId: string, adjustment: ApplianceAdjustment) => void;
   onReset: () => void;
-  homeId: string;
   onRetry: () => void;
   t: Translations;
+  savingsKwh: number;
+  savingsVnd: number;
+  savingsCo2Kg: number;
+  original: SimulationSnapshot | null;
+  adjusted: SimulationSnapshot | null;
 }
 
 function SimulatorContent({
@@ -322,6 +412,11 @@ function SimulatorContent({
   onReset,
   onRetry,
   t,
+  savingsKwh,
+  savingsVnd,
+  savingsCo2Kg,
+  original,
+  adjusted,
 }: SimulatorContentProps) {
   if (homeState.status === "loading" || homeState.status === "idle") {
     return (
@@ -349,31 +444,37 @@ function SimulatorContent({
   }
 
   const { data: homeData } = homeState;
-  const original = calculateOriginal(homeData);
-  const adjusted = recalculate(homeData, adjustments);
-
-  const savingsKwh = original.totalKwh - adjusted.totalKwh;
-  const savingsVnd = original.totalCost - adjusted.totalCost;
-  const savingsCo2Kg = original.totalCo2Kg - adjusted.totalCo2Kg;
 
   return (
     <div className="flex flex-col gap-4">
-      <ImpactSummary
-        savingsKwh={savingsKwh}
-        savingsVnd={savingsVnd}
-        savingsCo2Kg={savingsCo2Kg}
-      />
+      {/* Combined summary card: stats + comparison in one glass card */}
+      <div className="glass rounded-2xl border border-border/50">
+        <div className="p-3 lg:p-4">
+          <ImpactSummary
+            savingsKwh={savingsKwh}
+            savingsVnd={savingsVnd}
+            savingsCo2Kg={savingsCo2Kg}
+            originalKwh={original?.totalKwh}
+            originalCost={original?.totalCost}
+            originalCo2={original?.totalCo2Kg}
+            unstyled
+          />
+        </div>
+        <div className="border-t border-border/40 p-3 lg:p-4">
+          <ComparisonBar
+            originalCost={original?.totalCost ?? 0}
+            adjustedCost={adjusted?.totalCost ?? 0}
+            originalCo2={original?.totalCo2Kg ?? 0}
+            adjustedCo2={adjusted?.totalCo2Kg ?? 0}
+            onReset={onReset}
+            unstyled
+          />
+        </div>
+      </div>
       <ApplianceAdjuster
         rooms={homeData.rooms}
         adjustments={adjustments}
         onAdjust={onAdjust}
-      />
-      <ComparisonBar
-        originalCost={original.totalCost}
-        adjustedCost={adjusted.totalCost}
-        originalCo2={original.totalCo2Kg}
-        adjustedCo2={adjusted.totalCo2Kg}
-        onReset={onReset}
       />
     </div>
   );

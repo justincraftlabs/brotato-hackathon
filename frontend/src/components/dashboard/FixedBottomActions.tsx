@@ -54,7 +54,7 @@ export function FixedBottomActions({
         <Button
           variant="outline"
           asChild
-          className="flex-1 gap-2 rounded-xl border-border/60 hover:border-primary/40 hover:bg-primary/10 hover:text-primary"
+          className="flex-1 gap-2 rounded-xl"
         >
           <Link href={simulateHref}>
             <Zap className="h-4 w-4 shrink-0" />

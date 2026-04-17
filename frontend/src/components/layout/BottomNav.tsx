@@ -21,9 +21,9 @@ export function BottomNav() {
 
   const NAV_ITEMS: NavItem[] = [
     { href: NAV_ROUTES.DASHBOARD, label: t.NAV_OVERVIEW, icon: LayoutDashboard },
-    { href: NAV_ROUTES.SETUP, label: t.NAV_SETUP, icon: Settings },
-    { href: NAV_ROUTES.TIPS, label: t.NAV_TIPS, icon: Lightbulb },
     { href: NAV_ROUTES.ASSISTANT, label: t.NAV_ASSISTANT, icon: MessageCircle },
+    { href: NAV_ROUTES.TIPS, label: t.NAV_TIPS, icon: Lightbulb },
+    { href: NAV_ROUTES.SETUP, label: t.NAV_SETUP, icon: Settings },
   ];
 
   return (

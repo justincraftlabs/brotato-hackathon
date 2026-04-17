@@ -15,11 +15,15 @@ import type { ReactNode } from "react";
 import { AnomalyAlert } from "@/components/dashboard/AnomalyAlert";
 import { CarbonWaterfallChart } from "@/components/dashboard/CarbonWaterfallChart";
 import { Co2TreeVisual } from "@/components/dashboard/Co2TreeVisual";
+import { EfficiencyGauge } from "@/components/dashboard/EfficiencyGauge";
 import { EvnTierProgress } from "@/components/dashboard/EvnTierProgress";
 import { FixedBottomActions } from "@/components/dashboard/FixedBottomActions";
 import { MonthComparison } from "@/components/dashboard/MonthComparison";
+import { MonthlyBillProjection } from "@/components/dashboard/MonthlyBillProjection";
+import { RoomEnergyHeatmap } from "@/components/dashboard/RoomEnergyHeatmap";
 import { SavingsForecastChart } from "@/components/dashboard/SavingsForecastChart";
 import { TopConsumersChart } from "@/components/dashboard/TopConsumersChart";
+import { VampireAppliances } from "@/components/dashboard/VampireAppliances";
 import { WasteHotspotChart } from "@/components/dashboard/WasteHotspotChart";
 import { Button } from "@/components/ui/button";
 import { AnimatedCounter, CrossFade, FadeSlide, StaggerList } from "@/components/ui/motion";
@@ -320,12 +324,28 @@ function DashboardContent({ data, t }: DashboardContentProps) {
       <StaggerList className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:gap-5">
         <FadeSlide className="h-full"><TopConsumersChart consumers={data.topConsumers} /></FadeSlide>
         <FadeSlide className="h-full">
+          <VampireAppliances
+            vampireData={data.vampireData}
+            totalMonthlyKwh={data.totalMonthlyKwh}
+          />
+        </FadeSlide>
+        <FadeSlide className="h-full">
           <WasteHotspotChart
             consumers={data.topConsumers}
             totalMonthlyCost={data.totalMonthlyCost}
           />
         </FadeSlide>
         <FadeSlide className="h-full"><SavingsForecastChart monthlyCost={data.totalMonthlyCost} /></FadeSlide>
+
+        {/* Row: Room heatmap + Bill projection */}
+        <FadeSlide className="h-full">
+          <RoomEnergyHeatmap consumers={data.topConsumers} />
+        </FadeSlide>
+        <FadeSlide className="h-full">
+          <MonthlyBillProjection totalMonthlyCost={data.totalMonthlyCost} />
+        </FadeSlide>
+
+        {/* Row: Stat cluster + Eco Score */}
         <FadeSlide className="h-full">
           <div className="flex h-full flex-col gap-4">
             <MonthComparison comparison={data.comparison} />
@@ -333,6 +353,13 @@ function DashboardContent({ data, t }: DashboardContentProps) {
             <Co2TreeVisual co2={data.co2} />
           </div>
         </FadeSlide>
+        <FadeSlide className="h-full">
+          <EfficiencyGauge
+            evnTier={data.evnTier}
+            percentDifference={data.comparison.percentDifference}
+          />
+        </FadeSlide>
+
         <FadeSlide className="md:col-span-2">
           <CarbonWaterfallChart co2TotalKg={data.co2.totalKg} consumers={data.topConsumers} />
         </FadeSlide>

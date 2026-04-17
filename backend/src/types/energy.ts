@@ -31,6 +31,23 @@ export interface Comparison {
   status: 'above' | 'below' | 'average';
 }
 
+export interface VampireAppliance {
+  applianceId: string;
+  name: string;
+  roomName: string;
+  standbyWattage: number;
+  monthlyStandbyKwh: number;
+  monthlyStandbyCost: number;
+  standbyRatio: number;
+}
+
+export interface VampireData {
+  topVampires: VampireAppliance[];
+  totalStandbyKwh: number;
+  totalStandbyCost: number;
+  vampirePercent: number;
+}
+
 export interface DashboardData {
   totalMonthlyKwh: number;
   totalMonthlyCost: number;
@@ -39,4 +56,5 @@ export interface DashboardData {
   comparison: Comparison;
   anomalies: Anomaly[];
   co2: Co2Data;
+  vampireData: VampireData;
 }

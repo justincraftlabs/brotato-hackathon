@@ -416,17 +416,4 @@
       inset 0 1px 0 rgba(255, 255, 255, 0.065);
   }
 
-  /* ─── Active left-edge pill indicator ─── */
-  .sidebar-nav-active::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 3px;
-    height: 55%;
-    background: hsl(var(--primary));
-    border-radius: 0 2px 2px 0;
-    box-shadow: 0 0 8px hsl(var(--primary) / 0.6);
-  }
 }

@@ -1,7 +1,5 @@
 "use client";
 
-import { Card, CardContent } from "@/components/ui/card";
-import { useT } from "@/hooks/use-t";
 import { cn } from "@/lib/utils";
 
 interface EfficiencyGaugeProps {
@@ -10,12 +8,11 @@ interface EfficiencyGaugeProps {
 }
 
 const MAX_TIER = 6;
-const CIRCLE_RADIUS = 54;
-const STROKE_WIDTH = 10;
+const CIRCLE_RADIUS = 48;
+const STROKE_WIDTH = 9;
 const CIRCUMFERENCE = 2 * Math.PI * CIRCLE_RADIUS;
-const VIEW_SIZE = 140;
+const VIEW_SIZE = 124;
 const CENTER = VIEW_SIZE / 2;
-const FULL_CIRCLE_DEGREES = 360;
 const MAX_SCORE = 100;
 const ROTATION_OFFSET = -90;
 
@@ -28,41 +25,24 @@ const TIER_SCORE_MAP: Record<number, number> = {
   6: 15,
 };
 
-const SCORE_THRESHOLD_GREAT = 75;
-const SCORE_THRESHOLD_OK = 45;
-
-interface ScoreLevel {
-  label: { vi: string; en: string };
+interface Rank {
+  label: string;
+  emoji: string;
   color: string;
   trackColor: string;
-  bgClass: string;
+  glowColor: string;
+  min: number;
 }
 
-const LEVEL_GREAT: ScoreLevel = {
-  label: { vi: "Tuyệt vời!", en: "Great!" },
-  color: "#2E7D32",
-  trackColor: "#C8E6C9",
-  bgClass: "bg-primary-light dark:bg-primary/10",
-};
+const RANKS: readonly Rank[] = [
+  { label: "Khoai Bạch Kim", emoji: "💎", color: "#22d3ee", trackColor: "rgba(34,211,238,0.15)", glowColor: "rgba(34,211,238,0.35)", min: 81 },
+  { label: "Khoai Vàng",     emoji: "⭐", color: "#4ade80", trackColor: "rgba(74,222,128,0.15)", glowColor: "rgba(74,222,128,0.35)", min: 61 },
+  { label: "Khoai Nảy Mầm", emoji: "🌱", color: "#fbbf24", trackColor: "rgba(251,191,36,0.15)",  glowColor: "rgba(251,191,36,0.35)",  min: 41 },
+  { label: "Khoai Thô",      emoji: "🥔", color: "#f87171", trackColor: "rgba(248,113,113,0.15)", glowColor: "rgba(248,113,113,0.35)", min: 0  },
+] as const;
 
-const LEVEL_OK: ScoreLevel = {
-  label: { vi: "Khá tốt", en: "Not bad" },
-  color: "#EF9F27",
-  trackColor: "#FFF3E0",
-  bgClass: "bg-accent-light dark:bg-accent/10",
-};
-
-const LEVEL_BAD: ScoreLevel = {
-  label: { vi: "Cần cải thiện", en: "Needs work" },
-  color: "#E53935",
-  trackColor: "#FFCDD2",
-  bgClass: "bg-red-50 dark:bg-red-950/20",
-};
-
-function getLevel(score: number): ScoreLevel {
-  if (score >= SCORE_THRESHOLD_GREAT) return LEVEL_GREAT;
-  if (score >= SCORE_THRESHOLD_OK) return LEVEL_OK;
-  return LEVEL_BAD;
+function getRank(score: number): Rank {
+  return RANKS.find((r) => score >= r.min) ?? RANKS[RANKS.length - 1];
 }
 
 function calculateScore(evnTier: number, percentDiff: number): number {
@@ -71,88 +51,110 @@ function calculateScore(evnTier: number, percentDiff: number): number {
   return Math.max(0, Math.min(MAX_SCORE, Math.round(tierBase + diffBonus)));
 }
 
-export function EfficiencyGauge({
-  evnTier,
-  percentDifference,
-}: EfficiencyGaugeProps) {
-  const t = useT();
+export function EfficiencyGauge({ evnTier, percentDifference }: EfficiencyGaugeProps) {
   const score = calculateScore(evnTier, percentDifference);
-  const level = getLevel(score);
-  const lang = t.NAV_OVERVIEW === "Dashboard" ? "en" : "vi";
+  const rank = getRank(score);
 
   const filledLength = (score / MAX_SCORE) * CIRCUMFERENCE;
   const gapLength = CIRCUMFERENCE - filledLength;
 
   return (
-    <Card
-      className={cn(
-        "overflow-hidden rounded-2xl border-0 shadow-[0_2px_12px_-3px_rgba(0,0,0,0.08),0_8px_20px_-4px_rgba(0,0,0,0.04)]",
-        level.bgClass
-      )}
-    >
-      <CardContent className="flex items-center gap-5 p-5 lg:p-6">
-        {/* Radial gauge */}
-        <div className="relative shrink-0">
-          <svg
-            width={VIEW_SIZE}
-            height={VIEW_SIZE}
-            viewBox={`0 0 ${VIEW_SIZE} ${VIEW_SIZE}`}
+    <div className="glass rounded-2xl overflow-hidden card-hover-glow h-full flex items-center gap-4 p-4 lg:p-5">
+      {/* Radial gauge */}
+      <div
+        className="relative shrink-0"
+        style={{ filter: `drop-shadow(0 0 14px ${rank.glowColor})` }}
+      >
+        <svg
+          width={VIEW_SIZE}
+          height={VIEW_SIZE}
+          viewBox={`0 0 ${VIEW_SIZE} ${VIEW_SIZE}`}
+        >
+          {/* Track ring */}
+          <circle
+            cx={CENTER}
+            cy={CENTER}
+            r={CIRCLE_RADIUS}
+            fill="none"
+            stroke={rank.trackColor}
+            strokeWidth={STROKE_WIDTH}
+          />
+          {/* Filled arc */}
+          <circle
+            cx={CENTER}
+            cy={CENTER}
+            r={CIRCLE_RADIUS}
+            fill="none"
+            stroke={rank.color}
+            strokeWidth={STROKE_WIDTH}
+            strokeLinecap="round"
+            strokeDasharray={`${filledLength} ${gapLength}`}
+            transform={`rotate(${ROTATION_OFFSET} ${CENTER} ${CENTER})`}
+            className="transition-all duration-1000 ease-out"
+          />
+        </svg>
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-0.5">
+          <span
+            className="text-2xl font-black tabular-nums leading-none"
+            style={{ color: rank.color }}
           >
-            {/* Track */}
-            <circle
-              cx={CENTER}
-              cy={CENTER}
-              r={CIRCLE_RADIUS}
-              fill="none"
-              stroke={level.trackColor}
-              strokeWidth={STROKE_WIDTH}
-            />
-            {/* Filled arc */}
-            <circle
-              cx={CENTER}
-              cy={CENTER}
-              r={CIRCLE_RADIUS}
-              fill="none"
-              stroke={level.color}
-              strokeWidth={STROKE_WIDTH}
-              strokeLinecap="round"
-              strokeDasharray={`${filledLength} ${gapLength}`}
-              transform={`rotate(${ROTATION_OFFSET} ${CENTER} ${CENTER})`}
-              className="transition-all duration-1000 ease-out"
-            />
-          </svg>
-          {/* Center text */}
-          <div className="absolute inset-0 flex flex-col items-center justify-center">
+            {score}
+          </span>
+          <span className="text-[10px] font-medium text-muted-foreground">
+            / {MAX_SCORE}
+          </span>
+        </div>
+      </div>
+
+      {/* Info */}
+      <div className="flex flex-1 min-w-0 flex-col gap-2.5">
+        <div>
+          <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+            Eco Score
+          </p>
+          <p
+            className="mt-0.5 text-base font-black leading-tight"
+            style={{ color: rank.color }}
+          >
+            {rank.emoji} {rank.label}
+          </p>
+        </div>
+
+        <div className="flex flex-col gap-1.5 text-xs">
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-muted-foreground">Bậc EVN</span>
+            <span className="font-semibold">Bậc {evnTier}</span>
+          </div>
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-muted-foreground">So hộ TB</span>
             <span
-              className="text-3xl font-black tabular-nums"
-              style={{ color: level.color }}
+              className={cn(
+                "font-semibold",
+                percentDifference <= 0 ? "text-primary" : "text-amber-400"
+              )}
             >
-              {score}
-            </span>
-            <span className="text-[10px] font-medium text-muted-foreground">
-              / {MAX_SCORE}
+              {percentDifference > 0 ? "+" : ""}
+              {percentDifference.toFixed(0)}%
             </span>
           </div>
         </div>
 
-        {/* Info */}
-        <div className="flex flex-col gap-1">
-          <p className="text-base font-bold">
-            {lang === "vi" ? "Điểm hiệu quả" : "Efficiency Score"}
-          </p>
-          <p
-            className="text-lg font-black"
-            style={{ color: level.color }}
-          >
-            {level.label[lang]}
-          </p>
-          <p className="text-xs text-muted-foreground">
-            {lang === "vi"
-              ? `Dựa trên bậc EVN ${evnTier} và mức tiêu thụ`
-              : `Based on EVN tier ${evnTier} & usage`}
-          </p>
+        {/* Progress bar */}
+        <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted/30">
+          <div
+            className="h-full rounded-full transition-all duration-1000 ease-out"
+            style={{ width: `${score}%`, backgroundColor: rank.color }}
+          />
         </div>
-      </CardContent>
-    </Card>
+
+        {/* Rank progression hint */}
+        <p className="text-[10px] text-muted-foreground leading-relaxed">
+          {score < 41 && "Giảm standby để lên hạng 🌱"}
+          {score >= 41 && score < 61 && "Gần tới Khoai Vàng rồi! ⭐"}
+          {score >= 61 && score < 81 && "Hướng tới Bạch Kim! 💎"}
+          {score >= 81 && "Bạn đang ở đỉnh cao! 🎉"}
+        </p>
+      </div>
+    </div>
   );
 }

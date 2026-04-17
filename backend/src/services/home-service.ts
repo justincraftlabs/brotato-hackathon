@@ -143,6 +143,21 @@ export async function addAppliances(
 
   const created = await ApplianceModel.insertMany(appliancesWithCost);
 
+  // Recalculate monthlyCost for existing appliances so proportional share stays accurate
+  if (existingAppliances.length > ZERO_KWH && householdTotalKwh > ZERO_KWH) {
+    const bulkOps = existingAppliances.map((a) => ({
+      updateOne: {
+        filter: { applianceId: a.applianceId, homeId },
+        update: {
+          $set: {
+            monthlyCost: Math.round((a.monthlyKwh / householdTotalKwh) * householdTotalCost),
+          },
+        },
+      },
+    }));
+    await ApplianceModel.bulkWrite(bulkOps);
+  }
+
   return created.map((doc) => ({
     applianceId: doc.applianceId,
     roomId: doc.roomId,
@@ -221,7 +236,10 @@ export async function updateAppliance(
   const newUsageHabit = updates.usageHabit ?? existing.usageHabit ?? '';
   const sliderDailyHours = updates.dailyUsageHours ?? existing.dailyUsageHours;
 
-  const habitIsUpdated = updates.usageHabit !== undefined && updates.usageHabit.trim().length > 0;
+  const habitIsUpdated =
+    updates.usageHabit !== undefined &&
+    updates.usageHabit.trim().length > 0 &&
+    updates.usageHabit.trim() !== (existing.usageHabit ?? '').trim();
   let newDailyUsageHours = sliderDailyHours;
 
   if (habitIsUpdated) {
@@ -259,6 +277,24 @@ export async function updateAppliance(
 
   if (!updated) {
     throw new ApplianceNotFoundError(applianceId);
+  }
+
+  // Recalculate monthlyCost for all other appliances so proportional share stays accurate
+  if (otherAppliances.length > ZERO_KWH) {
+    const bulkOps = otherAppliances.map((a) => ({
+      updateOne: {
+        filter: { applianceId: a.applianceId, homeId },
+        update: {
+          $set: {
+            monthlyCost:
+              householdTotalKwh > ZERO_KWH
+                ? Math.round((a.monthlyKwh / householdTotalKwh) * householdTotalCost)
+                : ZERO_COST,
+          },
+        },
+      },
+    }));
+    await ApplianceModel.bulkWrite(bulkOps);
   }
 
   return {

@@ -171,6 +171,9 @@ export const TRANSLATIONS = {
     en: "An error occurred, please try again.",
   },
   CHAT_SEND_BUTTON: { vi: "Gửi", en: "Send" },
+  CHAT_NEW_CONVERSATION: { vi: "Cuộc trò chuyện mới", en: "New conversation" },
+  SUGGESTIONS_TRY_SIMULATOR: { vi: "Thử Simulator →", en: "Try Simulator →" },
+  SUGGESTIONS_IOT_SECTION_TITLE: { vi: "Tự động hóa tiết kiệm điện", en: "Automate energy savings" },
 
   // Simulator
   SIMULATOR_PAGE_TITLE: { vi: "Mô phỏng tiết kiệm", en: "Savings Simulator" },
@@ -340,6 +343,81 @@ export const TRANSLATIONS = {
   CHART_CARBON_OFF_PREFIX: { vi: "Tắt", en: "Off" },
   CHART_CARBON_REMAINING: { vi: "Còn lại", en: "Remaining" },
   CHART_CARBON_UNIT: { vi: "kg CO₂/tháng", en: "kg CO₂/mo" },
+
+  // TopConsumers info dialog
+  CHART_CONSUMERS_INFO_TITLE: { vi: "Thiết bị tiêu thụ nhiều nhất", en: "Top Energy Consumers" },
+  CHART_CONSUMERS_INFO_SUBTITLE: { vi: "Top 5 theo kWh tiêu thụ/tháng", en: "Top 5 by monthly kWh" },
+  CHART_CONSUMERS_INFO_NORMAL: { vi: "Bình thường", en: "Normal" },
+  CHART_CONSUMERS_INFO_NORMAL_DESC: { vi: "≤ 20% tổng tiêu thụ", en: "≤ 20% of total" },
+  CHART_CONSUMERS_INFO_HIGH: { vi: "Tiêu thụ cao", en: "High usage" },
+  CHART_CONSUMERS_INFO_HIGH_DESC: { vi: "> 20% tổng tiêu thụ", en: "> 20% of total" },
+  CHART_CONSUMERS_INFO_TIP: {
+    vi: "Điều hòa & máy nước nóng thường chiếm 60–70% hóa đơn điện. Giảm nhiệt độ 1°C → tiết kiệm ~6%.",
+    en: "AC & water heaters typically account for 60–70% of your bill. Lower temp by 1°C → save ~6%.",
+  },
+  CHART_CONSUMERS_INFO_FOOTER: { vi: "Dựa trên thói quen sử dụng đã cấu hình", en: "Based on your configured usage habits" },
+
+  // WasteHotspot info dialog
+  CHART_WASTE_INFO_TITLE: { vi: "Chi phí điện theo thiết bị", en: "Electricity Cost by Appliance" },
+  CHART_WASTE_INFO_SUBTITLE: { vi: "Phân bổ tỷ lệ chi phí/tháng", en: "Monthly cost breakdown" },
+  CHART_WASTE_INFO_CENTER_HINT: { vi: "Số ở giữa = % chi phí của thiết bị đắt nhất", en: "Center % = cost share of the biggest spender" },
+  CHART_WASTE_INFO_TIER_NOTE: { vi: "Dùng nhiều điện → bậc cao hơn → giá/kWh đắt hơn", en: "Higher usage → higher tier → more expensive per kWh" },
+  CHART_WASTE_INFO_TIER_RANGE: { vi: "Bậc 1: 1.984 đ/kWh → Bậc 6: 3.967 đ/kWh (×2)", en: "Tier 1: ₫1,984/kWh → Tier 6: ₫3,967/kWh (×2)" },
+  CHART_WASTE_INFO_FOOTER: { vi: "Giá theo biểu giá EVN 2026, chưa gồm 10% VAT", en: "EVN 2026 rates, excl. 10% VAT" },
+
+  // SavingsForecast info dialog
+  CHART_FORECAST_INFO_TITLE: { vi: "Kịch bản tiết kiệm", en: "Savings Scenarios" },
+  CHART_FORECAST_INFO_SUBTITLE: { vi: "3 mức độ tối ưu thực tế", en: "3 realistic optimization levels" },
+  CHART_FORECAST_INFO_ROW_10_LABEL: { vi: "Tiết kiệm 10%", en: "Save 10%" },
+  CHART_FORECAST_INFO_ROW_10_DESC: { vi: "Tắt điện khi ra khỏi phòng, chỉnh điều hòa 25–26°C", en: "Turn off lights when leaving, set AC to 25–26°C" },
+  CHART_FORECAST_INFO_ROW_20_LABEL: { vi: "Tiết kiệm 20%", en: "Save 20%" },
+  CHART_FORECAST_INFO_ROW_20_DESC: { vi: "Nâng cấp bóng đèn LED, dùng chế độ eco và hẹn giờ", en: "Upgrade to LED lighting, use eco modes and timers" },
+  CHART_FORECAST_INFO_ROW_30_LABEL: { vi: "Tiết kiệm 30%", en: "Save 30%" },
+  CHART_FORECAST_INFO_ROW_30_DESC: { vi: "Thay điều hòa/tủ lạnh cũ bằng loại tiết kiệm điện 5 sao", en: "Replace old AC/fridge with 5-star energy-efficient models" },
+  CHART_FORECAST_INFO_FOOTER: { vi: "Dự báo dựa trên chi phí hiện tại, không tính trượt giá điện", en: "Forecast based on current costs, excluding energy price inflation" },
+
+  // MonthComparison info dialog
+  CHART_COMPARISON_INFO_TITLE: { vi: "Trung bình tiêu thụ điện toàn quốc", en: "National Electricity Average" },
+  CHART_COMPARISON_INFO_SUBTITLE: { vi: "Mức điện điển hình tại Việt Nam", en: "Typical usage in Vietnam" },
+  CHART_COMPARISON_INFO_HH_SMALL: { vi: "Hộ 1–2 người", en: "1–2 person HH" },
+  CHART_COMPARISON_INFO_HH_MEDIUM: { vi: "Hộ 3–4 người", en: "3–4 person HH" },
+  CHART_COMPARISON_INFO_HH_LARGE: { vi: "Hộ 5+ người", en: "5+ person HH" },
+  CHART_COMPARISON_INFO_HH_AVG_LABEL: { vi: "(trung bình quốc gia)", en: "(national avg)" },
+  CHART_COMPARISON_INFO_FOOTER: { vi: "Nguồn: EVN & Tổng cục Thống kê Việt Nam 2024", en: "Source: EVN & General Statistics Office Vietnam 2024" },
+
+  // Co2TreeVisual info dialog
+  CHART_CO2_INFO_TITLE: { vi: "Cách tính CO₂ phát thải", en: "CO₂ Emission Calculation" },
+  CHART_CO2_INFO_SUBTITLE: { vi: "Từ tiêu thụ điện sinh hoạt tại Việt Nam", en: "From residential electricity in Vietnam" },
+  CHART_CO2_INFO_FACTOR_LABEL: { vi: "Hệ số phát thải lưới điện", en: "Grid emission factor" },
+  CHART_CO2_INFO_FACTOR_VALUE: { vi: "0.913 kg CO₂/kWh", en: "0.913 kg CO₂/kWh" },
+  CHART_CO2_INFO_TREE_LABEL: { vi: "1 cây xanh trưởng thành hấp thụ", en: "1 mature tree absorbs" },
+  CHART_CO2_INFO_TREE_VALUE: { vi: "~20 kg CO₂/năm", en: "~20 kg CO₂/year" },
+  CHART_CO2_INFO_FORMULA_LABEL: { vi: "Công thức quy đổi", en: "Conversion formula" },
+  CHART_CO2_INFO_FORMULA_VALUE: { vi: "kWh × 0.913 ÷ 20 = số cây", en: "kWh × 0.913 ÷ 20 = trees" },
+  CHART_CO2_INFO_FOOTER: { vi: "Hệ số phát thải lưới điện VN. Nguồn: Bộ TN&MT 2023", en: "Vietnam grid emission factor. Source: MONRE 2023" },
+
+  // CarbonWaterfall info dialog
+  CHART_CARBON_INFO_TITLE: { vi: "Dấu chân Carbon chi tiết", en: "Carbon Footprint Details" },
+  CHART_CARBON_INFO_SUBTITLE: { vi: "CO₂ phát thải từ từng thiết bị/tháng", en: "CO₂ emitted per appliance per month" },
+  CHART_CARBON_INFO_SCALE_HINT: { vi: "Đỏ → phát thải nhiều nhất · Xanh → ít nhất", en: "Red = highest emitters · Green = lowest" },
+  CHART_CARBON_INFO_CONTEXT: { vi: "Hộ gia đình VN thải TB ~150 kg CO₂/tháng từ điện", en: "Avg. Vietnamese household emits ~150 kg CO₂/month" },
+  CHART_CARBON_INFO_FOOTER: { vi: "0.913 kg CO₂/kWh — lưới điện Việt Nam. Nguồn: Bộ TN&MT 2023", en: "0.913 kg CO₂/kWh — Vietnam grid. Source: MONRE 2023" },
+
+  // Vampire / standby power
+  VAMPIRE_CARD_TITLE: { vi: "Điện năng tiêu thụ vô hình", en: "Vampire Power (Standby)" },
+  VAMPIRE_CARD_SUBTITLE: { vi: "Điện bị hút âm thầm khi thiết bị ở chế độ chờ (standby)", en: "Silent drain while devices are in standby" },
+  VAMPIRE_TOTAL_KWH: { vi: "Điện chờ/tháng", en: "Standby/month" },
+  VAMPIRE_TOTAL_COST: { vi: "Lãng phí/tháng", en: "Wasted/month" },
+  VAMPIRE_PERCENT_SUFFIX: { vi: "% tổng điện", en: "% of total" },
+  VAMPIRE_TOP_TITLE: { vi: "Thiết bị hút điện ngầm", en: "Top vampire appliances" },
+  VAMPIRE_UNPLUG_TIP: { vi: "Rút phích khi không dùng", en: "Unplug when not in use" },
+  VAMPIRE_EMPTY: { vi: "Không phát hiện điện tiêu thụ vô hình", en: "No standby drain detected" },
+  VAMPIRE_BADGE: { vi: "Vô hình", en: "Standby" },
+  VAMPIRE_STANDBY_WATTAGE: { vi: "Chờ", en: "Standby" },
+
+  // Simulator standby
+  SIMULATOR_STANDBY_OFF_LABEL: { vi: "Rút phích khi không dùng", en: "Unplug when not in use" },
+  SIMULATOR_STANDBY_KWH_LABEL: { vi: "Điện chờ", en: "Standby drain" },
 } as const;
 
 type FlatTranslation = {

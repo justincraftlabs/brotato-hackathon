@@ -25,7 +25,6 @@ const PRICE_DIVISOR = 1000;
 const STAIR_BASE_HEIGHT_PERCENT = 25;
 const STAIR_GROWTH_PERCENT = 75;
 const STAIR_HEIGHT_PX = 88;
-const PRICE_INCREASE_DIVISOR = 100;
 const VN_LOCALE = "vi-VN";
 
 function formatStairPrice(price: number): string {
@@ -36,9 +35,6 @@ function formatTablePrice(price: number): string {
   return new Intl.NumberFormat(VN_LOCALE).format(price);
 }
 
-function calcIncreasePercent(oldPrice: number, newPrice: number): number {
-  return Math.round(((newPrice - oldPrice) / oldPrice) * PRICE_INCREASE_DIVISOR * 10) / 10;
-}
 
 function usageLabel(minKwh: number, maxKwh: number): string {
   if (maxKwh === Infinity) return `${minKwh}+ kWh`;
@@ -91,8 +87,6 @@ function PricingDialog({ open, onClose, activeTier }: PricingDialogProps) {
             <tbody>
               {EVN_TIERS.map((tier) => {
                 const isActive = tier.tier === activeTier;
-                const increase = calcIncreasePercent(tier.priceRange[0], tier.priceRange[1]);
-
                 return (
                   <tr
                     key={tier.tier}
@@ -129,18 +123,13 @@ function PricingDialog({ open, onClose, activeTier }: PricingDialogProps) {
                       {usageLabel(tier.minKwh, tier.maxKwh)}
                     </td>
 
-                    {/* Price range + increase badge */}
+                    {/* Price range */}
                     <td className="py-2.5 text-right">
-                      <div className="flex flex-col items-end gap-0.5">
-                        <span className={cn("font-semibold tabular-nums", isActive && "text-primary")}>
-                          {formatTablePrice(tier.priceRange[0])}
-                          <span className="mx-0.5 text-muted-foreground/60">→</span>
-                          {formatTablePrice(tier.priceRange[1])}
-                        </span>
-                        <span className="text-[9px] font-bold text-amber-500 dark:text-amber-400">
-                          +{increase}%
-                        </span>
-                      </div>
+                      <span className={cn("font-semibold tabular-nums", isActive && "text-primary")}>
+                        {formatTablePrice(tier.priceRange[0])}
+                        <span className="mx-0.5 text-muted-foreground/60">→</span>
+                        {formatTablePrice(tier.priceRange[1])}
+                      </span>
                     </td>
                   </tr>
                 );

@@ -188,7 +188,7 @@ export function Sidebar() {
         </AnimatePresence>
 
         {/* Nav items */}
-        <div className="flex flex-col gap-0.5">
+        <div className="flex flex-col gap-1">
           {NAV_ITEMS.map((item) => {
             const Icon = item.icon;
             const isActive = pathname === item.href;

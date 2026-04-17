@@ -37,6 +37,8 @@ import {
   updateAppliance,
   updateRoom as apiUpdateRoom,
 } from "@/lib/api";
+import { CO2_EMISSION_FACTOR } from "@/lib/constants";
+import { formatKwh } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import type { Appliance, Home, RoomSize, RoomType, RoomWithAppliances } from "@/lib/types";
 import type { Translations } from "@/lib/translations";
@@ -53,6 +55,18 @@ const ICON_MAP: Record<RoomType, ComponentType<{ className?: string }>> = {
 };
 
 const DEFAULT_ROOM_SIZE: RoomSize = "medium";
+const HOURS_PER_DAY = 24;
+const DAYS_PER_MONTH = 30;
+
+function calcRoomStats(room: RoomWithAppliances) {
+  const totalKwh = room.appliances.reduce((sum, a) => sum + a.monthlyKwh, 0);
+  const totalCo2Kg = totalKwh * CO2_EMISSION_FACTOR;
+  const totalStandbyKwh = room.appliances.reduce(
+    (sum, a) => sum + (a.standbyWattage / 1000) * HOURS_PER_DAY * DAYS_PER_MONTH,
+    0
+  );
+  return { totalKwh, totalCo2Kg, totalStandbyKwh };
+}
 
 type EditState =
   | { status: "loading" }
@@ -74,6 +88,8 @@ interface RoomCardProps {
 
 function RoomCard({ room, onSelect, onEdit, onDelete, t }: RoomCardProps) {
   const Icon = ICON_MAP[room.type];
+  const { totalKwh, totalCo2Kg, totalStandbyKwh } = calcRoomStats(room);
+  const hasAppliances = room.appliances.length > 0;
 
   return (
     <Card
@@ -82,52 +98,60 @@ function RoomCard({ room, onSelect, onEdit, onDelete, t }: RoomCardProps) {
       role="button"
       tabIndex={0}
       onKeyDown={(e) => {
-        if (e.key !== "Enter" && e.key !== " ") {
-          return;
-        }
+        if (e.key !== "Enter" && e.key !== " ") return;
         e.preventDefault();
         onSelect(room.id);
       }}
     >
-      <CardContent className="flex items-center justify-between p-4">
-        <div className="flex items-center gap-3">
-          <Icon className="h-5 w-5 text-primary" />
-          <div>
-            <p className="font-semibold">{room.name}</p>
-            <p className="text-xs text-muted-foreground">
-              {t.ROOM_TYPE_LABELS[room.type]} · {t.ROOM_SIZE_LABELS[room.size]}
-            </p>
+      <CardContent className="p-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Icon className="h-5 w-5 shrink-0 text-primary" />
+            <div>
+              <p className="font-semibold">{room.name}</p>
+              <p className="text-xs text-muted-foreground">
+                {room.appliances.length} {t.SETUP_APPLIANCE_COUNT} · {t.ROOM_SIZE_LABELS[room.size]}
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-1">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8"
+              onClick={(e) => { e.stopPropagation(); onEdit(room); }}
+              aria-label={t.SETUP_EDIT_ROOM}
+            >
+              <Pencil className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 text-destructive hover:text-destructive"
+              onClick={(e) => { e.stopPropagation(); onDelete(room.id); }}
+              aria-label={t.LABEL_DELETE}
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          <Badge variant="secondary" className="text-xs">
-            {room.appliances.length} {t.SETUP_APPLIANCE_COUNT}
-          </Badge>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8"
-            onClick={(e) => {
-              e.stopPropagation();
-              onEdit(room);
-            }}
-            aria-label={t.SETUP_EDIT_ROOM}
-          >
-            <Pencil className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8 text-destructive hover:text-destructive"
-            onClick={(e) => {
-              e.stopPropagation();
-              onDelete(room.id);
-            }}
-            aria-label={t.LABEL_DELETE}
-          >
-            <Trash2 className="h-4 w-4" />
-          </Button>
-        </div>
+
+        {hasAppliances && (
+          <div className="mt-3 grid grid-cols-3 gap-2 border-t border-border/30 pt-3">
+            <div className="flex flex-col">
+              <span className="text-[10px] text-muted-foreground">Điện/tháng</span>
+              <span className="text-xs font-semibold text-primary">{formatKwh(totalKwh)}</span>
+            </div>
+            <div className="flex flex-col">
+              <span className="text-[10px] text-muted-foreground">CO₂</span>
+              <span className="text-xs font-semibold">{totalCo2Kg.toFixed(1)} kg</span>
+            </div>
+            <div className="flex flex-col">
+              <span className="text-[10px] text-muted-foreground">Điện chờ</span>
+              <span className="text-xs font-semibold text-amber-500">{formatKwh(totalStandbyKwh)}</span>
+            </div>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
@@ -485,7 +509,10 @@ export function EditModeView({ homeId }: EditModeViewProps) {
 
   const handleAddRoom = useCallback(
     async (type: RoomType, size: RoomSize) => {
-      const name = t.ROOM_TYPE_LABELS[type];
+      const currentRooms = editState.status === "room-list" ? editState.home.rooms : [];
+      const sameTypeCount = currentRooms.filter((r) => r.type === type).length;
+      const baseName = t.ROOM_TYPE_LABELS[type];
+      const name = sameTypeCount === 0 ? baseName : `${baseName} ${sameTypeCount + 1}`;
       const result = await apiAddRoom(homeId, { name, type, size });
       if (!result.success) {
         return;
@@ -493,7 +520,7 @@ export function EditModeView({ homeId }: EditModeViewProps) {
       setAddDialogOpen(false);
       await reloadToRoomList();
     },
-    [homeId, t.ROOM_TYPE_LABELS, reloadToRoomList]
+    [homeId, t.ROOM_TYPE_LABELS, reloadToRoomList, editState]
   );
 
   const handleEditRoom = useCallback(
@@ -506,13 +533,16 @@ export function EditModeView({ homeId }: EditModeViewProps) {
 
   const handleSaveRoom = useCallback(
     async (roomId: string, type: RoomType, size: RoomSize) => {
-      const name = t.ROOM_TYPE_LABELS[type];
+      const currentRooms = editState.status === "room-list" ? editState.home.rooms : [];
+      const sameTypeCount = currentRooms.filter((r) => r.type === type && r.id !== roomId).length;
+      const baseName = t.ROOM_TYPE_LABELS[type];
+      const name = sameTypeCount === 0 ? baseName : `${baseName} ${sameTypeCount + 1}`;
       await apiUpdateRoom(homeId, roomId, { name, type, size });
       setEditDialogOpen(false);
       setEditingRoom(null);
       await reloadToRoomList();
     },
-    [homeId, t.ROOM_TYPE_LABELS, reloadToRoomList]
+    [homeId, t.ROOM_TYPE_LABELS, reloadToRoomList, editState]
   );
 
   const handleDeleteRoomClick = useCallback((roomId: string) => {
@@ -537,7 +567,7 @@ export function EditModeView({ homeId }: EditModeViewProps) {
       roomId: string,
       appliance: Omit<Appliance, "id" | "roomId" | "monthlyKwh" | "monthlyCost">
     ) => {
-      await addAppliances(homeId, roomId, [
+      const result = await addAppliances(homeId, roomId, [
         {
           name: appliance.name,
           type: appliance.type,
@@ -547,6 +577,9 @@ export function EditModeView({ homeId }: EditModeViewProps) {
           usageHabit: appliance.usageHabit,
         },
       ]);
+      if (!result.success) {
+        throw new Error(result.error);
+      }
       await reloadAndStayInRoom(roomId);
     },
     [homeId, reloadAndStayInRoom]
@@ -558,7 +591,7 @@ export function EditModeView({ homeId }: EditModeViewProps) {
       applianceId: string,
       updates: Omit<Appliance, "id" | "roomId" | "monthlyKwh" | "monthlyCost">
     ) => {
-      await updateAppliance(homeId, applianceId, {
+      const result = await updateAppliance(homeId, applianceId, {
         name: updates.name,
         type: updates.type,
         wattage: updates.wattage,
@@ -566,6 +599,9 @@ export function EditModeView({ homeId }: EditModeViewProps) {
         standbyWattage: updates.standbyWattage,
         usageHabit: updates.usageHabit,
       });
+      if (!result.success) {
+        throw new Error(result.error);
+      }
       await reloadAndStayInRoom(roomId);
     },
     [homeId, reloadAndStayInRoom]
@@ -605,6 +641,14 @@ export function EditModeView({ homeId }: EditModeViewProps) {
   }
 
   if (editState.status === "room-list") {
+    const allAppliances = editState.home.rooms.flatMap((r) => r.appliances);
+    const homeTotalKwh = allAppliances.reduce((s, a) => s + a.monthlyKwh, 0);
+    const homeTotalCo2 = homeTotalKwh * CO2_EMISSION_FACTOR;
+    const homeTotalStandby = allAppliances.reduce(
+      (s, a) => s + (a.standbyWattage / 1000) * HOURS_PER_DAY * DAYS_PER_MONTH,
+      0
+    );
+
     return (
       <div className="flex flex-col gap-4 lg:gap-6">
         <div>
@@ -614,6 +658,24 @@ export function EditModeView({ homeId }: EditModeViewProps) {
           <p className="mt-1 text-center text-sm text-muted-foreground lg:text-left">
             {t.SETUP_SELECT_ROOM}
           </p>
+        </div>
+
+        {/* Home summary stats */}
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          {(
+            [
+              { label: "Số phòng", value: String(editState.home.rooms.length), sub: "phòng" },
+              { label: "Điện/tháng", value: formatKwh(homeTotalKwh), sub: "tiêu thụ" },
+              { label: "CO₂/tháng", value: `${homeTotalCo2.toFixed(1)} kg`, sub: "phát thải" },
+              { label: "Điện chờ", value: formatKwh(homeTotalStandby), sub: "standby" },
+            ] as const
+          ).map(({ label, value, sub }) => (
+            <div key={label} className="glass rounded-xl p-3">
+              <p className="text-[10px] text-muted-foreground">{label}</p>
+              <p className="mt-0.5 text-base font-bold text-primary leading-tight">{value}</p>
+              <p className="text-[10px] text-muted-foreground">{sub}</p>
+            </div>
+          ))}
         </div>
 
         <div className="grid grid-cols-1 gap-3 lg:grid-cols-2 lg:gap-4">
@@ -678,7 +740,7 @@ export function EditModeView({ homeId }: EditModeViewProps) {
   };
 
   return (
-    <div className="flex flex-col gap-4 pb-24 lg:gap-6 lg:pb-0">
+    <div className="flex flex-col gap-4 lg:gap-6">
       <div className="flex items-center gap-2">
         <Button variant="ghost" size="icon" onClick={backToRooms}>
           <ArrowLeft className="h-5 w-5" />
@@ -694,6 +756,7 @@ export function EditModeView({ homeId }: EditModeViewProps) {
         onDeleteAppliance={handleDeleteAppliance}
         onNext={backToRooms}
         onBack={backToRooms}
+        hideNavigation
       />
     </div>
   );

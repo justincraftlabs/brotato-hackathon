@@ -54,14 +54,14 @@ function FreshWizard() {
   const [setupError, setSetupError] = useState<string | null>(null);
 
   const handleAddRoom = useCallback((type: RoomType, roomTypeLabels: Record<RoomType, string>) => {
-    const newRoom: Room = {
-      id: generateRoomId(),
-      name: roomTypeLabels[type],
-      type,
-      size: DEFAULT_ROOM_SIZE,
-    };
-    setRooms((prev) => [...prev, newRoom]);
-    setAppliancesByRoom((prev) => ({ ...prev, [newRoom.id]: [] }));
+    setRooms((prev) => {
+      const sameTypeCount = prev.filter((r) => r.type === type).length;
+      const baseName = roomTypeLabels[type];
+      const name = sameTypeCount === 0 ? baseName : `${baseName} ${sameTypeCount + 1}`;
+      const newRoom: Room = { id: generateRoomId(), name, type, size: DEFAULT_ROOM_SIZE };
+      setAppliancesByRoom((ap) => ({ ...ap, [newRoom.id]: [] }));
+      return [...prev, newRoom];
+    });
   }, []);
 
   const handleRemoveRoom = useCallback((roomId: string) => {
