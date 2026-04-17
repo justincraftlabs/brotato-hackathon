@@ -44,14 +44,27 @@ function loadMessages(homeId: string): ChatMessage[] {
 }
 
 export function useChat(homeId: string) {
-  const [messages, setMessages] = useState<ChatMessage[]>(() =>
-    loadMessages(homeId)
-  );
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isStreaming, setIsStreaming] = useState(false);
-  const sessionIdRef = useRef<string>(loadSessionId(homeId));
+  const [isInitialized, setIsInitialized] = useState(false);
+  const sessionIdRef = useRef<string>("");
+  const skipNextSaveRef = useRef(false);
 
   useEffect(() => {
     if (!homeId) return;
+    skipNextSaveRef.current = true;
+    const stored = loadMessages(homeId);
+    sessionIdRef.current = loadSessionId(homeId);
+    setMessages(stored);
+    setIsInitialized(true);
+  }, [homeId]);
+
+  useEffect(() => {
+    if (!homeId) return;
+    if (skipNextSaveRef.current) {
+      skipNextSaveRef.current = false;
+      return;
+    }
     localStorage.setItem(messagesKey(homeId), JSON.stringify(messages));
   }, [homeId, messages]);
 
@@ -161,5 +174,5 @@ export function useChat(homeId: string) {
     [homeId]
   );
 
-  return { messages, isStreaming, sendMessage, setMessages, clearSession };
+  return { messages, isStreaming, isInitialized, sendMessage, setMessages, clearSession };
 }

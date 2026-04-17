@@ -416,32 +416,60 @@ export function ApplianceFormStep({
           const roomAppliances = appliancesByRoom[room.id] ?? [];
           return (
             <TabsContent key={room.id} value={room.id}>
-              <div className="flex flex-col gap-3 pt-2">
+              <div className="flex flex-col gap-2 pt-2">
                 {roomAppliances.length === 0 && (
-                  <p className="py-4 text-center text-sm text-muted-foreground">
+                  <p className="py-6 text-center text-sm text-muted-foreground">
                     {t.LABEL_NO_APPLIANCE_WARNING}
                   </p>
                 )}
 
-                {roomAppliances.map((appliance) => (
-                  <ApplianceCard
-                    key={appliance.id}
-                    appliance={appliance}
-                    onDelete={(applianceId) =>
-                      onDeleteAppliance(room.id, applianceId)
-                    }
-                    onEdit={(a) => openEditDialog(room.id, a)}
-                  />
-                ))}
+                {roomAppliances.length > 0 && (
+                  <>
+                    {/* Desktop table header */}
+                    <div className="hidden md:grid md:grid-cols-[1fr_72px_88px_100px_116px_72px] items-center gap-3 border-b border-border/30 px-4 pb-2 text-xs font-medium text-muted-foreground/60">
+                      <span>Thiết bị</span>
+                      <span>Công suất</span>
+                      <span>Giờ/ngày</span>
+                      <span>{t.LABEL_MONTHLY_KWH}</span>
+                      <span>{t.LABEL_MONTHLY_COST}</span>
+                      <span />
+                    </div>
 
-                <Button
-                  variant="outline"
-                  className="h-12 w-full border-dashed"
-                  onClick={() => openAddDialog(room.id)}
-                >
-                  <Plus className="mr-2 h-4 w-4" />
-                  {t.BUTTON_ADD_APPLIANCE}
-                </Button>
+                    <div className="flex flex-col gap-2">
+                      {roomAppliances.map((appliance) => (
+                        <ApplianceCard
+                          key={appliance.id}
+                          appliance={appliance}
+                          onDelete={(applianceId) =>
+                            onDeleteAppliance(room.id, applianceId)
+                          }
+                          onEdit={(a) => openEditDialog(room.id, a)}
+                        />
+                      ))}
+                    </div>
+                  </>
+                )}
+
+                {/* Add button: full-width dashed on mobile, compact on desktop */}
+                <div className="flex items-center justify-between pt-1">
+                  <Button
+                    variant="outline"
+                    className="h-10 w-full border-dashed md:hidden"
+                    onClick={() => openAddDialog(room.id)}
+                  >
+                    <Plus className="mr-2 h-4 w-4" />
+                    {t.BUTTON_ADD_APPLIANCE}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="hidden gap-1.5 md:flex"
+                    onClick={() => openAddDialog(room.id)}
+                  >
+                    <Plus className="h-3.5 w-3.5" />
+                    {t.BUTTON_ADD_APPLIANCE}
+                  </Button>
+                </div>
               </div>
             </TabsContent>
           );
@@ -451,7 +479,7 @@ export function ApplianceFormStep({
       {/* ── Add / Edit Appliance Dialog ── */}
       <Dialog open={dialogOpen} onOpenChange={(v) => { if (!isSaving) { setDialogOpen(v); if (!v) setSaveError(null); } }}>
         {/* p-0: remove default padding so we can control header/body/footer separately */}
-        <DialogContent className="flex max-h-[90vh] flex-col overflow-hidden p-0 sm:max-w-md">
+        <DialogContent className="flex max-h-[90vh] flex-col overflow-hidden p-0 sm:max-w-lg md:max-w-2xl">
 
           {/* Sticky header */}
           <div className="shrink-0 border-b border-border/40 px-5 pb-4 pt-5">
@@ -466,11 +494,11 @@ export function ApplianceFormStep({
           </div>
 
           {/* Scrollable body */}
-          <div className="flex flex-1 flex-col gap-4 overflow-y-auto px-5 py-4">
+          <div className="flex flex-1 flex-col overflow-y-auto">
 
-            {/* Quick-add presets (add mode only) */}
+            {/* Quick-add presets — full width, above the 2-col grid (add mode only) */}
             {!isEditMode && (
-              <div>
+              <div className="border-b border-border/30 px-5 py-3">
                 <p className="mb-2 text-xs font-medium text-muted-foreground">
                   {t.LABEL_QUICK_ADD}
                 </p>
@@ -498,297 +526,307 @@ export function ApplianceFormStep({
               </div>
             )}
 
-            {/* Name + camera */}
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="appliance-name">{t.LABEL_NAME}</Label>
-              <div className="flex items-center gap-2">
-                <div className="relative flex-1">
-                  <Input
-                    id="appliance-name"
-                    value={form.name}
-                    onChange={(e) =>
-                      setForm({ ...form, name: e.target.value })
-                    }
-                    onBlur={handleNameBlur}
-                    placeholder="VD: Điều hòa Daikin"
-                  />
-                  {isEstimating && (
-                    <Loader2 className="absolute right-3 top-2.5 h-4 w-4 animate-spin text-muted-foreground" />
-                  )}
-                </div>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="icon"
-                  className="shrink-0"
-                  onClick={() => cameraInputRef.current?.click()}
-                  aria-label={IMAGE_LABELS.CAMERA_BUTTON}
-                >
-                  <Camera className="h-4 w-4 text-primary" />
-                </Button>
-                <input
-                  ref={cameraInputRef}
-                  type="file"
-                  accept={ACCEPTED_CAMERA_TYPES}
-                  capture="environment"
-                  onChange={handleCameraFileChange}
-                  className="hidden"
-                  aria-hidden="true"
-                />
-              </div>
+            {/* Desktop: 2-column grid | Mobile: single column */}
+            <div className="md:grid md:grid-cols-2 md:divide-x md:divide-border/30">
 
-              {/* Image capture result card */}
-              {showCaptureCard && (
-                <Card>
-                  <CardContent className="flex flex-col gap-3 p-3">
-                    {capturedImage && (
-                      <div className="relative overflow-hidden rounded-md">
-                        {/* eslint-disable-next-line @next/next/no-img-element -- base64 data URL */}
-                        <img
-                          src={`data:image/jpeg;base64,${capturedImage}`}
-                          alt="Captured appliance"
-                          className="h-32 w-full object-cover"
-                        />
-                        {isCapturing && (
-                          <div className="absolute inset-0 flex items-center justify-center bg-black/50">
-                            <Loader2 className="h-6 w-6 animate-spin text-primary" />
-                            <span className="ml-2 text-xs text-white">
-                              {IMAGE_LABELS.PROCESSING}
-                            </span>
+              {/* ── Left column: identity & specs ── */}
+              <div className="flex flex-col gap-4 px-5 py-4">
+
+                {/* Name + camera */}
+                <div className="flex flex-col gap-1.5">
+                  <Label htmlFor="appliance-name">{t.LABEL_NAME}</Label>
+                  <div className="flex items-center gap-2">
+                    <div className="relative flex-1">
+                      <Input
+                        id="appliance-name"
+                        value={form.name}
+                        onChange={(e) =>
+                          setForm({ ...form, name: e.target.value })
+                        }
+                        onBlur={handleNameBlur}
+                        placeholder="VD: Điều hòa Daikin"
+                      />
+                      {isEstimating && (
+                        <Loader2 className="absolute right-3 top-2.5 h-4 w-4 animate-spin text-muted-foreground" />
+                      )}
+                    </div>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="icon"
+                      className="shrink-0"
+                      onClick={() => cameraInputRef.current?.click()}
+                      aria-label={IMAGE_LABELS.CAMERA_BUTTON}
+                    >
+                      <Camera className="h-4 w-4 text-primary" />
+                    </Button>
+                    <input
+                      ref={cameraInputRef}
+                      type="file"
+                      accept={ACCEPTED_CAMERA_TYPES}
+                      capture="environment"
+                      onChange={handleCameraFileChange}
+                      className="hidden"
+                      aria-hidden="true"
+                    />
+                  </div>
+
+                  {/* Image capture result card */}
+                  {showCaptureCard && (
+                    <Card>
+                      <CardContent className="flex flex-col gap-3 p-3">
+                        {capturedImage && (
+                          <div className="relative overflow-hidden rounded-md">
+                            {/* eslint-disable-next-line @next/next/no-img-element -- base64 data URL */}
+                            <img
+                              src={`data:image/jpeg;base64,${capturedImage}`}
+                              alt="Captured appliance"
+                              className="h-32 w-full object-cover"
+                            />
+                            {isCapturing && (
+                              <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+                                <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                                <span className="ml-2 text-xs text-white">
+                                  {IMAGE_LABELS.PROCESSING}
+                                </span>
+                              </div>
+                            )}
                           </div>
                         )}
-                      </div>
-                    )}
 
-                    {recognitionResult && (
-                      <div className="flex flex-col gap-2">
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm font-semibold">
-                            {recognitionResult.name}
-                          </span>
-                          <Badge
-                            className={cn(
-                              "text-[10px]",
-                              getConfidenceColor(recognitionResult.confidence)
-                            )}
-                          >
-                            {getConfidenceLabel(recognitionResult.confidence)}
-                          </Badge>
-                        </div>
-                        <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground">
-                          <span>
-                            {recognitionResult.estimatedWattage}
-                            {IMAGE_LABELS.WATTAGE_SUFFIX}
-                          </span>
-                          {recognitionResult.brand && (
-                            <span>
-                              {IMAGE_LABELS.BRAND_LABEL}: {recognitionResult.brand}
-                            </span>
-                          )}
-                          {recognitionResult.model && (
-                            <span>
-                              {IMAGE_LABELS.MODEL_LABEL}: {recognitionResult.model}
-                            </span>
-                          )}
-                        </div>
-                        <div className="flex gap-2">
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="sm"
-                            className="flex-1"
-                            onClick={handleRetryCapture}
-                            disabled={isUsingResult}
-                          >
-                            <RotateCcw className="mr-1 h-3 w-3" />
-                            {IMAGE_LABELS.RETRY}
-                          </Button>
-                          <Button
-                            type="button"
-                            size="sm"
-                            className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90"
-                            onClick={handleUseDetectedResult}
-                            disabled={isUsingResult}
-                          >
-                            {isUsingResult ? (
-                              <>
-                                <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
-                                {IMAGE_LABELS.PROCESSING}
-                              </>
-                            ) : (
-                              IMAGE_LABELS.USE_RESULT
-                            )}
-                          </Button>
-                        </div>
-                      </div>
-                    )}
+                        {recognitionResult && (
+                          <div className="flex flex-col gap-2">
+                            <div className="flex items-center justify-between">
+                              <span className="text-sm font-semibold">
+                                {recognitionResult.name}
+                              </span>
+                              <Badge
+                                className={cn(
+                                  "text-[10px]",
+                                  getConfidenceColor(recognitionResult.confidence)
+                                )}
+                              >
+                                {getConfidenceLabel(recognitionResult.confidence)}
+                              </Badge>
+                            </div>
+                            <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground">
+                              <span>
+                                {recognitionResult.estimatedWattage}
+                                {IMAGE_LABELS.WATTAGE_SUFFIX}
+                              </span>
+                              {recognitionResult.brand && (
+                                <span>
+                                  {IMAGE_LABELS.BRAND_LABEL}: {recognitionResult.brand}
+                                </span>
+                              )}
+                              {recognitionResult.model && (
+                                <span>
+                                  {IMAGE_LABELS.MODEL_LABEL}: {recognitionResult.model}
+                                </span>
+                              )}
+                            </div>
+                            <div className="flex gap-2">
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                className="flex-1"
+                                onClick={handleRetryCapture}
+                                disabled={isUsingResult}
+                              >
+                                <RotateCcw className="mr-1 h-3 w-3" />
+                                {IMAGE_LABELS.RETRY}
+                              </Button>
+                              <Button
+                                type="button"
+                                size="sm"
+                                className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90"
+                                onClick={handleUseDetectedResult}
+                                disabled={isUsingResult}
+                              >
+                                {isUsingResult ? (
+                                  <>
+                                    <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+                                    {IMAGE_LABELS.PROCESSING}
+                                  </>
+                                ) : (
+                                  IMAGE_LABELS.USE_RESULT
+                                )}
+                              </Button>
+                            </div>
+                          </div>
+                        )}
 
-                    {captureError && !recognitionResult && (
-                      <div className="flex flex-col items-center gap-2">
-                        <p className="text-xs text-destructive">{captureError}</p>
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          onClick={handleRetryCapture}
-                        >
-                          <RotateCcw className="mr-1 h-3 w-3" />
-                          {IMAGE_LABELS.RETRY}
-                        </Button>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              )}
+                        {captureError && !recognitionResult && (
+                          <div className="flex flex-col items-center gap-2">
+                            <p className="text-xs text-destructive">{captureError}</p>
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={handleRetryCapture}
+                            >
+                              <RotateCcw className="mr-1 h-3 w-3" />
+                              {IMAGE_LABELS.RETRY}
+                            </Button>
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  )}
 
-              {aiSuggestion && (
-                <p className="flex items-center gap-1 text-xs text-accent">
-                  <Sparkles className="h-3 w-3" />
-                  {t.LABEL_AI_SUGGESTION_PREFIX} {aiSuggestion}
-                </p>
-              )}
-            </div>
-
-            {/* Type */}
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="appliance-type">{t.LABEL_TYPE}</Label>
-              <Select
-                value={form.type}
-                onValueChange={handleTypeChange}
-              >
-                <SelectTrigger id="appliance-type">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {APPLIANCE_TYPES.map((type) => (
-                    <SelectItem key={type} value={type}>
-                      {t.APPLIANCE_TYPE_LABELS[type]}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Wattage */}
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="appliance-wattage">{t.LABEL_WATTAGE}</Label>
-              <Input
-                id="appliance-wattage"
-                type="number"
-                min={1}
-                value={form.wattage}
-                onChange={(e) =>
-                  setForm({ ...form, wattage: e.target.value })
-                }
-                placeholder="1500"
-              />
-            </div>
-
-            {/* Daily hours */}
-            <div className="flex flex-col gap-1.5">
-              <Label>
-                {t.LABEL_DAILY_HOURS}:{" "}
-                <span className="font-semibold text-primary">
-                  {form.dailyUsageHours} {t.LABEL_HOURS_SUFFIX}
-                </span>
-              </Label>
-              <Slider
-                min={SLIDER_MIN}
-                max={SLIDER_MAX}
-                step={SLIDER_STEP}
-                value={[form.dailyUsageHours]}
-                onValueChange={([val]) =>
-                  setForm({ ...form, dailyUsageHours: val })
-                }
-              />
-            </div>
-
-            {/* Standby wattage */}
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="appliance-standby">
-                {t.LABEL_STANDBY_WATTAGE}
-              </Label>
-              <Input
-                id="appliance-standby"
-                type="number"
-                min={0}
-                value={form.standbyWattage}
-                onChange={(e) =>
-                  setForm({ ...form, standbyWattage: e.target.value })
-                }
-                placeholder="0"
-              />
-            </div>
-
-            {/* Usage habit */}
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="appliance-habit">{t.LABEL_USAGE_HABIT}</Label>
-              <div className="relative">
-                <Input
-                  id="appliance-habit"
-                  value={form.usageHabit}
-                  onChange={(e) =>
-                    setForm({ ...form, usageHabit: e.target.value })
-                  }
-                  onBlur={handleHabitBlur}
-                  placeholder="VD: Bật từ 9h tối đến 6h sáng"
-                  className="pr-8"
-                />
-                {isFetchingHabit && (
-                  <Loader2 className="absolute right-3 top-2.5 h-4 w-4 animate-spin text-muted-foreground" />
-                )}
-              </div>
-
-              {/* Smart suggestion chips */}
-              {habitAnalysis && habitAnalysis.habit_suggestions.length > 0 && (
-                <div className="flex flex-wrap gap-1.5">
-                  {habitAnalysis.habit_suggestions.map((s) => (
-                    <button
-                      key={s}
-                      type="button"
-                      onClick={() => handleSelectSuggestion(s)}
-                      className={cn(
-                        "rounded-full border px-2.5 py-0.5 text-[11px] transition-colors",
-                        form.usageHabit === s
-                          ? "border-primary bg-primary/15 text-primary font-medium"
-                          : "border-border text-muted-foreground hover:border-primary/50 hover:bg-primary/8 hover:text-primary"
-                      )}
-                    >
-                      {s}
-                    </button>
-                  ))}
-                </div>
-              )}
-
-              {/* Analysis result card */}
-              {habitAnalysis && habitAnalysis.analysis_summary && (
-                <div className="glass rounded-xl p-3 text-xs">
-                  <div className="flex items-start justify-between gap-2">
-                    <span className="flex items-center gap-1 text-muted-foreground leading-relaxed">
-                      <Sparkles className="h-3 w-3 shrink-0 text-primary" />
-                      {habitAnalysis.analysis_summary}
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setForm((prev) => ({
-                          ...prev,
-                          dailyUsageHours: habitAnalysis.calculated_average_hours,
-                        }))
-                      }
-                      className="shrink-0 rounded-lg bg-primary/15 px-2 py-0.5 text-[11px] font-semibold text-primary hover:bg-primary/25 transition-colors"
-                    >
-                      Áp dụng {habitAnalysis.calculated_average_hours.toFixed(1)}h
-                    </button>
-                  </div>
-                  {habitAnalysis.carbon_impact_note && (
-                    <p className="mt-1.5 text-muted-foreground/80">
-                      🌱 {habitAnalysis.carbon_impact_note}
+                  {aiSuggestion && (
+                    <p className="flex items-center gap-1 text-xs text-accent">
+                      <Sparkles className="h-3 w-3" />
+                      {t.LABEL_AI_SUGGESTION_PREFIX} {aiSuggestion}
                     </p>
                   )}
                 </div>
-              )}
+
+                {/* Type */}
+                <div className="flex flex-col gap-1.5">
+                  <Label htmlFor="appliance-type">{t.LABEL_TYPE}</Label>
+                  <Select value={form.type} onValueChange={handleTypeChange}>
+                    <SelectTrigger id="appliance-type">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {APPLIANCE_TYPES.map((type) => (
+                        <SelectItem key={type} value={type}>
+                          {t.APPLIANCE_TYPE_LABELS[type]}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Wattage + Standby side-by-side */}
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="flex flex-col gap-1.5">
+                    <Label htmlFor="appliance-wattage">{t.LABEL_WATTAGE}</Label>
+                    <Input
+                      id="appliance-wattage"
+                      type="number"
+                      min={1}
+                      value={form.wattage}
+                      onChange={(e) =>
+                        setForm({ ...form, wattage: e.target.value })
+                      }
+                      placeholder="1500"
+                    />
+                  </div>
+                  <div className="flex flex-col gap-1.5">
+                    <Label htmlFor="appliance-standby">{t.LABEL_STANDBY_WATTAGE}</Label>
+                    <Input
+                      id="appliance-standby"
+                      type="number"
+                      min={0}
+                      value={form.standbyWattage}
+                      onChange={(e) =>
+                        setForm({ ...form, standbyWattage: e.target.value })
+                      }
+                      placeholder="0"
+                    />
+                  </div>
+                </div>
+
+              </div>
+
+              {/* ── Right column: usage patterns ── */}
+              <div className="flex flex-col gap-4 px-5 py-4">
+
+                {/* Daily hours */}
+                <div className="flex flex-col gap-1.5">
+                  <Label>
+                    {t.LABEL_DAILY_HOURS}:{" "}
+                    <span className="font-semibold text-primary">
+                      {form.dailyUsageHours} {t.LABEL_HOURS_SUFFIX}
+                    </span>
+                  </Label>
+                  <Slider
+                    min={SLIDER_MIN}
+                    max={SLIDER_MAX}
+                    step={SLIDER_STEP}
+                    value={[form.dailyUsageHours]}
+                    onValueChange={([val]) =>
+                      setForm({ ...form, dailyUsageHours: val })
+                    }
+                  />
+                </div>
+
+                {/* Usage habit */}
+                <div className="flex flex-col gap-2">
+                  <Label htmlFor="appliance-habit">{t.LABEL_USAGE_HABIT}</Label>
+                  <div className="relative">
+                    <Input
+                      id="appliance-habit"
+                      value={form.usageHabit}
+                      onChange={(e) =>
+                        setForm({ ...form, usageHabit: e.target.value })
+                      }
+                      onBlur={handleHabitBlur}
+                      placeholder="VD: Bật từ 9h tối đến 6h sáng"
+                      className="pr-8"
+                    />
+                    {isFetchingHabit && (
+                      <Loader2 className="absolute right-3 top-2.5 h-4 w-4 animate-spin text-muted-foreground" />
+                    )}
+                  </div>
+
+                  {/* Smart suggestion chips */}
+                  {habitAnalysis && habitAnalysis.habit_suggestions.length > 0 && (
+                    <div className="flex flex-wrap gap-1.5">
+                      {habitAnalysis.habit_suggestions.map((s) => (
+                        <button
+                          key={s}
+                          type="button"
+                          onClick={() => handleSelectSuggestion(s)}
+                          className={cn(
+                            "rounded-full border px-2.5 py-0.5 text-[11px] transition-colors",
+                            form.usageHabit === s
+                              ? "border-primary bg-primary/15 text-primary font-medium"
+                              : "border-border text-muted-foreground hover:border-primary/50 hover:bg-primary/8 hover:text-primary"
+                          )}
+                        >
+                          {s}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Analysis result card */}
+                  {habitAnalysis && habitAnalysis.analysis_summary && (
+                    <div className="glass rounded-xl p-3 text-xs">
+                      <p className="flex items-start gap-1 text-muted-foreground leading-relaxed">
+                        <Sparkles className="mt-0.5 h-3 w-3 shrink-0 text-primary" />
+                        {habitAnalysis.analysis_summary}
+                      </p>
+                      {habitAnalysis.carbon_impact_note && (
+                        <p className="mt-1.5 text-muted-foreground/80">
+                          🌱 {habitAnalysis.carbon_impact_note}
+                        </p>
+                      )}
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setForm((prev) => ({
+                            ...prev,
+                            dailyUsageHours: habitAnalysis.calculated_average_hours,
+                          }))
+                        }
+                        className="mt-2 rounded-lg bg-primary/15 px-2.5 py-1 text-[11px] font-semibold text-primary hover:bg-primary/25 transition-colors"
+                      >
+                        Áp dụng {habitAnalysis.calculated_average_hours.toFixed(1)}h
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+              </div>
+              {/* end right column */}
+
             </div>
+            {/* end 2-col grid */}
 
           </div>
 

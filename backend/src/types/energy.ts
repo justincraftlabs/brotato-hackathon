@@ -48,11 +48,19 @@ export interface VampireData {
   vampirePercent: number;
 }
 
+export interface RoomStat {
+  roomName: string;
+  totalKwh: number;
+  totalCost: number;
+  applianceCount: number;
+}
+
 export interface DashboardData {
   totalMonthlyKwh: number;
   totalMonthlyCost: number;
   evnTier: number;
   topConsumers: TopConsumer[];
+  roomStats: RoomStat[];
   comparison: Comparison;
   anomalies: Anomaly[];
   co2: Co2Data;

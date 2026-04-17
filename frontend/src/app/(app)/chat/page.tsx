@@ -17,11 +17,16 @@ import type { Translations } from "@/lib/translations";
 
 const ROLE_ASSISTANT = "assistant" as const;
 
-const STANDBY_KEYWORDS = ["standby", "rút phích", "điện chờ", "vô hình", "điện ma", "tiêu thụ ngầm", "hút điện", "kẻ hút"];
+const IOT_ACTION_KEYWORDS = [
+  // standby / vampire
+  "standby", "rút phích", "điện chờ", "vô hình", "điện ma", "tiêu thụ ngầm", "hút điện", "kẻ hút",
+  // scheduling & behavioral savings
+  "rút điện", "tắt trước", "tắt máy", "lên lịch", "tiết kiệm", "cắt giảm", "thói quen",
+];
 
-function hasStandbyContent(content: string): boolean {
+function hasIotActionContent(content: string): boolean {
   const lower = content.toLowerCase();
-  return STANDBY_KEYWORDS.some((kw) => lower.includes(kw));
+  return IOT_ACTION_KEYWORDS.some((kw) => lower.includes(kw));
 }
 
 interface EmptyStateProps {
@@ -57,18 +62,18 @@ export default function ChatPage() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const welcomeSetRef = useRef(false);
 
-  const { messages, isStreaming, sendMessage, setMessages, clearSession } = useChat(
+  const { messages, isStreaming, isInitialized, sendMessage, setMessages, clearSession } = useChat(
     homeId ?? ""
   );
 
   useEffect(() => {
-    if (!homeId || welcomeSetRef.current) return;
+    if (!homeId || !isInitialized || welcomeSetRef.current) return;
     welcomeSetRef.current = true;
     if (messages.length === 0) {
       setMessages([{ id: "welcome", role: ROLE_ASSISTANT, content: t.CHAT_WELCOME_MESSAGE }]);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [homeId]);
+  }, [homeId, isInitialized]);
 
   useEffect(() => {
     scrollRef.current?.scrollTo({
@@ -125,7 +130,7 @@ export default function ChatPage() {
             />
             {msg.role === ROLE_ASSISTANT &&
               (!isStreaming || index !== lastMessageIndex) &&
-              hasStandbyContent(msg.content) && (
+              hasIotActionContent(msg.content) && (
                 <IotActionCard />
               )}
           </div>

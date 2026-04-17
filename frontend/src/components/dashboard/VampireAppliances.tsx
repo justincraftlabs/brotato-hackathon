@@ -3,11 +3,11 @@
 import { Info, PlugZap } from "lucide-react";
 import { useState } from "react";
 
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useT } from "@/hooks/use-t";
@@ -102,9 +102,9 @@ export function VampireAppliances({
             />
           </div>
           <div className="mt-1 flex justify-between text-[10px] text-muted-foreground">
-            <span>Hoạt động</span>
+            <span>{t.VAMPIRE_ACTIVE_LABEL}</span>
             <span className={cn("font-medium", percentColor)}>
-              Vô hình {vampirePercent.toFixed(1)}%
+              {t.VAMPIRE_INVISIBLE_LABEL} {vampirePercent.toFixed(1)}%
             </span>
           </div>
         </div>
@@ -157,37 +157,67 @@ export function VampireAppliances({
 
       {/* Info dialog */}
       <Dialog open={dialogOpen} onOpenChange={(v) => !v && setDialogOpen(false)}>
-        <DialogContent className="max-w-sm overflow-hidden rounded-2xl border-border/60 bg-card p-0 sm:rounded-2xl">
-          <div className="border-b border-border/40 bg-amber-400/8 px-5 py-4">
-            <DialogHeader className="gap-0.5">
-              <DialogTitle className="flex items-center gap-2 text-base font-bold">
-                <PlugZap className="h-4 w-4 shrink-0 text-amber-400" />
-                {t.VAMPIRE_CARD_TITLE}
-              </DialogTitle>
-              <DialogDescription className="text-xs">
-                {t.VAMPIRE_CARD_SUBTITLE}
-              </DialogDescription>
-            </DialogHeader>
-          </div>
-          <div className="px-5 py-4">
-            <p className="mb-3 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
-              Tại sao quan trọng?
-            </p>
-            <div className="flex flex-col gap-2.5 text-xs text-muted-foreground leading-relaxed">
-              <p>🔌 <strong>10%</strong> điện năng của hộ gia đình trung bình bị tiêu thụ âm thầm bởi thiết bị ở chế độ chờ.</p>
-              <p>⚡ <strong>1 Watt chờ = 9 kWh/năm</strong> — một thiết bị nhỏ cũng đang hút điện 24/7.</p>
-              <p>💡 Rút phích hoặc dùng ổ điện có công tắc để loại bỏ hoàn toàn điện ma.</p>
+        <DialogContent className="max-w-[340px] overflow-hidden rounded-2xl border-border/60 bg-card p-0 sm:rounded-2xl">
+          {/* Gradient hero header */}
+          <div className="relative overflow-hidden bg-gradient-to-br from-amber-400/20 via-amber-400/8 to-transparent px-5 pb-5 pt-5">
+            <div className="pointer-events-none absolute -right-8 -top-8 h-32 w-32 rounded-full bg-amber-400/10 blur-2xl" />
+
+            <span className="mb-3 inline-flex items-center gap-1.5 rounded-full border border-amber-400/30 bg-amber-400/10 px-2.5 py-1 text-[10px] font-semibold text-amber-400">
+              ⚡ {t.VAMPIRE_CARD_TITLE}
+            </span>
+
+            <div className="flex items-start gap-3">
+              <div className="mt-0.5 shrink-0 rounded-xl bg-amber-400/15 p-2.5">
+                <PlugZap className="h-5 w-5 text-amber-400" />
+              </div>
+              <div className="min-w-0">
+                <DialogTitle className="text-base font-bold leading-snug">
+                  {t.VAMPIRE_CARD_TITLE}
+                </DialogTitle>
+                <DialogDescription className="mt-0.5 text-sm font-medium text-foreground/70">
+                  {t.VAMPIRE_CARD_SUBTITLE}
+                </DialogDescription>
+              </div>
             </div>
-            <div className="mt-4 rounded-xl border border-amber-400/20 bg-amber-400/8 px-3.5 py-3">
-              <p className="text-xs leading-relaxed text-muted-foreground">
-                💡 {t.VAMPIRE_UNPLUG_TIP} — tiết kiệm ngay {formatVnd(totalStandbyCost)}/tháng.
+
+            {/* Cost highlight */}
+            <div className="mt-4 flex items-center gap-3 rounded-xl border border-amber-400/25 bg-amber-400/10 px-3 py-2.5">
+              <PlugZap className="h-4 w-4 shrink-0 text-amber-400" />
+              <div>
+                <p className="text-[10px] text-muted-foreground">{t.VAMPIRE_TOTAL_COST}</p>
+                <p className="text-sm font-bold text-amber-400">
+                  {formatVnd(totalStandbyCost)}
+                  <span className="ml-1 text-xs font-normal text-muted-foreground">
+                    · {formatKwh(totalStandbyKwh)}/tháng
+                  </span>
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-3 px-5 py-4">
+            <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/60">
+              {t.VAMPIRE_INFO_WHY_TITLE}
+            </p>
+            <div className="flex flex-col gap-2 text-xs text-muted-foreground leading-relaxed">
+              <p>🔌 {t.VAMPIRE_INFO_STAT_1}</p>
+              <p>⚡ {t.VAMPIRE_INFO_STAT_2}</p>
+              <p>💡 {t.VAMPIRE_INFO_STAT_3}</p>
+            </div>
+            <div className="rounded-xl border border-amber-400/15 bg-amber-400/5 px-3.5 py-3">
+              <p className="text-[10px] leading-relaxed text-muted-foreground">
+                💡 {t.VAMPIRE_UNPLUG_TIP} {t.VAMPIRE_INFO_SAVE_INLINE} {formatVnd(totalStandbyCost)}{t.VAMPIRE_INFO_PER_MONTH}.
               </p>
             </div>
-          </div>
-          <div className="border-t border-border/30 bg-muted/30 px-4 py-2.5">
-            <p className="text-[10px] leading-relaxed text-muted-foreground">
-              * Tính dựa trên công suất chờ đã cấu hình, hoạt động liên tục 24/7.
+            <p className="text-[9px] leading-relaxed text-muted-foreground/60">
+              * {t.VAMPIRE_INFO_FOOTER_NOTE}
             </p>
+          </div>
+
+          <div className="flex justify-end border-t border-border/30 px-4 py-3">
+            <Button size="sm" className="btn-primary-gradient rounded-xl px-5" onClick={() => setDialogOpen(false)}>
+              {t.IOT_DIALOG_GOT_IT}
+            </Button>
           </div>
         </DialogContent>
       </Dialog>

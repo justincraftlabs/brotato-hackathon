@@ -233,7 +233,7 @@ export function WasteHotspotChart({
             {/* Tiered pricing note */}
             <div>
               <p className="mb-2 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
-                Điện bậc thang EVN
+                {t.CHART_WASTE_EVN_TIERS_LABEL}
               </p>
               <div className="flex flex-col gap-1.5">
                 <p className="text-xs text-muted-foreground">{t.CHART_WASTE_INFO_TIER_NOTE}</p>

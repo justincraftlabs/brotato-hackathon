@@ -8,6 +8,7 @@ import { APPLIANCE_DEFAULTS } from '../constants/appliance-defaults';
 import {
   DashboardData,
   TopConsumer,
+  RoomStat,
   Comparison,
   Anomaly,
   Co2Data,
@@ -42,6 +43,32 @@ function collectAppliancesWithRoom(rooms: Room[]): ApplianceWithRoom[] {
   }
 
   return result;
+}
+
+function buildRoomStats(appliancesWithRoom: ApplianceWithRoom[]): RoomStat[] {
+  const map = new Map<string, RoomStat>();
+  for (const { appliance, roomName } of appliancesWithRoom) {
+    const existing = map.get(roomName);
+    if (existing) {
+      existing.totalKwh += appliance.monthlyKwh;
+      existing.totalCost += appliance.monthlyCost;
+      existing.applianceCount += 1;
+    } else {
+      map.set(roomName, {
+        roomName,
+        totalKwh: appliance.monthlyKwh,
+        totalCost: appliance.monthlyCost,
+        applianceCount: 1,
+      });
+    }
+  }
+  return Array.from(map.values())
+    .map((r) => ({
+      ...r,
+      totalKwh: Math.round(r.totalKwh * 100) / 100,
+      totalCost: Math.round(r.totalCost),
+    }))
+    .sort((a, b) => b.totalKwh - a.totalKwh);
 }
 
 function buildTopConsumers(
@@ -186,6 +213,7 @@ export async function getDashboard(
   const evnTierInfo = getCurrentTier(totalMonthlyKwh);
   const evnTier = evnTierInfo.current;
   const topConsumers = buildTopConsumers(appliancesWithRoom);
+  const roomStats = buildRoomStats(appliancesWithRoom);
   const comparison = buildComparison(totalMonthlyKwh);
   const anomalies = buildAnomalies(appliancesWithRoom);
   const co2 = buildCo2(totalMonthlyKwh);
@@ -196,6 +224,7 @@ export async function getDashboard(
     totalMonthlyCost,
     evnTier,
     topConsumers,
+    roomStats,
     comparison,
     anomalies,
     co2,

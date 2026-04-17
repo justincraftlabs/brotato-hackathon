@@ -18,6 +18,7 @@ import {
   calculateMonthlyKwh,
   calculateTemperatureFactor,
 } from "@/lib/calculations";
+import { BarChart2, SlidersHorizontal } from "lucide-react";
 import { LOCAL_STORAGE_HOME_ID_KEY, NAV_ROUTES } from "@/lib/constants";
 import type { Translations } from "@/lib/translations";
 import type { Home } from "@/lib/types";
@@ -256,20 +257,47 @@ export default function SimulatorPage() {
 
       {/* ── Mobile: stacked layout ── */}
       <div className="flex flex-col gap-4 lg:hidden">
-        <ImpactSummary
-          savingsKwh={savingsKwh}
-          savingsVnd={savingsVnd}
-          savingsCo2Kg={savingsCo2Kg}
-          originalKwh={original.totalKwh}
-          originalCost={original.totalCost}
-          originalCo2={original.totalCo2Kg}
-        />
+        {/* Page header */}
+        <div>
+          <h1 className="text-xl font-bold">{t.SIMULATOR_PAGE_TITLE}</h1>
+          <p className="mt-0.5 text-xs text-muted-foreground">
+            {t.TIPS_PAGE_SUBTITLE}
+          </p>
+        </div>
+
+        {/* Sticky impact summary */}
+        <div className="sticky top-0 z-10">
+          <ImpactSummary
+            savingsKwh={savingsKwh}
+            savingsVnd={savingsVnd}
+            savingsCo2Kg={savingsCo2Kg}
+            originalKwh={original.totalKwh}
+            originalCost={original.totalCost}
+            originalCo2={original.totalCo2Kg}
+          />
+        </div>
+
+        {/* Section: Appliances */}
+        <div className="flex items-center gap-2 mt-1">
+          <SlidersHorizontal className="h-4 w-4 text-primary" />
+          <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+            {t.SIMULATOR_ADJUST_SECTION}
+          </h2>
+        </div>
 
         <ApplianceAdjuster
           rooms={homeData.rooms}
           adjustments={adjustments}
           onAdjust={handleAdjust}
         />
+
+        {/* Section: Comparison */}
+        <div className="flex items-center gap-2">
+          <BarChart2 className="h-4 w-4 text-primary" />
+          <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+            {t.SIMULATOR_COMPARISON_SECTION}
+          </h2>
+        </div>
 
         <ComparisonBar
           originalCost={original.totalCost}

@@ -91,9 +91,32 @@ function RoomCard({ room, onSelect, onEdit, onDelete, t }: RoomCardProps) {
   const { totalKwh, totalCo2Kg, totalStandbyKwh } = calcRoomStats(room);
   const hasAppliances = room.appliances.length > 0;
 
+  const actionButtons = (
+    <div className="flex shrink-0 items-center gap-0.5" onClick={(e) => e.stopPropagation()}>
+      <Button
+        variant="ghost"
+        size="icon"
+        className="h-7 w-7 hover:bg-primary/10 hover:text-primary"
+        onClick={(e) => { e.stopPropagation(); onEdit(room); }}
+        aria-label={t.SETUP_EDIT_ROOM}
+      >
+        <Pencil className="h-3.5 w-3.5" />
+      </Button>
+      <Button
+        variant="ghost"
+        size="icon"
+        className="h-7 w-7 hover:bg-destructive/10 hover:text-destructive"
+        onClick={(e) => { e.stopPropagation(); onDelete(room.id); }}
+        aria-label={t.LABEL_DELETE}
+      >
+        <Trash2 className="h-3.5 w-3.5" />
+      </Button>
+    </div>
+  );
+
   return (
-    <Card
-      className="cursor-pointer transition-colors hover:border-primary"
+    <div
+      className="glass rounded-xl cursor-pointer transition-colors hover:border-primary/40 card-hover-glow"
       onClick={() => onSelect(room.id)}
       role="button"
       tabIndex={0}
@@ -103,7 +126,32 @@ function RoomCard({ room, onSelect, onEdit, onDelete, t }: RoomCardProps) {
         onSelect(room.id);
       }}
     >
-      <CardContent className="p-4">
+      {/* Desktop: table row */}
+      <div className="hidden md:grid md:grid-cols-[1fr_110px_80px_106px_80px_96px_72px] items-center gap-3 px-4 py-3">
+        <div className="flex min-w-0 items-center gap-2.5">
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/10">
+            <Icon className="h-4 w-4 text-primary" />
+          </div>
+          <span className="truncate text-sm font-semibold">{room.name}</span>
+        </div>
+        <span className="text-sm text-muted-foreground">{t.ROOM_SIZE_LABELS[room.size]}</span>
+        <span className="text-sm text-muted-foreground">
+          {room.appliances.length} {t.SETUP_APPLIANCE_COUNT}
+        </span>
+        <span className={cn("text-sm font-semibold", hasAppliances ? "text-primary" : "text-muted-foreground/30")}>
+          {hasAppliances ? formatKwh(totalKwh) : "—"}
+        </span>
+        <span className={cn("text-sm", hasAppliances ? "text-muted-foreground" : "text-muted-foreground/30")}>
+          {hasAppliances ? `${totalCo2Kg.toFixed(1)} kg` : "—"}
+        </span>
+        <span className={cn("text-sm", hasAppliances && totalStandbyKwh > 0 ? "text-amber-500" : "text-muted-foreground/30")}>
+          {hasAppliances && totalStandbyKwh > 0 ? formatKwh(totalStandbyKwh) : "—"}
+        </span>
+        {actionButtons}
+      </div>
+
+      {/* Mobile: card */}
+      <div className="p-4 md:hidden">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Icon className="h-5 w-5 shrink-0 text-primary" />
@@ -114,26 +162,7 @@ function RoomCard({ room, onSelect, onEdit, onDelete, t }: RoomCardProps) {
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-1">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8"
-              onClick={(e) => { e.stopPropagation(); onEdit(room); }}
-              aria-label={t.SETUP_EDIT_ROOM}
-            >
-              <Pencil className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8 text-destructive hover:text-destructive"
-              onClick={(e) => { e.stopPropagation(); onDelete(room.id); }}
-              aria-label={t.LABEL_DELETE}
-            >
-              <Trash2 className="h-4 w-4" />
-            </Button>
-          </div>
+          {actionButtons}
         </div>
 
         {hasAppliances && (
@@ -152,8 +181,8 @@ function RoomCard({ room, onSelect, onEdit, onDelete, t }: RoomCardProps) {
             </div>
           </div>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }
 
@@ -651,13 +680,26 @@ export function EditModeView({ homeId }: EditModeViewProps) {
 
     return (
       <div className="flex flex-col gap-4 lg:gap-6">
-        <div>
-          <h1 className="text-center text-xl font-bold lg:text-left lg:text-2xl">
-            {t.SETUP_EDIT_TITLE}
-          </h1>
-          <p className="mt-1 text-center text-sm text-muted-foreground lg:text-left">
-            {t.SETUP_SELECT_ROOM}
-          </p>
+
+        {/* Header */}
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <h1 className="text-center text-xl font-bold lg:text-left lg:text-2xl">
+              {t.SETUP_EDIT_TITLE}
+            </h1>
+            <p className="mt-1 text-center text-sm text-muted-foreground lg:text-left">
+              {t.SETUP_SELECT_ROOM}
+            </p>
+          </div>
+          {/* Desktop: Add room button in header */}
+          <Button
+            size="sm"
+            className="hidden shrink-0 gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90 md:flex"
+            onClick={() => setAddDialogOpen(true)}
+          >
+            <Plus className="h-3.5 w-3.5" />
+            {t.SETUP_ADD_ROOM}
+          </Button>
         </div>
 
         {/* Home summary stats */}
@@ -678,7 +720,19 @@ export function EditModeView({ homeId }: EditModeViewProps) {
           ))}
         </div>
 
-        <div className="grid grid-cols-1 gap-3 lg:grid-cols-2 lg:gap-4">
+        {/* Desktop: table layout */}
+        <div className="hidden md:flex md:flex-col md:gap-2">
+          {/* Table header */}
+          <div className="grid grid-cols-[1fr_110px_80px_106px_80px_96px_72px] items-center gap-3 border-b border-border/30 px-4 pb-2 text-xs font-medium text-muted-foreground/60">
+            <span>Phòng</span>
+            <span>Kích thước</span>
+            <span>Thiết bị</span>
+            <span>kWh/tháng</span>
+            <span>CO₂</span>
+            <span>Điện chờ</span>
+            <span />
+          </div>
+
           {editState.home.rooms.map((room) => (
             <RoomCard
               key={room.id}
@@ -692,7 +746,31 @@ export function EditModeView({ homeId }: EditModeViewProps) {
 
           <Button
             variant="outline"
-            className="h-auto min-h-[4.5rem] w-full border-dashed lg:min-h-[5rem]"
+            size="sm"
+            className="mt-1 w-fit gap-1.5"
+            onClick={() => setAddDialogOpen(true)}
+          >
+            <Plus className="h-3.5 w-3.5" />
+            {t.SETUP_ADD_ROOM}
+          </Button>
+        </div>
+
+        {/* Mobile: card grid */}
+        <div className="flex flex-col gap-3 md:hidden">
+          {editState.home.rooms.map((room) => (
+            <RoomCard
+              key={room.id}
+              room={room}
+              onSelect={selectRoom}
+              onEdit={handleEditRoom}
+              onDelete={handleDeleteRoomClick}
+              t={t}
+            />
+          ))}
+
+          <Button
+            variant="outline"
+            className="h-auto min-h-[4.5rem] w-full border-dashed"
             onClick={() => setAddDialogOpen(true)}
           >
             <Plus className="mr-2 h-4 w-4" />

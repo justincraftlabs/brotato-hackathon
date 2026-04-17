@@ -35,9 +35,9 @@ export function MonthComparison({ comparison }: MonthComparisonProps) {
   const description = template.replace("{percent}", percentText);
 
   const householdRows = [
-    { label: t.CHART_COMPARISON_INFO_HH_SMALL, value: "~100 kWh/tháng", note: "" },
-    { label: t.CHART_COMPARISON_INFO_HH_MEDIUM, value: "~165 kWh/tháng", note: t.CHART_COMPARISON_INFO_HH_AVG_LABEL },
-    { label: t.CHART_COMPARISON_INFO_HH_LARGE, value: "~230 kWh/tháng", note: "" },
+    { label: t.CHART_COMPARISON_INFO_HH_SMALL, value: `~100 ${t.LABEL_MONTHLY_KWH}`, note: "" },
+    { label: t.CHART_COMPARISON_INFO_HH_MEDIUM, value: `~165 ${t.LABEL_MONTHLY_KWH}`, note: t.CHART_COMPARISON_INFO_HH_AVG_LABEL },
+    { label: t.CHART_COMPARISON_INFO_HH_LARGE, value: `~230 ${t.LABEL_MONTHLY_KWH}`, note: "" },
   ];
 
   return (
@@ -125,11 +125,11 @@ export function MonthComparison({ comparison }: MonthComparisonProps) {
             <div className="mt-3 flex flex-col gap-1.5">
               <div className="flex items-center gap-2 text-xs">
                 <div className="h-2.5 w-2.5 rounded-full bg-primary" />
-                <span className="text-muted-foreground">Xanh = dưới mức trung bình (tốt)</span>
+                <span className="text-muted-foreground">{t.CHART_COMPARISON_COLOR_GREEN}</span>
               </div>
               <div className="flex items-center gap-2 text-xs">
                 <div className="h-2.5 w-2.5 rounded-full bg-red-500" />
-                <span className="text-muted-foreground">Đỏ = trên mức trung bình</span>
+                <span className="text-muted-foreground">{t.CHART_COMPARISON_COLOR_RED}</span>
               </div>
             </div>
           </div>

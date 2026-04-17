@@ -1,24 +1,21 @@
 import Link from "next/link";
 
-import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/cn";
 import { formatKwh, formatVnd } from "@/lib/format";
 import { NAV_ROUTES } from "@/lib/constants";
 import type { DeviceSuggestion, SuggestionPriority } from "@/lib/types";
 import type { Translations } from "@/lib/translations";
 
-type PriorityVariant = "destructive" | "secondary" | "outline";
-
-const PRIORITY_VARIANT: Record<SuggestionPriority, PriorityVariant> = {
-  high: "destructive",
-  medium: "secondary",
-  low: "outline",
+const PRIORITY_BADGE_CLASS: Record<SuggestionPriority, string> = {
+  high: "bg-red-500/15 text-red-400 border border-red-400/30",
+  medium: "bg-amber-400/15 text-amber-400 border border-amber-400/30",
+  low: "bg-blue-400/15 text-blue-400 border border-blue-400/30",
 };
 
 const PRIORITY_BORDER: Record<SuggestionPriority, string> = {
-  high: "border-l-destructive/60",
+  high: "border-l-red-400/60",
   medium: "border-l-amber-400/60",
-  low: "border-l-primary/60",
+  low: "border-l-blue-400/60",
 };
 
 interface DeviceSuggestionCardProps {
@@ -44,7 +41,14 @@ export function DeviceSuggestionCard({ device, t }: DeviceSuggestionCardProps) {
     >
       <div className="flex items-center justify-between gap-2">
         <p className="text-sm font-semibold">{device.applianceName}</p>
-        <Badge variant={PRIORITY_VARIANT[device.priority]}>{priorityLabel}</Badge>
+        <span
+          className={cn(
+            "shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold leading-none",
+            PRIORITY_BADGE_CLASS[device.priority]
+          )}
+        >
+          {priorityLabel}
+        </span>
       </div>
 
       {/* Tip with subtle quote styling via left border already on card */}

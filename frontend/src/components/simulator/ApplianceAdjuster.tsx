@@ -11,7 +11,6 @@ import {
 } from "lucide-react";
 import type { ComponentType } from "react";
 
-import { Card, CardContent } from "@/components/ui/card";
 import { Slider } from "@/components/ui/slider";
 import { cn } from "@/lib/cn";
 import { formatKwh } from "@/lib/format";
@@ -103,13 +102,13 @@ function ApplianceRow({ appliance, adjustment, onAdjust, t }: ApplianceRowProps)
   const standbyKwhMonthly = calcStandbyKwh(appliance.standbyWattage);
 
   return (
-    <div className="flex flex-col gap-2 rounded-lg border border-border p-3">
+    <div className="flex flex-col gap-2.5 rounded-xl border border-border/60 bg-muted/20 p-3">
       <div className="flex items-center gap-2">
         <div className={cn("h-2 w-2 shrink-0 rounded-full", dotColor)} />
         <span className="flex-1 truncate text-sm font-medium">
           {appliance.name}
         </span>
-        <span className="shrink-0 text-xs text-muted-foreground">
+        <span className="rounded-full bg-background/60 px-2 py-0.5 text-xs text-muted-foreground">
           {formatKwh(appliance.monthlyKwh)}
         </span>
       </div>
@@ -180,10 +179,10 @@ function ApplianceRow({ appliance, adjustment, onAdjust, t }: ApplianceRowProps)
             })
           }
           className={cn(
-            "flex w-full items-center justify-between rounded-md border px-2.5 py-1.5 text-xs transition-colors",
+            "mt-1 flex w-full items-center justify-between rounded-md border px-2.5 py-1.5 text-xs transition-colors",
             adjustment?.standbyOff
               ? "border-primary/40 bg-primary/10 text-primary"
-              : "border-border/50 bg-muted/20 text-muted-foreground hover:border-amber-400/40 hover:text-amber-400"
+              : "border-amber-400/50 bg-amber-400/10 text-amber-400 hover:border-amber-400/80 hover:bg-amber-400/20"
           )}
         >
           <span className="flex items-center gap-1.5">
@@ -217,16 +216,18 @@ export function ApplianceAdjuster({
           ZERO_DELTA
         );
         return (
-          <Card key={room.id}>
-            <CardContent className="flex flex-col gap-3 p-3">
+          <div key={room.id} className="glass rounded-2xl border border-border/50">
+            <div className="flex flex-col gap-3 p-4">
               <div className="flex items-center justify-between gap-2">
-                <div className="flex items-center gap-2">
-                  <Icon className="h-4 w-4 text-primary" />
+                <div className="flex items-center gap-2.5">
+                  <div className="rounded-xl bg-primary/10 p-2">
+                    <Icon className="h-4 w-4 text-primary" />
+                  </div>
                   <span className="text-sm font-semibold">
                     {t.ROOM_TYPE_LABELS[room.type]}
                   </span>
                 </div>
-                <span className="text-xs text-muted-foreground">
+                <span className="rounded-full bg-muted/60 px-2 py-0.5 text-xs text-muted-foreground">
                   {formatKwh(roomTotalKwh)}
                 </span>
               </div>
@@ -239,8 +240,8 @@ export function ApplianceAdjuster({
                   t={t}
                 />
               ))}
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         );
       })}
     </div>

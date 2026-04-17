@@ -70,13 +70,18 @@ function PricingDialog({ open, onClose, activeTier }: PricingDialogProps) {
 
         {/* Pricing table */}
         <div className="px-4 py-3">
-          <table className="w-full border-collapse text-xs">
+          <table className="w-full table-fixed border-collapse text-xs">
+            <colgroup>
+              <col className="w-[4.5rem]" />
+              <col />
+              <col className="w-[7.5rem]" />
+            </colgroup>
             <thead>
               <tr className="border-b border-border/30">
-                <th className="pb-2 pr-3 text-left font-semibold text-muted-foreground">
+                <th className="pb-2 text-left font-semibold text-muted-foreground">
                   {t.DASHBOARD_EVN_TIER_DIALOG_COL_TIER}
                 </th>
-                <th className="pb-2 pr-3 text-left font-semibold text-muted-foreground">
+                <th className="pb-2 text-left font-semibold text-muted-foreground">
                   {t.DASHBOARD_EVN_TIER_DIALOG_COL_USAGE}
                 </th>
                 <th className="pb-2 text-right font-semibold text-muted-foreground">
@@ -92,17 +97,15 @@ function PricingDialog({ open, onClose, activeTier }: PricingDialogProps) {
                     key={tier.tier}
                     className={cn(
                       "border-b border-border/20 transition-colors last:border-0",
-                      isActive
-                        ? "bg-primary/10"
-                        : "hover:bg-muted/40"
+                      !isActive && "hover:bg-muted/40"
                     )}
                   >
                     {/* Tier number */}
-                    <td className="py-2.5 pr-3">
+                    <td className={cn("py-2.5", isActive && "rounded-l-lg bg-primary/10")}>
                       <div className="flex items-center gap-1.5">
                         <span
                           className={cn(
-                            "flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-black",
+                            "flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-black",
                             isActive
                               ? "bg-primary text-primary-foreground shadow-[0_0_8px_hsl(var(--primary)/0.5)]"
                               : "bg-muted text-muted-foreground"
@@ -111,7 +114,7 @@ function PricingDialog({ open, onClose, activeTier }: PricingDialogProps) {
                           {tier.tier}
                         </span>
                         {isActive && (
-                          <span className="rounded-full bg-primary/15 px-1.5 py-0.5 text-[9px] font-bold text-primary">
+                          <span className="truncate rounded-full bg-primary/15 px-1.5 py-0.5 text-[9px] font-bold text-primary">
                             {t.DASHBOARD_EVN_TIER_DIALOG_CURRENT_BADGE}
                           </span>
                         )}
@@ -119,13 +122,13 @@ function PricingDialog({ open, onClose, activeTier }: PricingDialogProps) {
                     </td>
 
                     {/* Usage range */}
-                    <td className="py-2.5 pr-3 text-muted-foreground">
+                    <td className={cn("py-2.5 text-muted-foreground", isActive && "bg-primary/10")}>
                       {usageLabel(tier.minKwh, tier.maxKwh)}
                     </td>
 
                     {/* Price range */}
-                    <td className="py-2.5 text-right">
-                      <span className={cn("font-semibold tabular-nums", isActive && "text-primary")}>
+                    <td className={cn("py-2.5 text-right", isActive && "rounded-r-lg bg-primary/10")}>
+                      <span className={cn("whitespace-nowrap font-semibold tabular-nums", isActive && "text-primary")}>
                         {formatTablePrice(tier.priceRange[0])}
                         <span className="mx-0.5 text-muted-foreground/60">→</span>
                         {formatTablePrice(tier.priceRange[1])}
@@ -183,7 +186,7 @@ export function EvnTierProgress({ evnTier, totalKwh }: EvnTierProgressProps) {
 
   const hoveredTierData = hoveredTier !== null ? EVN_TIERS[hoveredTier - TIER_INDEX_OFFSET] : null;
   const bottomCaption = hoveredTierData
-    ? `${t.DASHBOARD_EVN_TIER_PREFIX} ${hoveredTierData.tier}: ${usageLabel(hoveredTierData.minKwh, hoveredTierData.maxKwh)} · ${formatTablePrice(hoveredTierData.priceRange[0])}→${formatTablePrice(hoveredTierData.priceRange[1])} đ/kWh`
+    ? `${t.DASHBOARD_EVN_TIER_PREFIX} ${hoveredTierData.tier}: ${usageLabel(hoveredTierData.minKwh, hoveredTierData.maxKwh)} · ${formatTablePrice(hoveredTierData.priceRange[0])}→${formatTablePrice(hoveredTierData.priceRange[1])} ${t.CHART_EVN_DONG_PER_KWH}`
     : defaultWarning;
 
   return (

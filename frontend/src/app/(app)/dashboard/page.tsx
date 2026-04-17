@@ -72,10 +72,10 @@ function MiniDotChart({ color, heights }: MiniDotChartProps) {
   );
 }
 
-const PREVIEW_CHARTS = [
-  { label: "Điện (kWh)", color: "bg-chart-1", heights: [1, 2, 2, 3, 4, 5, 6] },
-  { label: "Chi phí", color: "bg-chart-2", heights: [1, 1, 2, 3, 3, 4, 5] },
-  { label: "CO₂ (kg)", color: "bg-chart-3", heights: [1, 2, 2, 2, 3, 4, 4] },
+const PREVIEW_CHART_DEFS = [
+  { key: "electricity" as const, color: "bg-chart-1", heights: [1, 2, 2, 3, 4, 5, 6] },
+  { key: "cost" as const, color: "bg-chart-2", heights: [1, 1, 2, 3, 3, 4, 5] },
+  { key: "co2" as const, color: "bg-chart-3", heights: [1, 2, 2, 2, 3, 4, 4] },
 ];
 
 /* ---------- Stat Card ---------- */
@@ -157,9 +157,20 @@ interface EmptyStateProps {
   t: Translations;
 }
 
-const PREVIEW_ROOM_TAGS = ["Phòng khách", "Phòng ngủ", "Bếp", "Nhà tắm"];
-
 function EmptyState({ t }: EmptyStateProps) {
+  const previewCharts = [
+    { label: t.DASHBOARD_PREVIEW_ELECTRICITY, color: "bg-chart-1", heights: PREVIEW_CHART_DEFS[0].heights },
+    { label: t.DASHBOARD_TOTAL_COST, color: "bg-chart-2", heights: PREVIEW_CHART_DEFS[1].heights },
+    { label: t.DASHBOARD_PREVIEW_CO2_KG, color: "bg-chart-3", heights: PREVIEW_CHART_DEFS[2].heights },
+  ];
+
+  const previewRoomTags = [
+    t.ROOM_TYPE_LABELS.living_room,
+    t.ROOM_TYPE_LABELS.bedroom,
+    t.ROOM_TYPE_LABELS.kitchen,
+    t.ROOM_TYPE_LABELS.bathroom,
+  ];
+
   return (
     <div className="flex flex-1 flex-col">
       <PageHeader t={t} />
@@ -167,10 +178,10 @@ function EmptyState({ t }: EmptyStateProps) {
       {/* Preview: dot-plot charts like EcoHeart Analytics */}
       <div className="glass rounded-2xl p-5 mb-5">
         <p className="mb-4 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
-          Xem trước dữ liệu năng lượng
+          {t.DASHBOARD_PREVIEW_SECTION_LABEL}
         </p>
         <div className="grid grid-cols-3 gap-6">
-          {PREVIEW_CHARTS.map((chart) => (
+          {previewCharts.map((chart) => (
             <div key={chart.label}>
               <p className="mb-3 text-xs text-muted-foreground">{chart.label}</p>
               <MiniDotChart color={chart.color} heights={chart.heights} />
@@ -178,7 +189,7 @@ function EmptyState({ t }: EmptyStateProps) {
           ))}
         </div>
         <div className="mt-5 flex flex-wrap gap-2">
-          {PREVIEW_ROOM_TAGS.map((room) => (
+          {previewRoomTags.map((room) => (
             <span
               key={room}
               className="rounded-full border border-border px-3 py-1 text-xs text-muted-foreground"
@@ -187,7 +198,7 @@ function EmptyState({ t }: EmptyStateProps) {
             </span>
           ))}
           <span className="rounded-full border border-dashed border-primary/40 px-3 py-1 text-xs text-primary/70">
-            + Thêm phòng
+            {t.DASHBOARD_PREVIEW_ADD_ROOM}
           </span>
         </div>
       </div>
@@ -339,7 +350,7 @@ function DashboardContent({ data, t }: DashboardContentProps) {
 
         {/* Row: Room heatmap + Bill projection */}
         <FadeSlide className="h-full">
-          <RoomEnergyHeatmap consumers={data.topConsumers} />
+          <RoomEnergyHeatmap roomStats={data.roomStats} />
         </FadeSlide>
         <FadeSlide className="h-full">
           <MonthlyBillProjection totalMonthlyCost={data.totalMonthlyCost} />
