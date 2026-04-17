@@ -6,7 +6,6 @@ import {
   Gauge,
   Home,
   Leaf,
-  Loader2,
   Zap,
 } from "lucide-react";
 import Link from "next/link";
@@ -22,6 +21,8 @@ import { SavingsForecastChart } from "@/components/dashboard/SavingsForecastChar
 import { TopConsumersChart } from "@/components/dashboard/TopConsumersChart";
 import { WasteHotspotChart } from "@/components/dashboard/WasteHotspotChart";
 import { Button } from "@/components/ui/button";
+import { AnimatedCounter, CrossFade, FadeSlide, StaggerList } from "@/components/ui/motion";
+import { SkeletonChart, SkeletonStatCard } from "@/components/ui/skeleton";
 import { useT } from "@/hooks/use-t";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { LOCAL_STORAGE_HOME_ID_KEY, NAV_ROUTES } from "@/lib/constants";
@@ -78,7 +79,7 @@ type StatVariant = "primary" | "default";
 
 interface StatCardProps {
   title: string;
-  value: string;
+  value: ReactNode;
   subtitle: string;
   icon: ReactNode;
   variant?: StatVariant;
@@ -98,7 +99,7 @@ function StatCard({
   return (
     <div
       className={cn(
-        "relative overflow-hidden rounded-2xl p-5",
+        "relative overflow-hidden rounded-2xl p-5 card-hover-glow",
         isPrimary ? "stat-card-primary" : "glass"
       )}
     >
@@ -227,12 +228,16 @@ function PageHeader({ t }: PageHeaderProps) {
 
 function DashboardSkeleton() {
   return (
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 lg:gap-5">
-      {Array.from({ length: SKELETON_COUNT }).map((_, index) => (
-        <div key={index} className="glass rounded-2xl p-5">
-          <div className="h-24 animate-pulse rounded-xl bg-muted/50" />
-        </div>
-      ))}
+    <div className="flex flex-col gap-6">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 lg:gap-5">
+        {Array.from({ length: SKELETON_COUNT }).map((_, i) => (
+          <SkeletonStatCard key={i} />
+        ))}
+      </div>
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-6">
+        <SkeletonChart height={180} />
+        <SkeletonChart height={180} />
+      </div>
     </div>
   );
 }
@@ -268,77 +273,79 @@ interface DashboardContentProps {
 
 function DashboardContent({ data, t }: DashboardContentProps) {
   return (
-    <>
-      {/* Stat Cards Row */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 lg:gap-5">
-        <StatCard
-          title={t.DASHBOARD_TOTAL_KWH}
-          value={formatKwh(data.totalMonthlyKwh)}
-          subtitle={t.STAT_THIS_MONTH}
-          icon={<Zap className="h-4 w-4" />}
-          variant="primary"
-        />
-        <StatCard
-          title={t.DASHBOARD_TOTAL_COST}
-          value={formatVnd(data.totalMonthlyCost)}
-          subtitle={t.STAT_THIS_MONTH}
-          icon={<DollarSign className="h-4 w-4" />}
-        />
-        <StatCard
-          title={t.DASHBOARD_TOTAL_CO2}
-          value={formatCo2(data.co2.totalKg)}
-          subtitle={t.STAT_THIS_MONTH}
-          icon={<Leaf className="h-4 w-4" />}
-        />
-        <StatCard
-          title={t.DASHBOARD_EVN_TIER_PREFIX}
-          value={`${t.DASHBOARD_EVN_TIER_PREFIX} ${data.evnTier}`}
-          subtitle={t.STAT_THIS_MONTH}
-          icon={<Gauge className="h-4 w-4" />}
-        />
-      </div>
+    <div className="flex flex-col gap-6">
+      {/* Stat Cards — staggered slide-up */}
+      <StaggerList className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 lg:gap-5">
+        <FadeSlide>
+          <StatCard
+            title={t.DASHBOARD_TOTAL_KWH}
+            value={<AnimatedCounter value={data.totalMonthlyKwh} format={formatKwh} />}
+            subtitle={t.STAT_THIS_MONTH}
+            icon={<Zap className="h-4 w-4" />}
+            variant="primary"
+          />
+        </FadeSlide>
+        <FadeSlide>
+          <StatCard
+            title={t.DASHBOARD_TOTAL_COST}
+            value={<AnimatedCounter value={data.totalMonthlyCost} format={formatVnd} />}
+            subtitle={t.STAT_THIS_MONTH}
+            icon={<DollarSign className="h-4 w-4" />}
+          />
+        </FadeSlide>
+        <FadeSlide>
+          <StatCard
+            title={t.DASHBOARD_TOTAL_CO2}
+            value={<AnimatedCounter value={data.co2.totalKg} format={formatCo2} />}
+            subtitle={t.STAT_THIS_MONTH}
+            icon={<Leaf className="h-4 w-4" />}
+          />
+        </FadeSlide>
+        <FadeSlide>
+          <StatCard
+            title={t.DASHBOARD_EVN_TIER_PREFIX}
+            value={`${t.DASHBOARD_EVN_TIER_PREFIX} ${data.evnTier}`}
+            subtitle={t.STAT_THIS_MONTH}
+            icon={<Gauge className="h-4 w-4" />}
+          />
+        </FadeSlide>
+      </StaggerList>
 
       {/* Anomaly Alert */}
       <AnomalyAlert anomalies={data.anomalies} />
 
-      {/* Charts Grid */}
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-6">
-        <TopConsumersChart consumers={data.topConsumers} />
-        <WasteHotspotChart
-          consumers={data.topConsumers}
-          totalMonthlyCost={data.totalMonthlyCost}
-        />
-        <SavingsForecastChart monthlyCost={data.totalMonthlyCost} />
-        <div className="flex flex-col gap-4 lg:gap-6">
-          <MonthComparison comparison={data.comparison} />
-          <EvnTierProgress
-            evnTier={data.evnTier}
-            totalKwh={data.totalMonthlyKwh}
-          />
-          <Co2TreeVisual co2={data.co2} />
-        </div>
-        <div className="lg:col-span-2">
-          <CarbonWaterfallChart
-            co2TotalKg={data.co2.totalKg}
+      {/* Charts Grid — staggered */}
+      <StaggerList className="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-6">
+        <FadeSlide><TopConsumersChart consumers={data.topConsumers} /></FadeSlide>
+        <FadeSlide>
+          <WasteHotspotChart
             consumers={data.topConsumers}
+            totalMonthlyCost={data.totalMonthlyCost}
           />
-        </div>
-      </div>
+        </FadeSlide>
+        <FadeSlide><SavingsForecastChart monthlyCost={data.totalMonthlyCost} /></FadeSlide>
+        <FadeSlide>
+          <div className="flex flex-col gap-4 lg:gap-6">
+            <MonthComparison comparison={data.comparison} />
+            <EvnTierProgress evnTier={data.evnTier} totalKwh={data.totalMonthlyKwh} />
+            <Co2TreeVisual co2={data.co2} />
+          </div>
+        </FadeSlide>
+        <FadeSlide className="lg:col-span-2">
+          <CarbonWaterfallChart co2TotalKg={data.co2.totalKg} consumers={data.topConsumers} />
+        </FadeSlide>
+      </StaggerList>
 
       {/* CTAs */}
       <div className="flex flex-col gap-3 lg:flex-row">
         <Button asChild className="btn-primary-gradient rounded-xl lg:flex-1">
-          <Link href={NAV_ROUTES.TIPS}>
-            {t.DASHBOARD_CTA_VIEW_SUGGESTIONS}
-          </Link>
+          <Link href={NAV_ROUTES.TIPS}>{t.DASHBOARD_CTA_VIEW_SUGGESTIONS}</Link>
         </Button>
         <Button variant="outline" asChild className="rounded-xl border-border/60 hover:bg-primary/10 hover:text-primary hover:border-primary/40 lg:flex-1">
-          <Link href={NAV_ROUTES.TIPS}>
-            {t.DASHBOARD_CTA_SIMULATE}
-          </Link>
+          <Link href={NAV_ROUTES.TIPS}>{t.DASHBOARD_CTA_SIMULATE}</Link>
         </Button>
       </div>
-    </>
+    </div>
   );
 }
 
@@ -373,33 +380,29 @@ export default function DashboardPage() {
     return <EmptyState t={t} />;
   }
 
-  if (pageState.status === "loading" || pageState.status === "idle") {
-    return (
-      <div className="flex flex-col gap-6">
-        <PageHeader t={t} />
-        <Loader2 className="mx-auto h-6 w-6 animate-spin text-primary" />
-        <DashboardSkeleton />
-      </div>
-    );
-  }
-
-  if (pageState.status === "error") {
-    return (
-      <div className="flex flex-col gap-6">
-        <PageHeader t={t} />
-        <ErrorBanner
-          message={pageState.message}
-          onRetry={() => fetchDashboard(homeId)}
-          t={t}
-        />
-      </div>
-    );
-  }
+  const crossFadeKey =
+    pageState.status === "loading" || pageState.status === "idle"
+      ? "skeleton"
+      : pageState.status;
 
   return (
     <div className="flex flex-col gap-6">
       <PageHeader t={t} />
-      <DashboardContent data={pageState.data} t={t} />
+      <CrossFade stateKey={crossFadeKey}>
+        {(pageState.status === "loading" || pageState.status === "idle") && (
+          <DashboardSkeleton />
+        )}
+        {pageState.status === "error" && (
+          <ErrorBanner
+            message={pageState.message}
+            onRetry={() => fetchDashboard(homeId)}
+            t={t}
+          />
+        )}
+        {pageState.status === "success" && (
+          <DashboardContent data={pageState.data} t={t} />
+        )}
+      </CrossFade>
     </div>
   );
 }

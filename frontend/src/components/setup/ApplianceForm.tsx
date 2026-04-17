@@ -308,15 +308,17 @@ export function ApplianceFormStep({
     const estimate = await estimateAppliance(recognitionResult.name);
     setIsEstimating(false);
 
+    let resolvedHabit = form.usageHabit;
     if (estimate.success) {
       setAiSuggestion(`${estimate.data.estimatedWattage}W`);
-      setForm((prev) => ({
-        ...prev,
-        ...(prev.usageHabit || !estimate.data.suggestedUsageHabit
-          ? {}
-          : { usageHabit: estimate.data.suggestedUsageHabit }),
-      }));
+      const suggestedHabit = estimate.data.suggestedUsageHabit;
+      if (!form.usageHabit && suggestedHabit) {
+        resolvedHabit = suggestedHabit;
+        setForm((prev) => ({ ...prev, usageHabit: suggestedHabit }));
+      }
     }
+
+    fetchHabitAnalysis(recognitionResult.name, applianceType, resolvedHabit, form.dailyUsageHours);
 
     clearCapture();
   }

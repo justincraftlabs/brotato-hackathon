@@ -1,6 +1,7 @@
 "use client";
 
 import { Moon, Sun } from "lucide-react";
+import Link from "next/link";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
 
@@ -49,9 +50,9 @@ export function Header() {
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/50 glass-strong lg:hidden">
       <div className="flex h-14 items-center justify-between px-4">
-        <span className="text-lg font-bold tracking-tight">
+        <Link href="/dashboard" className="text-lg font-bold tracking-tight hover:opacity-80 transition-opacity">
           E-<span className="text-primary drop-shadow-[0_0_8px_hsl(var(--primary)/0.5)]">LUMI</span>-NATE
-        </span>
+        </Link>
 
         <div className="flex items-center gap-1">
           <Button

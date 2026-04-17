@@ -73,7 +73,7 @@ export function Sidebar() {
     <aside className="hidden lg:flex lg:w-[var(--sidebar-width)] lg:shrink-0 lg:flex-col glass-strong border-r border-border/50">
       {/* Logo + controls */}
       <div className="px-6 pb-2 pt-6">
-        <div className="flex items-center gap-2.5">
+        <Link href="/dashboard" className="flex items-center gap-2.5 hover:opacity-80 transition-opacity">
           <div className="relative">
             <Image
               src="/logo.png"
@@ -86,7 +86,7 @@ export function Sidebar() {
           <span className="text-lg font-bold tracking-tight">
             E-<span className="text-primary drop-shadow-[0_0_8px_hsl(var(--primary)/0.5)]">LUMI</span>-NATE
           </span>
-        </div>
+        </Link>
         <div className="mt-3 flex items-center gap-1">
           <Button
             variant="ghost"

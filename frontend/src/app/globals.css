@@ -179,6 +179,56 @@
     flex-shrink: 0;
   }
 
+  /* ─── Skeleton shimmer ─── */
+  @keyframes skeleton-shimmer {
+    0%   { background-position: 200% center; }
+    100% { background-position: -200% center; }
+  }
+
+  .skeleton-shimmer {
+    background: linear-gradient(
+      90deg,
+      hsl(213 52% 7% / 0.55) 0%,
+      hsl(213 52% 11% / 0.45) 38%,
+      hsl(142 68% 54% / 0.07) 50%,
+      hsl(213 52% 11% / 0.45) 62%,
+      hsl(213 52% 7% / 0.55) 100%
+    );
+    background-size: 400% 100%;
+    animation: skeleton-shimmer 2.4s ease-in-out infinite;
+    border: 1px solid hsl(142 68% 54% / 0.05);
+  }
+
+  html:not(.dark) .skeleton-shimmer {
+    background: linear-gradient(
+      90deg,
+      hsl(155 20% 85% / 0.75) 0%,
+      hsl(155 20% 89% / 0.55) 38%,
+      hsl(145 56% 35% / 0.09) 50%,
+      hsl(155 20% 89% / 0.55) 62%,
+      hsl(155 20% 85% / 0.75) 100%
+    );
+    background-size: 400% 100%;
+    border: 1px solid hsl(145 56% 24% / 0.06);
+  }
+
+  /* ─── Card hover neon glow ─── */
+  .card-hover-glow {
+    transition: box-shadow 0.3s ease-out, border-color 0.3s ease-out;
+  }
+
+  .card-hover-glow:hover {
+    box-shadow:
+      0 0 0 1px hsl(var(--primary) / 0.22),
+      0 8px 32px hsl(var(--primary) / 0.09);
+  }
+
+  .dark .card-hover-glow:hover {
+    box-shadow:
+      0 0 0 1px hsl(var(--primary) / 0.30),
+      0 8px 40px hsl(var(--primary) / 0.14);
+  }
+
   /* ─── Hairline active nav indicator ─── */
   .nav-active-bar {
     position: relative;
