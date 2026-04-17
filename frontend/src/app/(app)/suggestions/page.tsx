@@ -133,12 +133,7 @@ export default function SuggestionsPage() {
   }
 
   if (pageState.status === "idle") {
-    return (
-      <div className="flex flex-col items-center gap-4 py-10">
-        <Loader2 className="h-6 w-6 animate-spin text-primary" />
-        <p className="text-sm text-muted-foreground">{t.SUGGESTIONS_ANALYZING}</p>
-      </div>
-    );
+    return null;
   }
 
   const { data } = pageState;
@@ -160,7 +155,7 @@ export default function SuggestionsPage() {
 
       {data.rooms.map((room, index) => (
         <RoomAccordionItem
-          key={room.roomName}
+          key={`room-${index}`}
           room={room}
           defaultOpen={index === 0}
           t={t}
