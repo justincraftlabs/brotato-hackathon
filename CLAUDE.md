@@ -179,15 +179,18 @@ const CO2_PER_TREE_PER_YEAR = 20;   // kg CO2 absorbed by 1 mature tree/year
 
 ## Branding / Theme
 
-| Token | Hex | Usage |
-|-------|-----|-------|
-| Primary Green | `#3B8C2A` | Buttons, active states |
-| Mid Green | `#639922` | Secondary actions, hover |
-| Light Green | `#EAF3DE` | Backgrounds (light mode) |
-| Accent Amber | `#BA7517` | Warnings, alerts |
-| Mid Amber | `#EF9F27` | Heatmap warm zone |
-| Light Amber | `#FAEEDA` | Warm surfaces |
-| Dark BG | `#1E1E1E` | Dark mode background |
+Colors are **CSS HSL variables** — never hardcode hex in Tailwind config for theme tokens. Tailwind config uses `primary: { DEFAULT: "hsl(var(--primary))" }` to enable opacity modifiers like `bg-primary/10`.
+
+| Mode | Background | Primary |
+|------|-----------|---------|
+| Dark (EcoHeart navy) | `hsl(213 52% 5%)` | `hsl(142 68% 54%)` neon green |
+| Light (Eco-Luxury) | `hsl(155 25% 96%)` | `hsl(145 56% 24%)` deep forest |
+
+**Glassmorphism utilities** (defined in `globals.css`):
+- `.glass` — frosted card (light: white 72% opacity; dark: navy 58% + blur)
+- `.glass-strong` — stronger blur for sidebars/headers
+- `.stat-card-primary` — gradient green stat card
+- `.btn-primary-gradient` — gradient green button
 
 Dark mode is default. Use `next-themes` with `class` strategy.
 
@@ -218,7 +221,7 @@ Types: `feat`, `fix`, `chore`, `docs`, `refactor`
 
 Never commit `.env` or `node_modules/`.
 
-## AI Use Cases (4 total)
+## AI Use Cases (6 total)
 
 | UC | Purpose | Model | Input | Output |
 |----|---------|-------|-------|--------|
@@ -226,8 +229,10 @@ Never commit `.env` or `node_modules/`.
 | UC2 | Chat (Khoai Tay) | Sonnet (streaming) | User message + home context | Vietnamese text via SSE |
 | UC3 | Appliance estimation | Sonnet | Appliance name (Vietnamese) | JSON: wattage, type, standby |
 | UC4 | Image recognition | Sonnet (Vision) | Base64 image | JSON: name, type, wattage, brand, confidence |
+| UC5 | Usage Habit Analysis | Sonnet | Appliance name + habit text + current hours | JSON: `calculated_average_hours`, `analysis_summary`, `habit_suggestions[3]`, `carbon_impact_note` |
+| UC6 | Savings Suggestions | Sonnet | homeId (cached per home) | JSON: room-by-room suggestions with `savingsKwh`/`savingsVnd` |
 
-System prompts live in `backend/src/prompts/` as exported constants. Never inline prompts in route handlers.
+System prompts live in `backend/src/prompts/` as exported constants — one file per UC. Never inline prompts in route handlers.
 
 ## Detailed Plans
 
@@ -255,6 +260,13 @@ For implementation details beyond what's here, see `plans/`:
 - [specs/energy/](specs/energy/) — F2 Energy Dashboard, EVN pricing, CO2
 - [specs/chat/](specs/chat/) — F3 AI Chat (Trợ Lý Khoai Tây) + Recommendations
 - [specs/simulator/](specs/simulator/) — F4 Green Heatmap Simulator
+
+## Gotchas
+
+- **`heic2any` must be dynamically imported** inside the async function body — a static top-level import causes `window is not defined` during Next.js SSR static generation. Use `const heic2any = (await import("heic2any")).default` in `lib/image.ts`.
+- **ESLint skipped during builds** — `eslint: { ignoreDuringBuilds: true }` is set in `next.config.mjs` due to pre-existing lint errors. Fix before removing this flag.
+- **Client-only libraries in hooks** — any `useState` initializer that accesses `window`/`document` directly (not inside `useEffect`) will break SSR. Always guard with `typeof window === "undefined"`.
+- **UC5 weighted average formula**: `[(weekday_hours × 5) + (weekend_hours × 2)] / 7` — natural language habit text is parsed by Claude, not regex.
 
 ## Agent Roles (reference)
 
