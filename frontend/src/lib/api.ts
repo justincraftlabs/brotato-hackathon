@@ -271,6 +271,15 @@ export async function updateAppliance(
   });
 }
 
+export async function deleteAppliance(
+  homeId: string,
+  applianceId: string
+): Promise<ApiResponse<null>> {
+  return request<null>(`/api/home/${homeId}/appliances/${applianceId}`, {
+    method: "DELETE",
+  });
+}
+
 export async function getSavingsSuggestions(
   homeId: string,
   forceRefresh = false
