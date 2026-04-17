@@ -33,10 +33,10 @@ export function MonthComparison({ comparison }: MonthComparisonProps) {
           : "bg-primary/8 border border-primary/12 dark:bg-primary/10 dark:border-primary/15"
       )}
     >
-      <div className="flex items-center gap-4 p-5 lg:p-6">
+      <div className="flex items-center gap-3 p-4 lg:p-5">
         <div
           className={cn(
-            "flex h-12 w-12 shrink-0 items-center justify-center rounded-xl",
+            "flex h-10 w-10 shrink-0 items-center justify-center rounded-xl",
             isIncrease ? "bg-red-100 dark:bg-red-900/30" : "bg-primary/15"
           )}
         >
@@ -49,7 +49,7 @@ export function MonthComparison({ comparison }: MonthComparisonProps) {
         <div>
           <p
             className={cn(
-              "text-2xl font-black tabular-nums",
+              "text-xl font-black tabular-nums",
               isIncrease ? "text-red-600 dark:text-red-400" : "text-primary"
             )}
           >

@@ -100,9 +100,9 @@ export function SavingsForecastChart({ monthlyCost }: SavingsForecastChartProps)
   const fiveYearAt20 = (monthlyCost * RATE_20 * FIVE_YEAR_MONTHS) / MILLION;
 
   return (
-    <div className="glass rounded-2xl overflow-hidden card-hover-glow">
-      <div className="px-5 pb-0 pt-5 lg:px-6 lg:pt-6">
-        <h3 className="text-base font-bold">{t.CHART_FORECAST_TITLE}</h3>
+    <div className="glass rounded-2xl overflow-hidden card-hover-glow h-full flex flex-col">
+      <div className="shrink-0 px-4 pb-0 pt-4 lg:px-5 lg:pt-5">
+        <h3 className="text-sm font-bold">{t.CHART_FORECAST_TITLE}</h3>
         <p className="mt-0.5 text-xs text-muted-foreground">
           {t.CHART_FORECAST_5Y_HINT}{" "}
           <span className="font-bold text-primary">
@@ -110,8 +110,9 @@ export function SavingsForecastChart({ monthlyCost }: SavingsForecastChartProps)
           </span>
         </p>
       </div>
-      <div className="px-5 pb-5 pt-4 lg:px-6 lg:pb-6">
-        <ResponsiveContainer width="100%" height={CHART_HEIGHT}>
+      <div className="flex-1 flex flex-col px-4 pb-4 pt-3 lg:px-5 lg:pb-5">
+        <div className="flex-1" style={{ minHeight: CHART_HEIGHT }}>
+        <ResponsiveContainer width="100%" height="100%">
           <AreaChart
             data={data}
             margin={{ top: 8, right: 8, left: -12, bottom: 0 }}
@@ -187,9 +188,10 @@ export function SavingsForecastChart({ monthlyCost }: SavingsForecastChartProps)
             />
           </AreaChart>
         </ResponsiveContainer>
+        </div>
 
-        {/* Legend */}
-        <div className="mt-3 flex justify-center gap-5">
+        {/* Legend — pinned to bottom */}
+        <div className="mt-3 shrink-0 flex justify-center gap-5">
           {[
             { color: COLOR_10, label: t.CHART_FORECAST_10 },
             { color: COLOR_20, label: t.CHART_FORECAST_20 },

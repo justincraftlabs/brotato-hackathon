@@ -87,32 +87,126 @@
 
 @layer components {
   /* ─── Glassmorphism ─── */
+
+  /* Light Mode: porcelain base → mint-sage radial mesh */
   .glass {
-    background: rgba(255, 255, 255, 0.72);
-    border: 1px solid rgba(255, 255, 255, 0.9);
-    box-shadow: 0 4px 24px rgba(20, 80, 45, 0.08), 0 1px 4px rgba(0, 0, 0, 0.04);
+    background:
+      radial-gradient(ellipse 72% 52% at 12% 10%, rgba(180, 232, 205, 0.42) 0%, transparent 58%),
+      radial-gradient(ellipse 50% 65% at 55% 55%, rgba(200, 240, 218, 0.22) 0%, transparent 62%),
+      linear-gradient(160deg, rgba(255, 255, 255, 0.96) 0%, rgba(237, 249, 243, 0.98) 100%);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
+    /* Eco-tinted hairline border */
+    border: 1px solid rgba(60, 140, 85, 0.14);
+    box-shadow:
+      /* Outer eco ring — separates card from bg */
+      0 0 0 1px rgba(60, 140, 85, 0.07),
+      /* Soft eco drop shadows */
+      0 8px 32px rgba(30, 100, 60, 0.09),
+      0 2px 8px rgba(30, 100, 60, 0.07),
+      /* Top inner specular (glossy overhead light) */
+      inset 0 1px 0 rgba(255, 255, 255, 0.95),
+      /* Inner mint ambient */
+      inset 0 0 20px rgba(180, 232, 205, 0.18);
   }
 
+  /* Dark Mode: deep emerald mesh gradient → near-black, neon border */
   .dark .glass {
-    background: rgba(10, 22, 42, 0.58);
-    border: 1px solid rgba(255, 255, 255, 0.065);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+    background:
+      /* Glossy top highlight — simulated overhead light source */
+      linear-gradient(180deg, rgba(255, 255, 255, 0.038) 0%, transparent 28%),
+      /* Mesh radial — Deep Emerald anchor, top-left */
+      radial-gradient(ellipse 72% 52% at 12% 10%, rgba(15, 90, 45, 0.30) 0%, transparent 58%),
+      /* Mesh radial — Forest Green, centre */
+      radial-gradient(ellipse 45% 60% at 55% 55%, rgba(10, 55, 28, 0.16) 0%, transparent 62%),
+      /* Mesh radial — cold bleed, bottom-right */
+      radial-gradient(ellipse 40% 40% at 90% 95%, rgba(5, 18, 10, 0.25) 0%, transparent 55%),
+      /* Dark base */
+      linear-gradient(155deg, rgba(8, 18, 13, 0.94) 0%, rgba(4, 8, 6, 0.98) 100%);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    /* 1px neon-green hairline border (subtle glow) */
+    border: 1px solid rgba(60, 212, 106, 0.13);
+    box-shadow:
+      /* Outer neon micro-glow — lifts card off dark bg */
+      0 0 0 1px rgba(60, 212, 106, 0.06),
+      0 0 18px rgba(60, 212, 106, 0.04),
+      /* Depth drop shadows */
+      0 8px 32px rgba(0, 0, 0, 0.52),
+      0 2px 6px rgba(0, 0, 0, 0.30),
+      /* Top inner specular (glossy overhead light) */
+      inset 0 1px 0 rgba(255, 255, 255, 0.055),
+      /* Inner green ambient */
+      inset 0 0 24px rgba(15, 90, 45, 0.06);
   }
 
+  /* Light Mode strong: richer mint, heavier blur for panels/sidebars */
   .glass-strong {
-    background: rgba(255, 255, 255, 0.88);
-    border: 1px solid rgba(255, 255, 255, 0.95);
-    box-shadow: 0 4px 24px rgba(20, 80, 45, 0.1);
+    background:
+      radial-gradient(ellipse 80% 60% at 10% 8%, rgba(160, 220, 190, 0.50) 0%, transparent 60%),
+      radial-gradient(ellipse 55% 70% at 60% 60%, rgba(190, 235, 212, 0.28) 0%, transparent 65%),
+      linear-gradient(160deg, rgba(255, 255, 255, 0.98) 0%, rgba(232, 248, 240, 0.99) 100%);
     backdrop-filter: blur(32px);
     -webkit-backdrop-filter: blur(32px);
+    border: 1px solid rgba(60, 140, 85, 0.18);
+    box-shadow:
+      0 0 0 1px rgba(60, 140, 85, 0.09),
+      0 12px 40px rgba(30, 100, 60, 0.11),
+      0 3px 10px rgba(30, 100, 60, 0.08),
+      inset 0 1px 0 rgba(255, 255, 255, 0.98),
+      inset 0 0 28px rgba(160, 220, 190, 0.22);
   }
 
+  /* Dark Mode strong: deeper emerald mesh, stronger blur */
   .dark .glass-strong {
-    background: rgba(10, 22, 42, 0.78);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.048) 0%, transparent 24%),
+      radial-gradient(ellipse 78% 56% at 10% 8%, rgba(15, 90, 45, 0.38) 0%, transparent 55%),
+      radial-gradient(ellipse 50% 65% at 52% 52%, rgba(10, 55, 28, 0.20) 0%, transparent 60%),
+      radial-gradient(ellipse 42% 42% at 88% 92%, rgba(5, 18, 10, 0.28) 0%, transparent 52%),
+      linear-gradient(155deg, rgba(8, 18, 13, 0.96) 0%, rgba(3, 7, 5, 0.99) 100%);
+    backdrop-filter: blur(28px);
+    -webkit-backdrop-filter: blur(28px);
+    border: 1px solid rgba(60, 212, 106, 0.16);
+    box-shadow:
+      0 0 0 1px rgba(60, 212, 106, 0.08),
+      0 0 24px rgba(60, 212, 106, 0.05),
+      0 12px 48px rgba(0, 0, 0, 0.58),
+      0 3px 8px rgba(0, 0, 0, 0.35),
+      inset 0 1px 0 rgba(255, 255, 255, 0.065),
+      inset 0 0 32px rgba(15, 90, 45, 0.08);
+  }
+
+  /* ─── Depth card — for small shadcn <Card> replacements ─── */
+
+  /* Light Mode */
+  .card-depth {
+    background:
+      radial-gradient(ellipse 80% 60% at 15% 15%, rgba(180, 232, 205, 0.35) 0%, transparent 55%),
+      linear-gradient(155deg, #ffffff 0%, rgba(237, 249, 243, 0.96) 100%);
+    border: 1px solid rgba(60, 140, 85, 0.12);
+    box-shadow:
+      0 0 0 1px rgba(60, 140, 85, 0.05),
+      0 4px 20px rgba(30, 100, 60, 0.08),
+      0 1px 4px rgba(30, 100, 60, 0.05),
+      inset 0 1px 0 rgba(255, 255, 255, 0.92),
+      inset 0 0 16px rgba(180, 232, 205, 0.14);
+  }
+
+  /* Dark Mode */
+  .dark .card-depth {
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.032) 0%, transparent 25%),
+      radial-gradient(ellipse 80% 60% at 15% 15%, rgba(15, 90, 45, 0.22) 0%, transparent 55%),
+      radial-gradient(ellipse 40% 50% at 80% 80%, rgba(5, 18, 10, 0.20) 0%, transparent 55%),
+      linear-gradient(150deg, rgba(8, 20, 14, 0.92) 0%, rgba(4, 8, 6, 0.96) 100%);
+    border: 1px solid rgba(60, 212, 106, 0.10);
+    box-shadow:
+      0 0 0 1px rgba(60, 212, 106, 0.04),
+      0 0 14px rgba(60, 212, 106, 0.03),
+      0 4px 16px rgba(0, 0, 0, 0.40),
+      inset 0 1px 0 rgba(255, 255, 255, 0.04),
+      inset 0 0 16px rgba(15, 90, 45, 0.04);
   }
 
   /* ─── Primary gradient stat card ─── */
@@ -214,19 +308,33 @@
 
   /* ─── Card hover neon glow ─── */
   .card-hover-glow {
-    transition: box-shadow 0.3s ease-out, border-color 0.3s ease-out;
+    transition: box-shadow 0.28s ease-out, border-color 0.28s ease-out, transform 0.2s ease-out;
   }
 
   .card-hover-glow:hover {
+    transform: translateY(-1px);
     box-shadow:
-      0 0 0 1px hsl(var(--primary) / 0.22),
-      0 8px 32px hsl(var(--primary) / 0.09);
+      0 0 0 1px rgba(60, 140, 85, 0.20),
+      0 0 20px rgba(60, 140, 85, 0.10),
+      0 12px 36px rgba(30, 100, 60, 0.13),
+      0 3px 8px rgba(30, 100, 60, 0.08),
+      inset 0 1px 0 rgba(255, 255, 255, 0.97),
+      inset 0 0 24px rgba(180, 232, 205, 0.24);
   }
 
   .dark .card-hover-glow:hover {
+    transform: translateY(-1px);
     box-shadow:
-      0 0 0 1px hsl(var(--primary) / 0.30),
-      0 8px 40px hsl(var(--primary) / 0.14);
+      /* Stronger neon border glow on hover */
+      0 0 0 1px rgba(60, 212, 106, 0.28),
+      0 0 24px rgba(60, 212, 106, 0.10),
+      0 0 48px rgba(60, 212, 106, 0.04),
+      /* Lifted depth */
+      0 12px 48px rgba(0, 0, 0, 0.58),
+      0 4px 10px rgba(0, 0, 0, 0.35),
+      /* Brighter top specular on hover */
+      inset 0 1px 0 rgba(255, 255, 255, 0.08),
+      inset 0 0 32px rgba(15, 90, 45, 0.09);
   }
 
   /* ─── Hairline active nav indicator ─── */

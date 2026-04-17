@@ -16,6 +16,7 @@ import { AnomalyAlert } from "@/components/dashboard/AnomalyAlert";
 import { CarbonWaterfallChart } from "@/components/dashboard/CarbonWaterfallChart";
 import { Co2TreeVisual } from "@/components/dashboard/Co2TreeVisual";
 import { EvnTierProgress } from "@/components/dashboard/EvnTierProgress";
+import { FixedBottomActions } from "@/components/dashboard/FixedBottomActions";
 import { MonthComparison } from "@/components/dashboard/MonthComparison";
 import { SavingsForecastChart } from "@/components/dashboard/SavingsForecastChart";
 import { TopConsumersChart } from "@/components/dashboard/TopConsumersChart";
@@ -99,14 +100,14 @@ function StatCard({
   return (
     <div
       className={cn(
-        "relative overflow-hidden rounded-2xl p-5 card-hover-glow",
+        "relative flex h-full flex-col overflow-hidden rounded-2xl p-4 card-hover-glow",
         isPrimary ? "stat-card-primary" : "glass"
       )}
     >
       <div className="flex items-start justify-between">
         <p
           className={cn(
-            "text-sm font-medium",
+            "text-xs font-medium",
             isPrimary ? "text-white/80" : "text-muted-foreground"
           )}
         >
@@ -114,7 +115,7 @@ function StatCard({
         </p>
         <div
           className={cn(
-            "rounded-xl p-1.5",
+            "rounded-lg p-1.5",
             isPrimary ? "bg-white/15" : "bg-primary/10"
           )}
         >
@@ -123,18 +124,19 @@ function StatCard({
           </span>
         </div>
       </div>
-      <p className={cn("mt-3 text-3xl font-bold", isPrimary && "text-white")}>
+      <p className={cn("mt-2 text-xl font-bold sm:text-2xl", isPrimary && "text-white")}>
         {value}
       </p>
-      <div className="mt-1.5 flex items-center gap-1 text-xs">
+      <div className="mt-1 flex items-center gap-1 text-xs">
         <ArrowUpRight
           className={cn(
-            "h-3.5 w-3.5",
+            "h-3 w-3 shrink-0",
             isPrimary ? "text-white/60" : "text-primary"
           )}
         />
         <span
           className={cn(
+            "truncate",
             isPrimary ? "text-white/70" : "text-muted-foreground"
           )}
         >
@@ -213,11 +215,11 @@ interface PageHeaderProps {
 
 function PageHeader({ t }: PageHeaderProps) {
   return (
-    <div className="mb-6">
-      <h1 className="text-2xl font-bold lg:text-3xl">
+    <div className="mb-4">
+      <h1 className="text-xl font-bold lg:text-2xl">
         {t.DASHBOARD_PAGE_TITLE}
       </h1>
-      <p className="mt-1 text-sm text-muted-foreground">
+      <p className="mt-0.5 text-xs text-muted-foreground">
         {t.DASHBOARD_PAGE_SUBTITLE}
       </p>
     </div>
@@ -228,13 +230,13 @@ function PageHeader({ t }: PageHeaderProps) {
 
 function DashboardSkeleton() {
   return (
-    <div className="flex flex-col gap-6">
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 lg:gap-5">
+    <div className="flex flex-col gap-4">
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-4">
         {Array.from({ length: SKELETON_COUNT }).map((_, i) => (
           <SkeletonStatCard key={i} />
         ))}
       </div>
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-6">
+      <div className="grid grid-cols-1 gap-3 lg:grid-cols-2 lg:gap-4">
         <SkeletonChart height={180} />
         <SkeletonChart height={180} />
       </div>
@@ -273,10 +275,10 @@ interface DashboardContentProps {
 
 function DashboardContent({ data, t }: DashboardContentProps) {
   return (
-    <div className="flex flex-col gap-6">
-      {/* Stat Cards — staggered slide-up */}
-      <StaggerList className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 lg:gap-5">
-        <FadeSlide>
+    <div className="flex flex-col gap-4">
+      {/* Stat Cards — 2×2 on mobile, 4-col on lg */}
+      <StaggerList className="grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-4">
+        <FadeSlide className="h-full">
           <StatCard
             title={t.DASHBOARD_TOTAL_KWH}
             value={<AnimatedCounter value={data.totalMonthlyKwh} format={formatKwh} />}
@@ -285,7 +287,7 @@ function DashboardContent({ data, t }: DashboardContentProps) {
             variant="primary"
           />
         </FadeSlide>
-        <FadeSlide>
+        <FadeSlide className="h-full">
           <StatCard
             title={t.DASHBOARD_TOTAL_COST}
             value={<AnimatedCounter value={data.totalMonthlyCost} format={formatVnd} />}
@@ -293,7 +295,7 @@ function DashboardContent({ data, t }: DashboardContentProps) {
             icon={<DollarSign className="h-4 w-4" />}
           />
         </FadeSlide>
-        <FadeSlide>
+        <FadeSlide className="h-full">
           <StatCard
             title={t.DASHBOARD_TOTAL_CO2}
             value={<AnimatedCounter value={data.co2.totalKg} format={formatCo2} />}
@@ -301,7 +303,7 @@ function DashboardContent({ data, t }: DashboardContentProps) {
             icon={<Leaf className="h-4 w-4" />}
           />
         </FadeSlide>
-        <FadeSlide>
+        <FadeSlide className="h-full">
           <StatCard
             title={t.DASHBOARD_EVN_TIER_PREFIX}
             value={`${t.DASHBOARD_EVN_TIER_PREFIX} ${data.evnTier}`}
@@ -314,18 +316,18 @@ function DashboardContent({ data, t }: DashboardContentProps) {
       {/* Anomaly Alert */}
       <AnomalyAlert anomalies={data.anomalies} />
 
-      {/* Charts Grid — Bento: 1-col → 2-col at md, full-width waterfall */}
-      <StaggerList className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:gap-6">
-        <FadeSlide><TopConsumersChart consumers={data.topConsumers} /></FadeSlide>
-        <FadeSlide>
+      {/* Charts Grid — 1-col → 2-col at md */}
+      <StaggerList className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:gap-5">
+        <FadeSlide className="h-full"><TopConsumersChart consumers={data.topConsumers} /></FadeSlide>
+        <FadeSlide className="h-full">
           <WasteHotspotChart
             consumers={data.topConsumers}
             totalMonthlyCost={data.totalMonthlyCost}
           />
         </FadeSlide>
-        <FadeSlide><SavingsForecastChart monthlyCost={data.totalMonthlyCost} /></FadeSlide>
+        <FadeSlide className="h-full"><SavingsForecastChart monthlyCost={data.totalMonthlyCost} /></FadeSlide>
         <FadeSlide className="h-full">
-          <div className="flex h-full flex-col gap-4 lg:gap-6">
+          <div className="flex h-full flex-col gap-4">
             <MonthComparison comparison={data.comparison} />
             <EvnTierProgress evnTier={data.evnTier} totalKwh={data.totalMonthlyKwh} />
             <Co2TreeVisual co2={data.co2} />
@@ -335,7 +337,6 @@ function DashboardContent({ data, t }: DashboardContentProps) {
           <CarbonWaterfallChart co2TotalKg={data.co2.totalKg} consumers={data.topConsumers} />
         </FadeSlide>
       </StaggerList>
-
     </div>
   );
 }
@@ -377,7 +378,8 @@ export default function DashboardPage() {
       : pageState.status;
 
   return (
-    <div className="flex flex-col gap-6">
+    // pb-24 mobile: clears BottomNav (64px) + ActionBar (~60px); pb-20 desktop: clears ActionBar only
+    <div className="flex flex-col gap-4 pb-24 lg:pb-20">
       <PageHeader t={t} />
       <CrossFade stateKey={crossFadeKey}>
         {(pageState.status === "loading" || pageState.status === "idle") && (
@@ -394,6 +396,15 @@ export default function DashboardPage() {
           <DashboardContent data={pageState.data} t={t} />
         )}
       </CrossFade>
+
+      {pageState.status === "success" && (
+        <FixedBottomActions
+          tipsLabel={t.DASHBOARD_CTA_VIEW_SUGGESTIONS}
+          simulateLabel={t.DASHBOARD_CTA_SIMULATE}
+          tipsHref={NAV_ROUTES.TIPS}
+          simulateHref={NAV_ROUTES.SIMULATOR}
+        />
+      )}
     </div>
   );
 }

@@ -24,12 +24,12 @@ export function Co2TreeVisual({ co2 }: Co2TreeVisualProps) {
 
   return (
     <div className="glass rounded-2xl overflow-hidden card-hover-glow">
-      <div className="flex flex-col gap-3 p-5 lg:p-6">
+      <div className="flex flex-col gap-2.5 p-4 lg:p-5">
         <div className="flex items-center justify-between">
-          <p className="text-base font-bold">
+          <p className="text-sm font-bold">
             {t.DASHBOARD_CO2_TREE_TITLE}
           </p>
-          <p className="text-base font-black text-primary">
+          <p className="text-sm font-black text-primary">
             {formatCo2(co2.totalKg)}
           </p>
         </div>

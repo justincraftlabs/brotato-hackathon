@@ -83,12 +83,12 @@ export function TopConsumersChart({ consumers }: TopConsumersChartProps) {
   const chartData = toChartData(consumers);
 
   return (
-    <div className="glass rounded-2xl overflow-hidden card-hover-glow">
-      <div className="px-5 pb-0 pt-5 lg:px-6 lg:pt-6">
-        <h3 className="text-base font-bold">{t.DASHBOARD_TOP_CONSUMERS_TITLE}</h3>
+    <div className="glass rounded-2xl overflow-hidden card-hover-glow h-full flex flex-col">
+      <div className="shrink-0 px-4 pb-0 pt-4 lg:px-5 lg:pt-5">
+        <h3 className="text-sm font-bold">{t.DASHBOARD_TOP_CONSUMERS_TITLE}</h3>
       </div>
-      <div className="px-5 pb-5 pt-4 lg:px-6 lg:pb-6">
-        <ResponsiveContainer width="100%" height={CHART_HEIGHT}>
+      <div className="flex-1 px-4 pb-4 pt-3 lg:px-5 lg:pb-5" style={{ minHeight: CHART_HEIGHT }}>
+        <ResponsiveContainer width="100%" height="100%">
           <BarChart
             data={chartData}
             layout="vertical"

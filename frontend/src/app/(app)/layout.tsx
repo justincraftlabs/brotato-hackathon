@@ -9,11 +9,11 @@ interface AppLayoutProps {
 
 export default function AppLayout({ children }: AppLayoutProps) {
   return (
-    <div className="flex min-h-screen">
+    <div className="flex h-screen overflow-hidden">
       <Sidebar />
-      <div className="flex min-w-0 flex-1 flex-col">
+      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
         <Header />
-        <main className="flex-1 overflow-y-auto px-4 pb-20 pt-4 lg:px-8 lg:pb-8 lg:pt-6">
+        <main className="flex-1 overflow-y-auto px-4 pb-20 pt-3 lg:px-6 lg:pb-6 lg:pt-4">
           {children}
         </main>
         <BottomNav />

@@ -21,7 +21,7 @@ interface EmptyStateProps {
 
 function EmptyState({ t }: EmptyStateProps) {
   return (
-    <div className="flex h-[calc(100vh-8rem)] items-center justify-center">
+    <div className="flex h-full items-center justify-center">
       <Card>
         <CardContent className="flex flex-col items-center gap-3 p-6 text-center">
           <p className="text-lg font-semibold">
@@ -81,10 +81,10 @@ export default function ChatPage() {
   const lastMessageIndex = messages.length - 1;
 
   return (
-    <div className="flex h-[calc(100vh-8rem)] flex-col lg:h-[calc(100vh-3.5rem)]">
+    <div className="flex h-full flex-col">
       <div
         ref={scrollRef}
-        className="flex flex-1 flex-col gap-3 overflow-y-auto px-2 py-4"
+        className="min-h-0 flex-1 overflow-y-auto flex flex-col gap-3 px-2 py-4"
       >
         {messages.map((msg, index) => (
           <ChatBubble

@@ -113,17 +113,18 @@ export function WasteHotspotChart({
   if (!slices.length) return null;
 
   return (
-    <div className="glass rounded-2xl overflow-hidden card-hover-glow">
-      <div className="px-5 pb-0 pt-5 lg:px-6 lg:pt-6">
-        <h3 className="text-base font-bold">{t.CHART_WASTE_TITLE}</h3>
+    <div className="glass rounded-2xl overflow-hidden card-hover-glow h-full flex flex-col">
+      <div className="shrink-0 px-4 pb-0 pt-4 lg:px-5 lg:pt-5">
+        <h3 className="text-sm font-bold">{t.CHART_WASTE_TITLE}</h3>
       </div>
-      <div className="px-5 pb-5 pt-2 lg:px-6 lg:pb-6">
+      <div className="flex-1 flex flex-col px-4 pb-4 pt-2 lg:px-5 lg:pb-5">
         <div
-          className="relative"
+          className="relative flex-1"
+          style={{ minHeight: CHART_HEIGHT }}
           onMouseMove={handleMouseMove}
           onMouseLeave={handleMouseLeave}
         >
-          <ResponsiveContainer width="100%" height={CHART_HEIGHT}>
+          <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie
                 data={slices}
@@ -163,8 +164,8 @@ export function WasteHotspotChart({
 
         <MouseTooltip data={activeSlice} x={mousePos.x} y={mousePos.y} />
 
-        {/* Legend */}
-        <div className="mt-2 flex flex-wrap justify-center gap-x-4 gap-y-2">
+        {/* Legend — pinned to bottom */}
+        <div className="mt-2 shrink-0 flex flex-wrap justify-center gap-x-4 gap-y-2">
           {slices.map((slice, index) => (
             <div
               key={slice.name}

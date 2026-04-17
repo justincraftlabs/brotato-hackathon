@@ -16,6 +16,7 @@ const FULL_PERCENT = 100;
 const PRICE_DIVISOR = 1000;
 const STAIR_BASE_HEIGHT_PERCENT = 25;
 const STAIR_GROWTH_PERCENT = 75;
+const STAIR_HEIGHT_PX = 80;
 
 function formatPrice(price: number): string {
   return `${(price / PRICE_DIVISOR).toFixed(1)}k`;
@@ -50,10 +51,10 @@ export function EvnTierProgress({ evnTier, totalKwh }: EvnTierProgressProps) {
 
   return (
     <div className="glass rounded-2xl overflow-hidden flex-1 card-hover-glow">
-      <div className="flex h-full flex-col gap-4 p-5 lg:p-6">
+      <div className="flex flex-col gap-3 p-4 lg:p-5">
         {/* Header */}
         <div className="flex items-center justify-between">
-          <p className="text-base font-bold">
+          <p className="text-sm font-bold">
             {t.DASHBOARD_EVN_TIER_PREFIX}
           </p>
           <div className="flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1">
@@ -65,7 +66,7 @@ export function EvnTierProgress({ evnTier, totalKwh }: EvnTierProgressProps) {
         </div>
 
         {/* Tier staircase */}
-        <div className="flex flex-1 items-end gap-1.5">
+        <div className="flex items-end gap-1.5" style={{ height: STAIR_HEIGHT_PX }}>
           {EVN_TIERS.map((tier, index) => {
             const tierNumber = index + TIER_INDEX_OFFSET;
             const isActive = tierNumber === evnTier;
