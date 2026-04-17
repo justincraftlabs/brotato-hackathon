@@ -8,6 +8,7 @@ import {
   addAppliances,
   getHome,
   updateAppliance,
+  deleteAppliance,
   HomeNotFoundError,
   RoomNotFoundError,
   ApplianceNotFoundError,
@@ -148,6 +149,36 @@ router.put(
 
       if (err instanceof ApplianceNotFoundError) {
         const response: ApiErrorResponse = { success: false, error: err.message };
+        res.status(HTTP_NOT_FOUND).json(response);
+        return;
+      }
+
+      next(err);
+    }
+  }
+);
+
+router.delete(
+  '/:homeId/appliances/:applianceId',
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const homeId = req.params.homeId as string;
+      const applianceId = req.params.applianceId as string;
+
+      await deleteAppliance(homeId, applianceId);
+
+      const response: ApiSuccessResponse<null> = {
+        success: true,
+        data: null,
+      };
+
+      res.status(HTTP_OK).json(response);
+    } catch (err) {
+      if (err instanceof ApplianceNotFoundError) {
+        const response: ApiErrorResponse = {
+          success: false,
+          error: err.message,
+        };
         res.status(HTTP_NOT_FOUND).json(response);
         return;
       }
