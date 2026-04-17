@@ -1,0 +1,78 @@
+"use client";
+
+import { SendHorizontal } from "lucide-react";
+import { type FormEvent, type KeyboardEvent, useRef } from "react";
+
+import { VoiceInputButton } from "@/components/setup/VoiceInputButton";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { CHAT_LABELS } from "@/lib/constants";
+
+interface ChatInputProps {
+  value: string;
+  onChange: (value: string) => void;
+  onSend: (message: string) => void;
+  disabled: boolean;
+}
+
+const ENTER_KEY = "Enter";
+
+export function ChatInput({ value, onChange, onSend, disabled }: ChatInputProps) {
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  function handleSubmit(e: FormEvent) {
+    e.preventDefault();
+    const trimmed = value.trim();
+    if (!trimmed || disabled) {
+      return;
+    }
+    onSend(trimmed);
+    onChange("");
+    inputRef.current?.focus();
+  }
+
+  function handleKeyDown(e: KeyboardEvent<HTMLInputElement>) {
+    if (e.key !== ENTER_KEY) {
+      return;
+    }
+    if (e.shiftKey) {
+      return;
+    }
+    e.preventDefault();
+    handleSubmit(e);
+  }
+
+  const isDisabled = disabled || value.trim().length === 0;
+
+  return (
+    <form
+      onSubmit={handleSubmit}
+      className="flex items-center gap-2 border-t border-border bg-background px-2 py-3"
+    >
+      <VoiceInputButton
+        onTranscript={(text) => {
+          onSend(text);
+        }}
+      />
+      <Input
+        ref={inputRef}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        onKeyDown={handleKeyDown}
+        placeholder={CHAT_LABELS.INPUT_PLACEHOLDER}
+        disabled={disabled}
+        className="flex-1"
+        aria-label={CHAT_LABELS.INPUT_PLACEHOLDER}
+      />
+      <Button
+        type="submit"
+        size="icon"
+        disabled={isDisabled}
+        className="shrink-0 bg-primary hover:bg-primary/90"
+        aria-label={CHAT_LABELS.SEND_BUTTON}
+      >
+        <SendHorizontal className="h-4 w-4" />
+      </Button>
+    </form>
+  );
+}

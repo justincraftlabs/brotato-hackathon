@@ -11,8 +11,8 @@ Express.js API Server
         ▼
 Claude API (claude-sonnet-4-6)
         │
-        ▼ (optional)
-SQLite / in-memory store
+        ▼
+MongoDB (mongoose)
 ```
 
 ## Ports
@@ -30,7 +30,7 @@ SQLite / in-memory store
 
 ## Data Persistence
 
-Use **SQLite** (`better-sqlite3`) for anything that must survive a server restart. Use in-memory `Map` for session-scoped data (e.g., conversation history keyed by session ID). Avoid a full ORM — raw SQL is fast enough for a 16-hour build.
+Use **MongoDB** (`mongoose`) for all persistent data: homes, rooms, appliances, chat sessions. Flexible schema fits the hackathon pace. Connection string via `MONGODB_URI` env var.
 
 ## Streaming (SSE)
 

@@ -3,7 +3,48 @@
     "allow": [
       "Read(//c/Users/hoang.nguyenxuan/.claude/projects/c--Users-hoang-nguyenxuan-Documents-Side-Projects-brotato-hackathon/memory/**)",
       "Skill(claude-api)",
-      "Skill(claude-api:*)"
+      "Skill(claude-api:*)",
+      "mcp__plugin_context7_context7__resolve-library-id",
+      "mcp__plugin_context7_context7__query-docs",
+      "Read(//c/Users/hoang.nguyenxuan/.claude/**)",
+      "Bash(npx create-next-app@14 frontend --typescript --tailwind --app --src-dir --no-import-alias --use-npm)",
+      "Bash(npx create-next-app@14 frontend --typescript --tailwind --app --src-dir --no-import-alias --use-npm --eslint)",
+      "Bash(npm install *)",
+      "Bash(npx shadcn@latest init --defaults)",
+      "Bash(npm run *)",
+      "Bash(npx shadcn@latest add button card input label select slider tabs badge progress dialog sheet toast)",
+      "Skill(update-config)",
+      "Skill(update-config:*)",
+      "Bash(powershell -c \"[System.Media.SystemSounds]::Exclamation.Play\\(\\)\")",
+      "Bash(npx shadcn@latest add card input label select slider tabs badge progress dialog sheet sonner)",
+      "Bash(powershell -NoProfile -c \"[System.Media.SystemSounds]::Exclamation.Play\\(\\)\")",
+      "Read(//c/Windows/Media/**)",
+      "Bash(ls /c/Windows/Media/*.wav)",
+      "Bash(powershell -NoProfile -c \"\\(New-Object Media.SoundPlayer 'C:\\\\Windows\\\\Media\\\\ding.wav'\\).PlaySync\\(\\)\")",
+      "Bash(npx next *)",
+      "Bash(npm ls *)",
+      "Bash(rm -rf src/components/ui)",
+      "Bash(npm uninstall *)",
+      "Bash(npx shadcn@2.3.0 init --defaults --force)",
+      "Bash(mkdir -p src/components/ui)",
+      "Bash(npx shadcn@2.3.0 add button card input label select slider tabs badge progress dialog sheet sonner --overwrite)",
+      "Bash(echo \"Backend started with PID $!\")",
+      "Bash(echo \"Frontend started with PID $!\")",
+      "Bash(curl -s http://localhost:3001/api/home)",
+      "Bash(curl -s http://localhost:3001/api/home -X POST -H \"Content-Type: application/json\" -d '{\"name\":\"Test Home\",\"location\":\"Hanoi\",\"monthlyBudget\":500000}')"
+    ]
+  },
+  "hooks": {
+    "PermissionRequest": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "powershell.exe -NoProfile -c \"[console]::beep(1000,300);[console]::beep(1500,300);[console]::beep(2000,300)\"",
+            "timeout": 5
+          }
+        ]
+      }
     ]
   }
 }
