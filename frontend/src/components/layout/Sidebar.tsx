@@ -9,7 +9,6 @@ import {
   MessageCircle,
   Moon,
   Settings,
-  Sliders,
   Sun,
 } from "lucide-react";
 import Image from "next/image";
@@ -33,6 +32,26 @@ const SIDEBAR_STORAGE_KEY = "sidebar-expanded";
 const SIDEBAR_EXPANDED_WIDTH = 240;
 const SIDEBAR_MINI_WIDTH = 68;
 const LOGO_SIZE = 32;
+
+const SIDEBAR_SPRING: Parameters<typeof motion.aside>[0]["transition"] = {
+  type: "spring",
+  stiffness: 340,
+  damping: 32,
+  mass: 0.85,
+};
+
+const LABEL_VARIANTS = {
+  visible: {
+    opacity: 1,
+    x: 0,
+    transition: { delay: 0.07, duration: 0.16, ease: "easeOut" as const },
+  },
+  hidden: {
+    opacity: 0,
+    x: -10,
+    transition: { duration: 0.1, ease: "easeIn" as const },
+  },
+};
 
 const LANGUAGE_LABELS: Record<Language, string> = {
   vi: "VI",
@@ -61,29 +80,8 @@ const NAV_ITEMS: NavItemDef[] = [
   { href: NAV_ROUTES.DASHBOARD, labelKey: "NAV_OVERVIEW", icon: LayoutDashboard },
   { href: NAV_ROUTES.ASSISTANT, labelKey: "NAV_ASSISTANT", icon: MessageCircle },
   { href: NAV_ROUTES.TIPS, labelKey: "NAV_TIPS", icon: Lightbulb },
-  { href: NAV_ROUTES.SIMULATOR, labelKey: "NAV_SIMULATOR", icon: Sliders },
   { href: NAV_ROUTES.SETUP, labelKey: "NAV_SETUP", icon: Settings },
 ];
-
-const SPRING: Parameters<typeof motion.aside>[0]["transition"] = {
-  type: "spring",
-  stiffness: 340,
-  damping: 32,
-  mass: 0.85,
-};
-
-const LABEL_VARIANTS = {
-  visible: {
-    opacity: 1,
-    x: 0,
-    transition: { delay: 0.07, duration: 0.16, ease: "easeOut" as const },
-  },
-  hidden: {
-    opacity: 0,
-    x: -10,
-    transition: { duration: 0.1, ease: "easeIn" as const },
-  },
-};
 
 export function Sidebar() {
   const t = useT();
@@ -93,14 +91,14 @@ export function Sidebar() {
   const [mounted, setMounted] = useState(false);
   const [storedExpanded, setStoredExpanded] = useLocalStorage(SIDEBAR_STORAGE_KEY);
 
-  // Default to expanded on first load (storedExpanded is null before hydration)
+  // null means not yet hydrated from localStorage — default to expanded
   const expanded = storedExpanded !== "false";
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  // Keep --sidebar-width CSS variable in sync so other components that reference it stay aligned
+  // Keep --sidebar-width in sync so offset-aware elements (FixedBottomActions etc.) align
   useEffect(() => {
     document.documentElement.style.setProperty(
       "--sidebar-width",
@@ -122,31 +120,29 @@ export function Sidebar() {
 
   return (
     <motion.aside
+      initial={false}
       animate={{ width: expanded ? SIDEBAR_EXPANDED_WIDTH : SIDEBAR_MINI_WIDTH }}
-      transition={SPRING}
-      className="hidden lg:flex shrink-0 flex-col glass-strong border-r border-border/50 overflow-hidden relative z-10"
+      transition={SIDEBAR_SPRING}
+      className="hidden lg:flex lg:shrink-0 lg:flex-col glass-strong border-r border-border/50 overflow-hidden"
     >
-      {/* ── Top: Logo ── */}
+      {/* ── Logo ── */}
       <div
         className={cn(
-          "flex items-center pt-7 pb-5",
-          expanded ? "px-5" : "justify-center px-0"
+          "flex items-center pb-5 pt-7 transition-[padding] duration-200",
+          expanded ? "px-6" : "justify-center px-0"
         )}
       >
         <Link
-          href="/dashboard"
-          title="E-LUMI-NATE"
-          className="flex items-center gap-2.5 hover:opacity-80 transition-opacity"
+          href={NAV_ROUTES.DASHBOARD}
+          className="flex min-w-0 items-center gap-2.5 transition-opacity hover:opacity-80"
         >
-          <div className="relative shrink-0">
-            <Image
-              src="/logo.png"
-              alt="E-LUMI-NATE"
-              width={LOGO_SIZE}
-              height={LOGO_SIZE}
-              className="rounded-full ring-2 ring-primary/30"
-            />
-          </div>
+          <Image
+            src="/logo.png"
+            alt="E-LUMI-NATE"
+            width={LOGO_SIZE}
+            height={LOGO_SIZE}
+            className="shrink-0 rounded-full ring-2 ring-primary/30"
+          />
           <AnimatePresence initial={false}>
             {expanded && (
               <motion.span
@@ -155,7 +151,7 @@ export function Sidebar() {
                 initial="hidden"
                 animate="visible"
                 exit="hidden"
-                className="text-lg font-bold tracking-tight whitespace-nowrap"
+                className="whitespace-nowrap text-lg font-bold tracking-tight"
               >
                 E-
                 <span className="text-primary drop-shadow-[0_0_8px_hsl(var(--primary)/0.5)]">
@@ -168,28 +164,30 @@ export function Sidebar() {
         </Link>
       </div>
 
-      {/* ── Section label ── */}
-      <AnimatePresence initial={false}>
-        {expanded && (
-          <motion.p
-            key="menu-label"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1, transition: { delay: 0.1, duration: 0.15 } }}
-            exit={{ opacity: 0, transition: { duration: 0.08 } }}
-            className="px-5 pb-1.5 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/50"
-          >
-            Menu
-          </motion.p>
-        )}
-      </AnimatePresence>
-
-      {/* ── Navigation items ── */}
+      {/* ── Navigation ── */}
       <nav
         className={cn(
-          "flex flex-1 flex-col overflow-hidden",
+          "flex flex-1 flex-col pt-1",
           expanded ? "px-3" : "px-2"
         )}
       >
+        {/* Section label */}
+        <AnimatePresence initial={false}>
+          {expanded && (
+            <motion.p
+              key="menu-heading"
+              variants={LABEL_VARIANTS}
+              initial="hidden"
+              animate="visible"
+              exit="hidden"
+              className="mb-2 px-3 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/70"
+            >
+              Menu
+            </motion.p>
+          )}
+        </AnimatePresence>
+
+        {/* Nav items */}
         <div className="flex flex-col gap-0.5">
           {NAV_ITEMS.map((item) => {
             const Icon = item.icon;
@@ -203,46 +201,36 @@ export function Sidebar() {
                 title={!expanded ? label : undefined}
                 aria-current={isActive ? "page" : undefined}
                 className={cn(
-                  // base shape + transition
-                  "relative flex items-center rounded-xl",
-                  "transition-[background-color,box-shadow,color] duration-200 ease-in-out",
-                  expanded ? "gap-3 px-3 py-2.5" : "justify-center p-3",
-                  // left-bar indicator only in expanded+active
-                  expanded && isActive && "nav-active-bar",
-                  // colour/glass state
-                  isActive ? "sidebar-nav-active" : "sidebar-nav-inactive"
+                  "sidebar-nav-link",
+                  isActive ? "sidebar-nav-active" : "sidebar-nav-inactive",
+                  expanded ? "px-3" : "justify-center px-0"
                 )}
               >
-                <Icon
-                  className={cn(
-                    "shrink-0 transition-[color] duration-200",
-                    expanded ? "h-[18px] w-[18px]" : "h-5 w-5"
-                  )}
-                />
+                <Icon className="h-[18px] w-[18px] shrink-0" />
 
                 <AnimatePresence initial={false}>
                   {expanded && (
                     <motion.span
-                      key={`label-${item.href}`}
+                      key="label"
                       variants={LABEL_VARIANTS}
                       initial="hidden"
                       animate="visible"
                       exit="hidden"
-                      className="flex-1 text-sm whitespace-nowrap overflow-hidden font-medium"
+                      className="flex-1 overflow-hidden whitespace-nowrap text-sm"
                     >
                       {label}
                     </motion.span>
                   )}
                 </AnimatePresence>
 
-                {/* Active dot indicator */}
+                {/* Active dot — only in expanded mode */}
                 <AnimatePresence initial={false}>
                   {isActive && expanded && (
                     <motion.span
-                      key="dot"
+                      key="active-dot"
                       initial={{ scale: 0, opacity: 0 }}
-                      animate={{ scale: 1, opacity: 1, transition: { delay: 0.1 } }}
-                      exit={{ scale: 0, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1, transition: { delay: 0.12 } }}
+                      exit={{ scale: 0, opacity: 0, transition: { duration: 0.08 } }}
                       className="ml-auto h-1.5 w-1.5 shrink-0 rounded-full bg-primary shadow-[0_0_6px_hsl(var(--primary)/0.8)]"
                     />
                   )}
@@ -252,7 +240,7 @@ export function Sidebar() {
           })}
         </div>
 
-        {/* ── Bottom: Language + Theme + Collapse ── */}
+        {/* ── Bottom controls: Language · Theme · Collapse ── */}
         <div
           className={cn(
             "mt-auto border-t border-border/40 py-4",
@@ -282,11 +270,7 @@ export function Sidebar() {
                 variant="ghost"
                 size="icon"
                 onClick={toggleTheme}
-                title={
-                  theme === THEME_DARK
-                    ? "Switch to light mode"
-                    : "Switch to dark mode"
-                }
+                title={theme === THEME_DARK ? "Switch to light mode" : "Switch to dark mode"}
                 className="h-8 w-8 shrink-0 rounded-lg text-muted-foreground hover:bg-primary/10 hover:text-primary"
               >
                 {theme === THEME_DARK ? (
@@ -297,7 +281,7 @@ export function Sidebar() {
               </Button>
             )}
 
-            {/* Collapse/Expand toggle */}
+            {/* Collapse / Expand toggle */}
             <Button
               variant="ghost"
               size="icon"

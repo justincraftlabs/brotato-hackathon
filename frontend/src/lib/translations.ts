@@ -109,6 +109,27 @@ export const TRANSLATIONS = {
   DASHBOARD_TOTAL_CO2: { vi: "CO₂", en: "CO₂" },
   DASHBOARD_EVN_TIER_PREFIX: { vi: "Bậc", en: "Tier" },
   DASHBOARD_EVN_TIER_MAX: { vi: "Bậc cao nhất", en: "Highest tier" },
+  DASHBOARD_EVN_TIER_DIALOG_TITLE: {
+    vi: "Biểu giá điện sinh hoạt 2026",
+    en: "2026 Residential Electricity Rates",
+  },
+  DASHBOARD_EVN_TIER_DIALOG_SUBTITLE: {
+    vi: "Chưa bao gồm 10% thuế GTGT",
+    en: "Excluding 10% VAT",
+  },
+  DASHBOARD_EVN_TIER_DIALOG_COL_TIER: { vi: "Bậc", en: "Tier" },
+  DASHBOARD_EVN_TIER_DIALOG_COL_USAGE: { vi: "Mức sử dụng", en: "Usage range" },
+  DASHBOARD_EVN_TIER_DIALOG_COL_PRICE: { vi: "Đơn giá (đ/kWh)", en: "Rate (₫/kWh)" },
+  DASHBOARD_EVN_TIER_DIALOG_VAT_NOTE: {
+    vi: "* Chưa bao gồm 10% thuế GTGT (VAT). Nguồn: EVN 2026.",
+    en: "* Prices exclude 10% VAT. Source: EVN 2026.",
+  },
+  DASHBOARD_EVN_TIER_DIALOG_CURRENT_BADGE: { vi: "Của bạn", en: "Your tier" },
+  DASHBOARD_EVN_TIER_DIALOG_INCREASE: { vi: "Tăng", en: "Increase" },
+  DASHBOARD_EVN_TIER_HOVER_PROMPT: {
+    vi: "Nhấn vào bậc để xem chi tiết biểu giá",
+    en: "Click a tier for full rate details",
+  },
   DASHBOARD_TOP_CONSUMERS_TITLE: {
     vi: "Thiết bị tiêu thụ nhiều",
     en: "Top consumers",

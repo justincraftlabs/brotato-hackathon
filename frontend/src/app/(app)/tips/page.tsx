@@ -3,6 +3,7 @@
 import { Lightbulb, Loader2, Sliders } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 
 import { ApplianceAdjuster } from "@/components/simulator/ApplianceAdjuster";
 import { ComparisonBar } from "@/components/simulator/ComparisonBar";
@@ -115,6 +116,8 @@ function NoHomeState({ t }: NoHomeProps) {
 export default function TipsPage() {
   const t = useT();
   const [homeId] = useLocalStorage(LOCAL_STORAGE_HOME_ID_KEY);
+  const searchParams = useSearchParams();
+  const initialTab = searchParams.get("tab") === TAB_SIMULATOR ? TAB_SIMULATOR : TAB_SUGGESTIONS;
 
   // Suggestions state
   const [suggestionsState, setSuggestionsState] =
@@ -183,7 +186,7 @@ export default function TipsPage() {
         </p>
       </div>
 
-      <Tabs defaultValue={TAB_SUGGESTIONS}>
+      <Tabs defaultValue={initialTab}>
         <TabsList className="glass w-full rounded-xl p-1 sm:w-auto">
           <TabsTrigger value={TAB_SUGGESTIONS} className="flex-1 gap-1.5 rounded-lg data-[state=active]:bg-primary/15 data-[state=active]:text-primary data-[state=active]:shadow-none sm:flex-initial">
             <Lightbulb className="h-4 w-4" />
