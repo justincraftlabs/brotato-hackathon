@@ -10,12 +10,13 @@ import {
   estimateAppliance,
   recognizeAppliance,
   buildHomeContext,
+  analyzeHabit,
 } from '../services/ai-service';
 import { upload } from '../middleware/upload';
 import { ChatSessionModel } from '../models/chat-session.model';
 import { HomeModel } from '../models/home.model';
 import { ApiSuccessResponse, ApiErrorResponse } from '../types/api';
-import { Recommendation, ApplianceEstimate, ImageRecognitionResult, ChatMessage, SavingsSuggestionsResult } from '../types/ai';
+import { Recommendation, ApplianceEstimate, ImageRecognitionResult, ChatMessage, SavingsSuggestionsResult, HabitAnalysis } from '../types/ai';
 
 const HTTP_OK = 200;
 const HTTP_NOT_FOUND = 404;
@@ -348,6 +349,59 @@ router.post(
       res.status(HTTP_OK).json(response);
     } catch (err) {
       next(err);
+    }
+  }
+);
+
+const analyzeHabitSchema = z.object({
+  applianceName: z.string().min(1),
+  deviceType: z.string().default('other'),
+  usageHabit: z.string().default(''),
+  currentDailyHours: z.number().min(0).max(24).default(0),
+});
+
+type AnalyzeHabitBody = z.infer<typeof analyzeHabitSchema>;
+
+const FALLBACK_HABIT_ANALYSIS: HabitAnalysis = {
+  calculated_average_hours: 0,
+  analysis_summary: '',
+  habit_suggestions: [],
+  carbon_impact_note: '',
+};
+
+router.post(
+  '/analyze-habit',
+  validate(analyzeHabitSchema),
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const { applianceName, deviceType, usageHabit, currentDailyHours } =
+        req.body as AnalyzeHabitBody;
+
+      const result = await analyzeHabit(
+        applianceName,
+        deviceType,
+        usageHabit,
+        currentDailyHours
+      );
+
+      const response: ApiSuccessResponse<HabitAnalysis> = {
+        success: true,
+        data: result,
+      };
+
+      res.status(HTTP_OK).json(response);
+    } catch {
+      const fallback: HabitAnalysis = {
+        ...FALLBACK_HABIT_ANALYSIS,
+        calculated_average_hours: (req.body as AnalyzeHabitBody).currentDailyHours ?? 0,
+      };
+
+      const response: ApiSuccessResponse<HabitAnalysis> = {
+        success: true,
+        data: fallback,
+      };
+
+      res.status(HTTP_OK).json(response);
     }
   }
 );

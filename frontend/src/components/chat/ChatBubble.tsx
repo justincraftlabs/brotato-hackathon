@@ -46,10 +46,10 @@ export function ChatBubble({ role, content, isStreaming }: ChatBubbleProps) {
         )}
         <div
           className={cn(
-            "rounded-2xl px-3 py-2 text-sm leading-relaxed",
+            "rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed shadow-sm",
             isUser
-              ? "bg-accent text-white"
-              : "bg-card text-card-foreground"
+              ? "bubble-user"
+              : "glass text-card-foreground"
           )}
         >
           {showTypingIndicator ? (

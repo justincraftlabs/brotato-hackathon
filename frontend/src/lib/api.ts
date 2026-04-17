@@ -4,6 +4,7 @@ import type {
   Appliance,
   ApplianceEstimate,
   DashboardData,
+  HabitAnalysis,
   Home,
   ImageRecognitionResult,
   Recommendation,
@@ -323,6 +324,18 @@ export async function getSavingsSuggestions(
   return request<SavingsSuggestionsResult>("/api/ai/savings-suggestions", {
     method: "POST",
     body: JSON.stringify({ homeId, forceRefresh }),
+  });
+}
+
+export async function analyzeHabit(
+  applianceName: string,
+  deviceType: string,
+  usageHabit: string,
+  currentDailyHours: number
+): Promise<ApiResponse<HabitAnalysis>> {
+  return request<HabitAnalysis>("/api/ai/analyze-habit", {
+    method: "POST",
+    body: JSON.stringify({ applianceName, deviceType, usageHabit, currentDailyHours }),
   });
 }
 

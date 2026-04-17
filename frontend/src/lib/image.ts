@@ -1,6 +1,7 @@
 import {
   CANVAS_OUTPUT_TYPE,
   CANVAS_QUALITY,
+  HEIC_MIME_TYPES,
   MAX_FILE_SIZE_BYTES,
   MAX_IMAGE_DIMENSION,
   MEDIA_TYPE_JPEG,
@@ -9,7 +10,27 @@ import {
   type SupportedMediaType,
 } from "./image-constants";
 
+function isHeicFile(file: File): boolean {
+  const lowerName = file.name.toLowerCase();
+  return (
+    (HEIC_MIME_TYPES as readonly string[]).includes(file.type) ||
+    lowerName.endsWith(".heic") ||
+    lowerName.endsWith(".heif")
+  );
+}
+
+async function convertHeicToJpeg(file: File): Promise<File> {
+  const heic2any = (await import("heic2any")).default;
+  const result = await heic2any({ blob: file, toType: "image/jpeg", quality: 0.9 });
+  const blob = Array.isArray(result) ? result[0] : result;
+  return new File([blob], file.name.replace(/\.heic$/i, ".jpg").replace(/\.heif$/i, ".jpg"), {
+    type: MEDIA_TYPE_JPEG,
+  });
+}
+
 export async function resizeImageToBase64(file: File): Promise<string> {
+  const sourceFile = isHeicFile(file) ? await convertHeicToJpeg(file) : file;
+
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
 
@@ -45,7 +66,7 @@ export async function resizeImageToBase64(file: File): Promise<string> {
     };
 
     reader.onerror = () => reject(new Error("Failed to read file"));
-    reader.readAsDataURL(file);
+    reader.readAsDataURL(sourceFile);
   });
 }
 

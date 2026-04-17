@@ -9,7 +9,6 @@ import { ComparisonBar } from "@/components/simulator/ComparisonBar";
 import { ImpactSummary } from "@/components/simulator/ImpactSummary";
 import { RoomAccordionItem } from "@/components/savings/RoomAccordionItem";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { useT } from "@/hooks/use-t";
@@ -94,17 +93,17 @@ interface NoHomeProps {
 
 function NoHomeState({ t }: NoHomeProps) {
   return (
-    <div className="mx-auto flex w-full max-w-lg flex-col items-center gap-6 py-20">
-      <div className="rounded-2xl bg-primary/10 p-6">
-        <Lightbulb className="h-12 w-12 text-primary" />
+    <div className="mx-auto flex w-full max-w-sm flex-col items-center gap-5 py-20 text-center">
+      <div className="rounded-2xl bg-primary/10 p-5 ring-1 ring-primary/20">
+        <Lightbulb className="h-10 w-10 text-primary" />
       </div>
-      <div className="text-center">
+      <div>
         <h2 className="text-xl font-bold">{t.SUGGESTIONS_NO_HOME_TITLE}</h2>
         <p className="mt-2 text-sm text-muted-foreground">
           {t.SUGGESTIONS_NO_HOME_MESSAGE}
         </p>
       </div>
-      <Button asChild size="lg" className="rounded-xl px-8">
+      <Button asChild size="lg" className="btn-primary-gradient w-full rounded-xl">
         <Link href={NAV_ROUTES.SETUP}>{t.SUGGESTIONS_NO_HOME_CTA}</Link>
       </Button>
     </div>
@@ -185,12 +184,12 @@ export default function TipsPage() {
       </div>
 
       <Tabs defaultValue={TAB_SUGGESTIONS}>
-        <TabsList className="w-full sm:w-auto">
-          <TabsTrigger value={TAB_SUGGESTIONS} className="flex-1 gap-1.5 sm:flex-initial">
+        <TabsList className="glass w-full rounded-xl p-1 sm:w-auto">
+          <TabsTrigger value={TAB_SUGGESTIONS} className="flex-1 gap-1.5 rounded-lg data-[state=active]:bg-primary/15 data-[state=active]:text-primary data-[state=active]:shadow-none sm:flex-initial">
             <Lightbulb className="h-4 w-4" />
             {t.TIPS_TAB_SUGGESTIONS}
           </TabsTrigger>
-          <TabsTrigger value={TAB_SIMULATOR} className="flex-1 gap-1.5 sm:flex-initial">
+          <TabsTrigger value={TAB_SIMULATOR} className="flex-1 gap-1.5 rounded-lg data-[state=active]:bg-primary/15 data-[state=active]:text-primary data-[state=active]:shadow-none sm:flex-initial">
             <Sliders className="h-4 w-4" />
             {t.TIPS_TAB_SIMULATOR}
           </TabsTrigger>
@@ -251,17 +250,15 @@ function SuggestionsContent({
 
   if (state.status === "error") {
     return (
-      <Card className="border-destructive shadow-sm">
-        <CardContent className="flex flex-col items-center gap-3 p-6 text-center">
-          <p className="text-sm font-semibold text-destructive">
-            {t.SUGGESTIONS_ERROR_TITLE}
-          </p>
-          <p className="text-xs text-muted-foreground">{state.message}</p>
-          <Button variant="outline" size="sm" onClick={onRefresh}>
-            {t.SUGGESTIONS_RETRY}
-          </Button>
-        </CardContent>
-      </Card>
+      <div className="glass rounded-2xl border border-destructive/40 p-6 text-center">
+        <p className="text-sm font-semibold text-destructive">
+          {t.SUGGESTIONS_ERROR_TITLE}
+        </p>
+        <p className="mt-1 text-xs text-muted-foreground">{state.message}</p>
+        <Button variant="outline" size="sm" className="mt-3" onClick={onRefresh}>
+          {t.SUGGESTIONS_RETRY}
+        </Button>
+      </div>
     );
   }
 
@@ -269,24 +266,22 @@ function SuggestionsContent({
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex items-center justify-between">
-        <Card className="flex-1 border-primary bg-primary/10 shadow-sm">
-          <CardContent className="p-4">
-            <p className="text-xs text-muted-foreground">
-              {t.SUGGESTIONS_TOTAL_SAVINGS}
-            </p>
-            <p className="mt-1 text-2xl font-bold text-primary">
-              {formatVnd(data.grandTotalSavingsVnd)}
-            </p>
-            <p className="text-sm text-muted-foreground">
-              {formatKwh(data.grandTotalSavingsKwh)}
-            </p>
-          </CardContent>
-        </Card>
+      <div className="flex items-center justify-between gap-3">
+        <div className="stat-card-primary flex-1 rounded-2xl p-4">
+          <p className="text-xs text-white/70">
+            {t.SUGGESTIONS_TOTAL_SAVINGS}
+          </p>
+          <p className="mt-1 text-2xl font-bold text-white">
+            {formatVnd(data.grandTotalSavingsVnd)}
+          </p>
+          <p className="text-sm text-white/60">
+            {formatKwh(data.grandTotalSavingsKwh)}
+          </p>
+        </div>
         <Button
           variant="outline"
           size="sm"
-          className="ml-4 shrink-0"
+          className="shrink-0 rounded-xl border-border/60 hover:bg-primary/10 hover:text-primary hover:border-primary/40"
           onClick={onRefresh}
         >
           {t.SUGGESTIONS_ANALYZE_BUTTON}
@@ -338,17 +333,15 @@ function SimulatorContent({
 
   if (homeState.status === "error") {
     return (
-      <Card className="border-destructive shadow-sm">
-        <CardContent className="flex flex-col items-center gap-3 p-6 text-center">
-          <p className="text-sm font-semibold text-destructive">
-            {t.SIMULATOR_ERROR_TITLE}
-          </p>
-          <p className="text-xs text-muted-foreground">{homeState.message}</p>
-          <Button variant="outline" size="sm" onClick={onRetry}>
-            {t.SIMULATOR_RETRY}
-          </Button>
-        </CardContent>
-      </Card>
+      <div className="glass rounded-2xl border border-destructive/40 p-6 text-center">
+        <p className="text-sm font-semibold text-destructive">
+          {t.SIMULATOR_ERROR_TITLE}
+        </p>
+        <p className="mt-1 text-xs text-muted-foreground">{homeState.message}</p>
+        <Button variant="outline" size="sm" className="mt-3" onClick={onRetry}>
+          {t.SIMULATOR_RETRY}
+        </Button>
+      </div>
     );
   }
 

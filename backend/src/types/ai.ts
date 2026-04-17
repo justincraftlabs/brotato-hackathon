@@ -68,3 +68,10 @@ export interface SavingsSuggestionsResult {
   grandTotalSavingsVnd: number;
   analyzedAt: string;
 }
+
+export interface HabitAnalysis {
+  calculated_average_hours: number;
+  analysis_summary: string;
+  habit_suggestions: string[];
+  carbon_impact_note: string;
+}

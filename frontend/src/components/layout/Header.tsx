@@ -47,10 +47,10 @@ export function Header() {
   }
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 lg:hidden">
+    <header className="sticky top-0 z-50 w-full border-b border-border/50 glass-strong lg:hidden">
       <div className="flex h-14 items-center justify-between px-4">
         <span className="text-lg font-bold tracking-tight">
-          E-<span className="text-primary">LUMI</span>-NATE
+          E-<span className="text-primary drop-shadow-[0_0_8px_hsl(var(--primary)/0.5)]">LUMI</span>-NATE
         </span>
 
         <div className="flex items-center gap-1">
@@ -58,7 +58,7 @@ export function Header() {
             variant="ghost"
             size="sm"
             onClick={toggleLanguage}
-            className="w-10 text-xs font-semibold"
+            className="h-8 w-10 rounded-lg text-xs font-semibold text-muted-foreground hover:bg-primary/10 hover:text-primary"
             aria-label={SWITCH_TO_LANGUAGE_LABEL[lang]}
           >
             {LANGUAGE_LABELS[lang]}
@@ -69,12 +69,13 @@ export function Header() {
               variant="ghost"
               size="icon"
               onClick={toggleTheme}
+              className="h-8 w-8 rounded-lg text-muted-foreground hover:bg-primary/10 hover:text-primary"
               aria-label={theme === THEME_DARK ? SWITCH_TO_LIGHT_LABEL : SWITCH_TO_DARK_LABEL}
             >
               {theme === THEME_DARK ? (
-                <Sun className="h-5 w-5" />
+                <Sun className="h-4 w-4" />
               ) : (
-                <Moon className="h-5 w-5" />
+                <Moon className="h-4 w-4" />
               )}
             </Button>
           )}

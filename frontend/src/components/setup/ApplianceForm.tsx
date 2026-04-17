@@ -42,7 +42,8 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
-import { estimateAppliance } from "@/lib/api";
+import { analyzeHabit, estimateAppliance } from "@/lib/api";
+import type { HabitAnalysis } from "@/lib/types";
 import { useT } from "@/hooks/use-t";
 import { useImageCapture } from "@/hooks/useImageCapture";
 import { cn } from "@/lib/cn";
@@ -137,7 +138,10 @@ export function ApplianceFormStep({
   const [form, setForm] = useState<FormState>(INITIAL_FORM_STATE);
   const [aiSuggestion, setAiSuggestion] = useState<string | null>(null);
   const [isEstimating, setIsEstimating] = useState(false);
+  const [habitAnalysis, setHabitAnalysis] = useState<HabitAnalysis | null>(null);
+  const [isFetchingHabit, setIsFetchingHabit] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const habitDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
 
   const {
@@ -166,6 +170,7 @@ export function ApplianceFormStep({
     setEditingApplianceId(null);
     setForm(INITIAL_FORM_STATE);
     setAiSuggestion(null);
+    setHabitAnalysis(null);
     setDialogOpen(true);
   }
 
@@ -181,6 +186,7 @@ export function ApplianceFormStep({
       usageHabit: appliance.usageHabit ?? "",
     });
     setAiSuggestion(null);
+    setHabitAnalysis(null);
     setDialogOpen(true);
   }
 
@@ -193,7 +199,46 @@ export function ApplianceFormStep({
       dailyUsageHours: preset.dailyHours,
     });
     setAiSuggestion(null);
+    setHabitAnalysis(null);
   }
+
+  const fetchHabitAnalysis = useCallback(
+    async (name: string, type: string, habit: string, hours: number) => {
+      if (!name.trim()) return;
+      if (habitDebounceRef.current) clearTimeout(habitDebounceRef.current);
+
+      habitDebounceRef.current = setTimeout(async () => {
+        setIsFetchingHabit(true);
+        const result = await analyzeHabit(name, type, habit, hours);
+        setIsFetchingHabit(false);
+        if (result.success) {
+          setHabitAnalysis(result.data);
+        }
+      }, 300);
+    },
+    []
+  );
+
+  const handleHabitBlur = useCallback(() => {
+    fetchHabitAnalysis(form.name, form.type, form.usageHabit, form.dailyUsageHours);
+  }, [form.name, form.type, form.usageHabit, form.dailyUsageHours, fetchHabitAnalysis]);
+
+  const handleSelectSuggestion = useCallback(
+    (suggestion: string) => {
+      setForm((prev) => ({ ...prev, usageHabit: suggestion }));
+      fetchHabitAnalysis(form.name, form.type, suggestion, form.dailyUsageHours);
+    },
+    [form.name, form.type, form.dailyUsageHours, fetchHabitAnalysis]
+  );
+
+  const handleTypeChange = useCallback(
+    (val: string) => {
+      setForm((prev) => ({ ...prev, type: val as ApplianceType }));
+      setHabitAnalysis(null);
+      fetchHabitAnalysis(form.name, val, form.usageHabit, form.dailyUsageHours);
+    },
+    [form.name, form.usageHabit, form.dailyUsageHours, fetchHabitAnalysis]
+  );
 
   const handleNameBlur = useCallback(async () => {
     const trimmedName = form.name.trim();
@@ -305,6 +350,7 @@ export function ApplianceFormStep({
     setDialogOpen(false);
     setForm(INITIAL_FORM_STATE);
     setAiSuggestion(null);
+    setHabitAnalysis(null);
     setEditingApplianceId(null);
   }
 
@@ -560,9 +606,7 @@ export function ApplianceFormStep({
               <Label htmlFor="appliance-type">{t.LABEL_TYPE}</Label>
               <Select
                 value={form.type}
-                onValueChange={(val) =>
-                  setForm({ ...form, type: val as ApplianceType })
-                }
+                onValueChange={handleTypeChange}
               >
                 <SelectTrigger id="appliance-type">
                   <SelectValue />
@@ -625,16 +669,73 @@ export function ApplianceFormStep({
               />
             </div>
 
-            <div className="flex flex-col gap-1.5">
+            <div className="flex flex-col gap-2">
               <Label htmlFor="appliance-habit">{t.LABEL_USAGE_HABIT}</Label>
-              <Input
-                id="appliance-habit"
-                value={form.usageHabit}
-                onChange={(e) =>
-                  setForm({ ...form, usageHabit: e.target.value })
-                }
-                placeholder="VD: Bật từ 9h tối đến 6h sáng"
-              />
+              <div className="relative">
+                <Input
+                  id="appliance-habit"
+                  value={form.usageHabit}
+                  onChange={(e) =>
+                    setForm({ ...form, usageHabit: e.target.value })
+                  }
+                  onBlur={handleHabitBlur}
+                  placeholder="VD: Bật từ 9h tối đến 6h sáng"
+                  className="pr-8"
+                />
+                {isFetchingHabit && (
+                  <Loader2 className="absolute right-3 top-2.5 h-4 w-4 animate-spin text-muted-foreground" />
+                )}
+              </div>
+
+              {/* Smart suggestion chips */}
+              {habitAnalysis && habitAnalysis.habit_suggestions.length > 0 && (
+                <div className="flex flex-wrap gap-1.5">
+                  {habitAnalysis.habit_suggestions.map((s) => (
+                    <button
+                      key={s}
+                      type="button"
+                      onClick={() => handleSelectSuggestion(s)}
+                      className={cn(
+                        "rounded-full border px-2.5 py-0.5 text-[11px] transition-colors",
+                        form.usageHabit === s
+                          ? "border-primary bg-primary/15 text-primary font-medium"
+                          : "border-border text-muted-foreground hover:border-primary/50 hover:bg-primary/8 hover:text-primary"
+                      )}
+                    >
+                      {s}
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {/* Analysis result card */}
+              {habitAnalysis && habitAnalysis.analysis_summary && (
+                <div className="glass rounded-xl p-3 text-xs">
+                  <div className="flex items-start justify-between gap-2">
+                    <span className="flex items-center gap-1 text-muted-foreground leading-relaxed">
+                      <Sparkles className="h-3 w-3 shrink-0 text-primary" />
+                      {habitAnalysis.analysis_summary}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setForm((prev) => ({
+                          ...prev,
+                          dailyUsageHours: habitAnalysis.calculated_average_hours,
+                        }))
+                      }
+                      className="shrink-0 rounded-lg bg-primary/15 px-2 py-0.5 text-[11px] font-semibold text-primary hover:bg-primary/25 transition-colors"
+                    >
+                      Áp dụng {habitAnalysis.calculated_average_hours.toFixed(1)}h
+                    </button>
+                  </div>
+                  {habitAnalysis.carbon_impact_note && (
+                    <p className="mt-1.5 text-muted-foreground/80">
+                      🌱 {habitAnalysis.carbon_impact_note}
+                    </p>
+                  )}
+                </div>
+              )}
             </div>
 
             <div className="flex gap-2 pt-2">

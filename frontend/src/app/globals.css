@@ -10,59 +10,61 @@
 
 @layer base {
   :root {
-    --background: 30 17% 95%;
-    --foreground: 0 0% 10%;
+    /* ─── Eco Luxury Light ─── */
+    --background: 155 25% 96%;
+    --foreground: 213 40% 11%;
     --card: 0 0% 100%;
-    --card-foreground: 0 0% 10%;
+    --card-foreground: 213 40% 11%;
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 10%;
-    --primary: 125 46% 34%;
+    --popover-foreground: 213 40% 11%;
+    --primary: 145 56% 24%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 30 14% 93%;
-    --secondary-foreground: 0 0% 10%;
-    --muted: 30 12% 93%;
-    --muted-foreground: 220 6% 44%;
-    --accent: 36 86% 55%;
+    --secondary: 155 18% 91%;
+    --secondary-foreground: 213 30% 22%;
+    --muted: 155 15% 93%;
+    --muted-foreground: 155 18% 44%;
+    --accent: 38 88% 52%;
     --accent-foreground: 0 0% 100%;
-    --destructive: 0 84.2% 60.2%;
+    --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
-    --border: 30 12% 91%;
-    --input: 30 12% 89%;
-    --ring: 125 46% 34%;
-    --radius: 1.25rem;
+    --border: 155 14% 87%;
+    --input: 155 14% 90%;
+    --ring: 145 56% 24%;
+    --radius: 1rem;
     --sidebar-width: 240px;
-    --chart-1: 125 46% 34%;
-    --chart-2: 130 38% 45%;
-    --chart-3: 36 86% 55%;
-    --chart-4: 30 80% 45%;
-    --chart-5: 140 35% 52%;
+    --chart-1: 145 56% 24%;
+    --chart-2: 200 72% 50%;
+    --chart-3: 38 88% 52%;
+    --chart-4: 172 62% 42%;
+    --chart-5: 280 60% 56%;
   }
 
   .dark {
-    --background: 220 14% 7%;
-    --foreground: 0 0% 95%;
-    --card: 220 14% 10%;
-    --card-foreground: 0 0% 95%;
-    --popover: 220 14% 10%;
-    --popover-foreground: 0 0% 95%;
-    --primary: 125 46% 42%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 220 14% 14%;
-    --secondary-foreground: 0 0% 95%;
-    --muted: 220 14% 14%;
-    --muted-foreground: 220 8% 55%;
-    --accent: 36 86% 55%;
-    --accent-foreground: 0 0% 100%;
-    --destructive: 0 62.8% 30.6%;
+    /* ─── EcoHeart Navy Dark ─── */
+    --background: 213 52% 5%;
+    --foreground: 210 35% 93%;
+    --card: 213 44% 9%;
+    --card-foreground: 210 35% 93%;
+    --popover: 213 44% 10%;
+    --popover-foreground: 210 35% 93%;
+    --primary: 142 68% 54%;
+    --primary-foreground: 213 52% 7%;
+    --secondary: 213 34% 13%;
+    --secondary-foreground: 210 35% 85%;
+    --muted: 213 34% 12%;
+    --muted-foreground: 213 22% 52%;
+    --accent: 38 88% 57%;
+    --accent-foreground: 213 52% 7%;
+    --destructive: 0 62% 50%;
     --destructive-foreground: 0 0% 100%;
-    --border: 220 14% 16%;
-    --input: 220 14% 16%;
-    --ring: 125 46% 42%;
-    --chart-1: 125 46% 42%;
-    --chart-2: 130 38% 50%;
-    --chart-3: 36 86% 55%;
-    --chart-4: 30 80% 55%;
-    --chart-5: 140 35% 55%;
+    --border: 213 30% 15%;
+    --input: 213 30% 15%;
+    --ring: 142 68% 54%;
+    --chart-1: 142 68% 54%;
+    --chart-2: 200 80% 60%;
+    --chart-3: 38 88% 57%;
+    --chart-4: 172 72% 50%;
+    --chart-5: 280 68% 65%;
   }
 }
 
@@ -72,5 +74,125 @@
   }
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+/* ─── Ambient leaf texture (dark mode only) ─── */
+.dark body {
+  background-image:
+    radial-gradient(ellipse 65% 45% at 8% 92%, rgba(60, 212, 106, 0.04) 0%, transparent 70%),
+    radial-gradient(ellipse 55% 55% at 92% 8%, rgba(26, 110, 55, 0.05) 0%, transparent 65%),
+    radial-gradient(ellipse 40% 35% at 55% 65%, rgba(20, 150, 80, 0.022) 0%, transparent 60%);
+}
+
+@layer components {
+  /* ─── Glassmorphism ─── */
+  .glass {
+    background: rgba(255, 255, 255, 0.72);
+    border: 1px solid rgba(255, 255, 255, 0.9);
+    box-shadow: 0 4px 24px rgba(20, 80, 45, 0.08), 0 1px 4px rgba(0, 0, 0, 0.04);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+  }
+
+  .dark .glass {
+    background: rgba(10, 22, 42, 0.58);
+    border: 1px solid rgba(255, 255, 255, 0.065);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  }
+
+  .glass-strong {
+    background: rgba(255, 255, 255, 0.88);
+    border: 1px solid rgba(255, 255, 255, 0.95);
+    box-shadow: 0 4px 24px rgba(20, 80, 45, 0.1);
+    backdrop-filter: blur(32px);
+    -webkit-backdrop-filter: blur(32px);
+  }
+
+  .dark .glass-strong {
+    background: rgba(10, 22, 42, 0.78);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  }
+
+  /* ─── Primary gradient stat card ─── */
+  .stat-card-primary {
+    background: linear-gradient(145deg, hsl(145 56% 18%) 0%, hsl(145 56% 28%) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 8px 32px rgba(26, 110, 55, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    color: white;
+  }
+
+  .dark .stat-card-primary {
+    background: linear-gradient(145deg, hsl(142 68% 22%) 0%, hsl(142 68% 40%) 100%);
+    box-shadow: 0 8px 32px rgba(60, 212, 106, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  }
+
+  /* ─── Gradient primary button ─── */
+  .btn-primary-gradient {
+    background: linear-gradient(135deg, hsl(145 56% 18%) 0%, hsl(145 56% 28%) 100%) !important;
+    color: white !important;
+    border: none !important;
+    transition: opacity 0.18s ease, transform 0.12s ease, box-shadow 0.18s ease !important;
+  }
+
+  .btn-primary-gradient:hover:not(:disabled) {
+    opacity: 0.9 !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 8px 20px rgba(26, 110, 55, 0.4) !important;
+  }
+
+  .dark .btn-primary-gradient {
+    background: linear-gradient(135deg, hsl(142 68% 28%) 0%, hsl(142 68% 50%) 100%) !important;
+  }
+
+  .dark .btn-primary-gradient:hover:not(:disabled) {
+    box-shadow: 0 8px 20px rgba(60, 212, 106, 0.4) !important;
+  }
+
+  /* ─── User chat bubble (green gradient) ─── */
+  .bubble-user {
+    background: linear-gradient(135deg, hsl(145 56% 18%) 0%, hsl(145 56% 30%) 100%);
+    color: white;
+  }
+
+  .dark .bubble-user {
+    background: linear-gradient(135deg, hsl(142 68% 28%) 0%, hsl(142 68% 46%) 100%);
+    color: white;
+  }
+
+  /* ─── Dot chart for empty states ─── */
+  .dot-chart-col {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .dot-row {
+    display: flex;
+    gap: 4px;
+    align-items: flex-end;
+  }
+
+  .dot {
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  /* ─── Hairline active nav indicator ─── */
+  .nav-active-bar {
+    position: relative;
+  }
+
+  .nav-active-bar::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 3px;
+    height: 60%;
+    background: hsl(var(--primary));
+    border-radius: 0 2px 2px 0;
   }
 }

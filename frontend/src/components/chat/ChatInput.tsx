@@ -48,7 +48,7 @@ export function ChatInput({ value, onChange, onSend, disabled }: ChatInputProps)
   return (
     <form
       onSubmit={handleSubmit}
-      className="flex items-center gap-2 border-t border-border bg-background px-2 py-3"
+      className="glass-strong flex items-center gap-2 border-t border-border/40 px-3 py-3"
     >
       <VoiceInputButton
         onTranscript={(text) => {
@@ -62,14 +62,14 @@ export function ChatInput({ value, onChange, onSend, disabled }: ChatInputProps)
         onKeyDown={handleKeyDown}
         placeholder={t.CHAT_INPUT_PLACEHOLDER}
         disabled={disabled}
-        className="flex-1"
+        className="flex-1 rounded-xl border-border/50 bg-background/50 focus-visible:ring-primary/40"
         aria-label={t.CHAT_INPUT_PLACEHOLDER}
       />
       <Button
         type="submit"
         size="icon"
         disabled={isDisabled}
-        className="shrink-0 bg-primary hover:bg-primary/90"
+        className="btn-primary-gradient h-9 w-9 shrink-0 rounded-xl disabled:opacity-40"
         aria-label={t.CHAT_SEND_BUTTON}
       >
         <SendHorizontal className="h-4 w-4" />

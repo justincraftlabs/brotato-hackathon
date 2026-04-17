@@ -147,6 +147,13 @@ export interface SimulationResult {
   perAppliance: ApplianceSimulationResult[];
 }
 
+export interface HabitAnalysis {
+  calculated_average_hours: number;
+  analysis_summary: string;
+  habit_suggestions: string[];
+  carbon_impact_note: string;
+}
+
 export type ApiResponse<T> =
   | { success: true; data: T }
   | { success: false; error: string };

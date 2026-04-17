@@ -1,12 +1,13 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { Home, Room } from '../types/home';
-import { Recommendation, RecommendationType, RecommendationDifficulty, ApplianceEstimate, ImageRecognitionResult, ChatMessage, SavingsSuggestionsResult, RoomSuggestion, DeviceSuggestion, SuggestionPriority } from '../types/ai';
+import { Recommendation, RecommendationType, RecommendationDifficulty, ApplianceEstimate, ImageRecognitionResult, ChatMessage, SavingsSuggestionsResult, RoomSuggestion, DeviceSuggestion, SuggestionPriority, HabitAnalysis } from '../types/ai';
 import { calculateMonthlyCost } from './evn-pricing-service';
 import { RECOMMENDATION_SYSTEM_PROMPT, RECOMMENDATION_RETRY_PROMPT } from '../prompts/recommendation';
 import { CHAT_ASSISTANT_SYSTEM_PROMPT } from '../prompts/chat-assistant';
 import { APPLIANCE_ESTIMATOR_PROMPT } from '../prompts/appliance-estimator';
 import { IMAGE_RECOGNIZER_PROMPT } from '../prompts/image-recognizer';
 import { USAGE_HABIT_PARSER_PROMPT } from '../prompts/usage-habit-parser';
+import { HABIT_ANALYZER_PROMPT } from '../prompts/habit-analyzer';
 import { SAVINGS_SUGGESTIONS_SYSTEM_PROMPT, SAVINGS_SUGGESTIONS_RETRY_PROMPT } from '../prompts/savings-suggestions';
 
 let _client: Anthropic | null = null;
@@ -471,6 +472,42 @@ interface RawHabitResult {
 
 const MIN_DAILY_HOURS = 0;
 const MAX_DAILY_HOURS = 24;
+
+const MAX_TOKENS_HABIT_ANALYSIS = 600;
+const HABIT_SUGGESTIONS_COUNT = 3;
+
+export async function analyzeHabit(
+  applianceName: string,
+  deviceType: string,
+  usageHabit: string,
+  currentDailyHours: number
+): Promise<HabitAnalysis> {
+  const input = { applianceName, deviceType, usageHabit, currentDailyHours };
+
+  const response = await getClient().messages.create({
+    model: MODEL_SONNET,
+    max_tokens: MAX_TOKENS_HABIT_ANALYSIS,
+    system: [{ type: 'text', text: HABIT_ANALYZER_PROMPT, cache_control: { type: 'ephemeral' } }],
+    messages: [{ role: 'user', content: JSON.stringify(input) }],
+  });
+
+  const text = extractTextFromResponse(response);
+  const cleaned = stripMarkdownJsonWrapper(text);
+  const parsed = JSON.parse(cleaned) as HabitAnalysis;
+
+  const effectiveHours = usageHabit.trim()
+    ? Math.max(MIN_DAILY_HOURS, Math.min(MAX_DAILY_HOURS, parsed.calculated_average_hours ?? currentDailyHours))
+    : currentDailyHours;
+
+  return {
+    calculated_average_hours: effectiveHours,
+    analysis_summary: parsed.analysis_summary ?? '',
+    habit_suggestions: Array.isArray(parsed.habit_suggestions)
+      ? parsed.habit_suggestions.slice(0, HABIT_SUGGESTIONS_COUNT)
+      : [],
+    carbon_impact_note: parsed.carbon_impact_note ?? '',
+  };
+}
 
 export async function parseUsageHabits(
   inputs: UsageHabitInput[]

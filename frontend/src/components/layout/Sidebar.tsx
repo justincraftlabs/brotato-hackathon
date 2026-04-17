@@ -70,19 +70,21 @@ export function Sidebar() {
   }
 
   return (
-    <aside className="hidden lg:flex lg:w-[var(--sidebar-width)] lg:shrink-0 lg:flex-col bg-card">
+    <aside className="hidden lg:flex lg:w-[var(--sidebar-width)] lg:shrink-0 lg:flex-col glass-strong border-r border-border/50">
       {/* Logo + controls */}
       <div className="px-6 pb-2 pt-6">
         <div className="flex items-center gap-2.5">
-          <Image
-            src="/logo.png"
-            alt="E-LUMI-NATE"
-            width={LOGO_SIZE}
-            height={LOGO_SIZE}
-            className="rounded-full"
-          />
+          <div className="relative">
+            <Image
+              src="/logo.png"
+              alt="E-LUMI-NATE"
+              width={LOGO_SIZE}
+              height={LOGO_SIZE}
+              className="rounded-full ring-2 ring-primary/30"
+            />
+          </div>
           <span className="text-lg font-bold tracking-tight">
-            E-<span className="text-primary">LUMI</span>-NATE
+            E-<span className="text-primary drop-shadow-[0_0_8px_hsl(var(--primary)/0.5)]">LUMI</span>-NATE
           </span>
         </div>
         <div className="mt-3 flex items-center gap-1">
@@ -90,7 +92,7 @@ export function Sidebar() {
             variant="ghost"
             size="sm"
             onClick={toggleLanguage}
-            className="h-7 w-9 px-0 text-[11px] font-semibold text-muted-foreground"
+            className="h-7 w-9 px-0 text-[11px] font-semibold text-muted-foreground hover:text-foreground"
           >
             {LANGUAGE_LABELS[lang]}
           </Button>
@@ -99,7 +101,7 @@ export function Sidebar() {
               variant="ghost"
               size="icon"
               onClick={toggleTheme}
-              className="h-7 w-7 text-muted-foreground"
+              className="h-7 w-7 text-muted-foreground hover:text-foreground"
             >
               {theme === THEME_DARK ? (
                 <Sun className="h-3.5 w-3.5" />
@@ -112,8 +114,8 @@ export function Sidebar() {
       </div>
 
       {/* Navigation */}
-      <nav className="flex flex-1 flex-col gap-0.5 px-4 pt-6">
-        <p className="mb-3 px-3 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
+      <nav className="flex flex-1 flex-col gap-0.5 px-3 pt-6">
+        <p className="mb-3 px-3 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/70">
           Menu
         </p>
         {NAV_ITEMS.map((item) => {
@@ -126,15 +128,23 @@ export function Sidebar() {
               key={item.href}
               href={item.href}
               className={cn(
-                "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors",
+                "nav-active-bar relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-all duration-200",
                 isActive
-                  ? "font-bold text-foreground"
-                  : "font-medium text-muted-foreground hover:text-foreground"
+                  ? "bg-primary/12 font-semibold text-primary shadow-[0_0_12px_hsl(var(--primary)/0.15)]"
+                  : "font-medium text-muted-foreground hover:bg-muted hover:text-foreground"
               )}
               aria-current={isActive ? "page" : undefined}
             >
-              <Icon className={cn("h-5 w-5", isActive && "text-primary")} />
+              <Icon
+                className={cn(
+                  "h-[18px] w-[18px] shrink-0 transition-colors",
+                  isActive ? "text-primary" : "text-muted-foreground"
+                )}
+              />
               <span>{label}</span>
+              {isActive && (
+                <span className="ml-auto h-1.5 w-1.5 rounded-full bg-primary shadow-[0_0_6px_hsl(var(--primary)/0.8)]" />
+              )}
             </Link>
           );
         })}

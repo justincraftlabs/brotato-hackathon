@@ -7,11 +7,13 @@ const ALLOWED_MIME_TYPES = [
   'image/jpeg',
   'image/png',
   'image/webp',
+  'image/heic',
+  'image/heif',
 ] as const;
 
 type AllowedMimeType = (typeof ALLOWED_MIME_TYPES)[number];
 
-const UNSUPPORTED_FILE_TYPE_MESSAGE = 'Only JPEG, PNG, and WebP images are allowed';
+const UNSUPPORTED_FILE_TYPE_MESSAGE = 'Only JPEG, PNG, WebP, HEIC, and HEIF images are allowed';
 
 function fileFilter(
   _req: Request,

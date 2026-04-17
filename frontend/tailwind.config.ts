@@ -23,7 +23,7 @@ const config: Config = {
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         primary: {
-          DEFAULT: "#2E7D32",
+          DEFAULT: "hsl(var(--primary))",
           dark: "#1B5E20",
           mid: "#43A047",
           light: "#E8F5E9",
@@ -42,7 +42,7 @@ const config: Config = {
           foreground: "hsl(var(--muted-foreground))",
         },
         accent: {
-          DEFAULT: "#EF9F27",
+          DEFAULT: "hsl(var(--accent))",
           dark: "#BA7517",
           mid: "#EF9F27",
           light: "#FAEEDA",
@@ -83,10 +83,20 @@ const config: Config = {
           from: { height: "var(--radix-accordion-content-height)" },
           to: { height: "0" },
         },
+        "glow-pulse": {
+          "0%, 100%": { opacity: "1" },
+          "50%": { opacity: "0.6" },
+        },
+        "dot-bounce": {
+          "0%, 100%": { transform: "translateY(0)" },
+          "50%": { transform: "translateY(-3px)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        "glow-pulse": "glow-pulse 2s ease-in-out infinite",
+        "dot-bounce": "dot-bounce 1.4s ease-in-out infinite",
       },
     },
   },
