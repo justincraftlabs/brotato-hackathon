@@ -32,6 +32,7 @@
     --ring: 145 56% 24%;
     --radius: 1rem;
     --sidebar-width: 240px;
+    --sidebar-width-mini: 68px;
     --chart-1: 145 56% 24%;
     --chart-2: 200 72% 50%;
     --chart-3: 38 88% 52%;
@@ -352,5 +353,68 @@
     height: 60%;
     background: hsl(var(--primary));
     border-radius: 0 2px 2px 0;
+  }
+
+  /* ─── Sidebar nav item visual states ─── */
+
+  /* Inactive — light mode: muted slate */
+  .sidebar-nav-inactive {
+    color: hsl(var(--foreground) / 0.55);
+  }
+
+  /* Inactive hover — light mode: vibrant green + soft lift shadow */
+  .sidebar-nav-inactive:hover {
+    color: hsl(var(--primary));
+    background-color: hsl(var(--primary) / 0.08);
+    box-shadow: 0 2px 14px hsl(var(--primary) / 0.10);
+  }
+
+  /* Inactive — dark mode: white at 65% opacity */
+  .dark .sidebar-nav-inactive {
+    color: rgba(255, 255, 255, 0.65);
+  }
+
+  /* Inactive hover — dark mode: full white + mint ambient glow */
+  .dark .sidebar-nav-inactive:hover {
+    color: rgba(255, 255, 255, 1);
+    background-color: rgba(60, 212, 106, 0.08);
+    box-shadow:
+      0 0 16px rgba(60, 212, 106, 0.14),
+      0 2px 8px rgba(0, 0, 0, 0.18);
+  }
+
+  /* Active — light mode: glassmorphism + deep green */
+  .sidebar-nav-active {
+    color: hsl(var(--primary));
+    font-weight: 600;
+    background: linear-gradient(
+      135deg,
+      hsl(var(--primary) / 0.14) 0%,
+      hsl(var(--primary) / 0.06) 100%
+    );
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid hsl(var(--primary) / 0.22);
+    box-shadow:
+      0 2px 16px hsl(var(--primary) / 0.10),
+      inset 0 1px 0 rgba(255, 255, 255, 0.80);
+  }
+
+  /* Active — dark mode: neon glassmorphism + emerald gradient */
+  .dark .sidebar-nav-active {
+    color: hsl(var(--primary));
+    font-weight: 600;
+    background: linear-gradient(
+      135deg,
+      rgba(60, 212, 106, 0.17) 0%,
+      rgba(20, 120, 60, 0.09) 100%
+    );
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(60, 212, 106, 0.26);
+    box-shadow:
+      0 0 22px rgba(60, 212, 106, 0.16),
+      0 2px 10px rgba(0, 0, 0, 0.32),
+      inset 0 1px 0 rgba(255, 255, 255, 0.065);
   }
 }
