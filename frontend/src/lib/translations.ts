@@ -51,11 +51,13 @@ export const TRANSLATIONS = {
   },
 
   // Navigation
-  NAV_OVERVIEW: { vi: "Tổng quan", en: "Overview" },
+  NAV_OVERVIEW: { vi: "Dashboard", en: "Dashboard" },
   NAV_CHAT: { vi: "Trợ lý", en: "Assistant" },
   NAV_SIMULATOR: { vi: "Mô phỏng", en: "Simulate" },
   NAV_SETUP: { vi: "Thiết lập", en: "Setup" },
   NAV_SUGGESTIONS: { vi: "Gợi ý", en: "Tips" },
+  NAV_TIPS: { vi: "Gợi ý", en: "Tips" },
+  NAV_ASSISTANT: { vi: "Trợ lý", en: "Assistant" },
 
   // App
   APP_DESCRIPTION_VI: {
@@ -180,6 +182,26 @@ export const TRANSLATIONS = {
   // General labels
   LABEL_DELETE: { vi: "Xóa", en: "Delete" },
 
+  // Setup edit mode
+  SETUP_EDIT_TITLE: { vi: "Quản lý thiết bị", en: "Manage Appliances" },
+  SETUP_SELECT_ROOM: { vi: "Chọn phòng", en: "Select room" },
+  SETUP_BACK_TO_ROOMS: {
+    vi: "Quay lại danh sách phòng",
+    en: "Back to rooms",
+  },
+  SETUP_DELETE_CONFIRM: {
+    vi: "Xóa thiết bị này?",
+    en: "Delete this appliance?",
+  },
+  SETUP_DELETING: { vi: "Đang xóa...", en: "Deleting..." },
+  SETUP_APPLIANCE_COUNT: { vi: "thiết bị", en: "appliances" },
+  SETUP_LOADING: { vi: "Đang tải...", en: "Loading..." },
+  SETUP_ERROR: {
+    vi: "Không thể tải dữ liệu",
+    en: "Failed to load data",
+  },
+  SETUP_RETRY: { vi: "Thử lại", en: "Retry" },
+
   // Suggestions page
   SUGGESTIONS_PAGE_TITLE: { vi: "Gợi ý tiết kiệm", en: "Savings Tips" },
   SUGGESTIONS_ANALYZE_BUTTON: { vi: "Phân tích lại", en: "Re-analyze" },
@@ -235,6 +257,56 @@ export const TRANSLATIONS = {
   },
   IMAGE_BRAND_LABEL: { vi: "Hãng", en: "Brand" },
   IMAGE_MODEL_LABEL: { vi: "Mẫu", en: "Model" },
+
+  // Waste hotspot chart
+  CHART_WASTE_TITLE: { vi: "Trọng điểm lãng phí", en: "Waste Hotspots" },
+  CHART_WASTE_OTHER: { vi: "Khác", en: "Others" },
+
+  // Savings forecast chart
+  CHART_FORECAST_TITLE: { vi: "Dự báo tích lũy", en: "Savings Forecast" },
+  CHART_FORECAST_10: { vi: "Tiết kiệm 10%", en: "Save 10%" },
+  CHART_FORECAST_20: { vi: "Tiết kiệm 20%", en: "Save 20%" },
+  CHART_FORECAST_30: { vi: "Tiết kiệm 30%", en: "Save 30%" },
+  CHART_FORECAST_UNIT: { vi: "triệu đ", en: "M₫" },
+  CHART_FORECAST_MONTH_SHORT: { vi: "T", en: "M" },
+  CHART_FORECAST_YEAR_SHORT: { vi: "N", en: "Y" },
+  CHART_FORECAST_5Y_HINT: {
+    vi: "Sau 5 năm ở mức 20%:",
+    en: "After 5 years at 20%:",
+  },
+
+  // Dashboard page
+  DASHBOARD_PAGE_TITLE: { vi: "Dashboard", en: "Dashboard" },
+  DASHBOARD_PAGE_SUBTITLE: {
+    vi: "Quản lý và tối ưu năng lượng cho ngôi nhà của bạn",
+    en: "Manage and optimize energy for your home",
+  },
+  DASHBOARD_SETUP_TITLE: {
+    vi: "Thiết lập phòng & thiết bị",
+    en: "Set up room & appliances",
+  },
+  DASHBOARD_SETUP_DESCRIPTION: {
+    vi: "Thêm phòng và thiết bị để bắt đầu theo dõi năng lượng tiêu thụ.",
+    en: "Add rooms and appliances to start tracking energy consumption.",
+  },
+  DASHBOARD_SETUP_CTA: { vi: "Bắt đầu thiết lập", en: "Get started" },
+  STAT_THIS_MONTH: { vi: "tháng này", en: "this month" },
+
+  // Tips page
+  TIPS_PAGE_TITLE: { vi: "Gợi ý & Mô phỏng", en: "Tips & Simulator" },
+  TIPS_PAGE_SUBTITLE: {
+    vi: "Khám phá cách tiết kiệm năng lượng và mô phỏng chi phí",
+    en: "Discover energy saving tips and simulate costs",
+  },
+  TIPS_TAB_SUGGESTIONS: { vi: "Gợi ý", en: "Suggestions" },
+  TIPS_TAB_SIMULATOR: { vi: "Mô phỏng", en: "Simulator" },
+
+  // Carbon waterfall chart
+  CHART_CARBON_TITLE: { vi: "Dấu chân Carbon", en: "Carbon Footprint" },
+  CHART_CARBON_CURRENT: { vi: "Hiện tại", en: "Current" },
+  CHART_CARBON_OFF_PREFIX: { vi: "Tắt", en: "Off" },
+  CHART_CARBON_REMAINING: { vi: "Còn lại", en: "Remaining" },
+  CHART_CARBON_UNIT: { vi: "kg CO₂/tháng", en: "kg CO₂/mo" },
 } as const;
 
 type FlatTranslation = {
