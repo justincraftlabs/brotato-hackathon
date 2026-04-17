@@ -138,20 +138,28 @@ export default function DashboardPage() {
   const { data } = pageState;
 
   return (
-    <div className="flex flex-col gap-4">
-      <AnomalyAlert anomalies={data.anomalies} />
-      <EnergyOverview data={data} />
+    <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-6">
+      <div className="lg:col-span-2">
+        <AnomalyAlert anomalies={data.anomalies} />
+      </div>
+      <div className="lg:col-span-2">
+        <EnergyOverview data={data} />
+      </div>
       <EvnTierProgress evnTier={data.evnTier} totalKwh={data.totalMonthlyKwh} />
-      <TopConsumersChart consumers={data.topConsumers} />
-      <MonthComparison comparison={data.comparison} />
       <Co2TreeVisual co2={data.co2} />
-      <div className="flex flex-col gap-2">
-        <Button asChild>
+      <div className="lg:col-span-2">
+        <TopConsumersChart consumers={data.topConsumers} />
+      </div>
+      <div className="lg:col-span-2">
+        <MonthComparison comparison={data.comparison} />
+      </div>
+      <div className="flex flex-col gap-3 lg:col-span-2 lg:flex-row">
+        <Button asChild className="lg:flex-1">
           <Link href={NAV_ROUTES.CHAT}>
             {t.DASHBOARD_CTA_VIEW_SUGGESTIONS}
           </Link>
         </Button>
-        <Button variant="outline" asChild>
+        <Button variant="outline" asChild className="lg:flex-1">
           <Link href={NAV_ROUTES.SIMULATOR}>
             {t.DASHBOARD_CTA_SIMULATE}
           </Link>

@@ -5,16 +5,13 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 import { ChatBubble } from "@/components/chat/ChatBubble";
 import { ChatInput } from "@/components/chat/ChatInput";
-import { RecommendationCards } from "@/components/chat/RecommendationCards";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useChat, type ChatMessage } from "@/hooks/useChat";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { useT } from "@/hooks/use-t";
-import { getRecommendations } from "@/lib/api";
 import { LOCAL_STORAGE_HOME_ID_KEY, NAV_ROUTES } from "@/lib/constants";
 import type { Translations } from "@/lib/translations";
-import type { Recommendation } from "@/lib/types";
 
 const ROLE_ASSISTANT = "assistant" as const;
 
@@ -48,7 +45,6 @@ export default function ChatPage() {
   const t = useT();
   const [homeId] = useLocalStorage(LOCAL_STORAGE_HOME_ID_KEY);
   const [input, setInput] = useState("");
-  const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const { messages, isStreaming, sendMessage, setMessages } = useChat(
@@ -61,16 +57,6 @@ export default function ChatPage() {
     }
 
     setMessages([{ id: "welcome", role: ROLE_ASSISTANT, content: t.CHAT_WELCOME_MESSAGE }]);
-
-    async function loadRecommendations() {
-      const result = await getRecommendations(homeId as string);
-      if (!result.success) {
-        return;
-      }
-      setRecommendations(result.data.recommendations);
-    }
-
-    loadRecommendations();
   }, [homeId, setMessages, t.CHAT_WELCOME_MESSAGE]);
 
   useEffect(() => {
@@ -88,13 +74,6 @@ export default function ChatPage() {
     [sendMessage]
   );
 
-  const handleRecommendationSelect = useCallback(
-    (title: string) => {
-      sendMessage(title);
-    },
-    [sendMessage]
-  );
-
   if (!homeId) {
     return <EmptyState t={t} />;
   }
@@ -102,15 +81,11 @@ export default function ChatPage() {
   const lastMessageIndex = messages.length - 1;
 
   return (
-    <div className="flex h-[calc(100vh-8rem)] flex-col">
+    <div className="flex h-[calc(100vh-8rem)] flex-col lg:h-[calc(100vh-3.5rem)]">
       <div
         ref={scrollRef}
         className="flex flex-1 flex-col gap-3 overflow-y-auto px-2 py-4"
       >
-        <RecommendationCards
-          recommendations={recommendations}
-          onSelect={handleRecommendationSelect}
-        />
         {messages.map((msg, index) => (
           <ChatBubble
             key={msg.id}

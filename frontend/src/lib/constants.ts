@@ -38,6 +38,7 @@ export const ROOM_SIZE_LABELS: Record<RoomSize, string> = {
 };
 
 export const LOCAL_STORAGE_HOME_ID_KEY = "homeId";
+export const LOCAL_STORAGE_RECOMMENDATIONS_KEY = "recommendations_cache";
 
 export const NAV_ROUTES = {
   HOME: "/",

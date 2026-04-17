@@ -7,7 +7,7 @@
 | Name | E-LUMI-NATE |
 | Tagline | "Illuminate the waste. Eliminate the bill." |
 | Type | AI-Powered Home Energy Intelligence |
-| AI Persona | "Tro Ly Khoai Tay" (Potato Assistant) — witty, eco-friendly energy expert |
+| AI Persona | "Trợ Lý Khoai Tây" (Potato Assistant) — witty, eco-friendly energy expert |
 | Duration | 16 hours hackathon |
 | Target | Mobile-first web app, MVP (no auth) |
 
@@ -51,7 +51,7 @@ Express.js API Server (port 3001)
 |---|---------|----------|------------|
 | F1 | Home Setup Wizard (rooms + appliances) | P0 | Medium |
 | F2 | AI Energy Dashboard (consumption + predictions) | P0 | High |
-| F3 | Personalized AI Recommendations (Tro Ly Khoai Tay) | P0 | High |
+| F3 | Personalized AI Recommendations (Trợ Lý Khoai Tây) | P0 | High |
 | F4 | Green Heatmap Simulator | P1 | Medium |
 | F5 | Voice Input (Speech-to-Text) | P1 | Low |
 | F6 | Image Recognition for Appliances (camera/upload) | P0 | Medium |

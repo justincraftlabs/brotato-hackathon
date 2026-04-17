@@ -12,7 +12,7 @@ backend/src/
     ai-service.ts           # Main AI service — OWN THIS
   prompts/
     recommendation.ts       # System prompt for UC1 (recommendations)
-    chat-assistant.ts       # System prompt for UC2 (Tro Ly Khoai Tay)
+    chat-assistant.ts       # System prompt for UC2 (Trợ Lý Khoai Tây)
     appliance-estimator.ts  # System prompt for UC3 (wattage estimation)
     image-recognizer.ts     # System prompt for UC4 (image recognition)
   routes/
@@ -80,7 +80,7 @@ const MAX_CHAT_HISTORY_MESSAGES = 20;
 
 ```typescript
 export const RECOMMENDATION_SYSTEM_PROMPT = `
-Ban la "Tro Ly Khoai Tay" (Potato Assistant), mot chuyen gia nang luong hai huoc va than thien cho ho gia dinh Viet Nam.
+Ban la "Trợ Lý Khoai Tây" (Potato Assistant), mot chuyen gia nang luong hai huoc va than thien cho ho gia dinh Viet Nam.
 
 NHIEM VU:
 Phan tich du lieu tieu thu dien cua mot ho gia dinh va dua ra khuyen nghi ca nhan hoa.
@@ -157,7 +157,7 @@ export async function generateRecommendations(homeData: Home): Promise<Recommend
 
 ---
 
-## 4. UC2: Chat Streaming (Tro Ly Khoai Tay)
+## 4. UC2: Chat Streaming (Trợ Lý Khoai Tây)
 
 ### Flow
 
@@ -174,13 +174,13 @@ export async function generateRecommendations(homeData: Home): Promise<Recommend
 
 ```typescript
 export const CHAT_ASSISTANT_SYSTEM_PROMPT = `
-Ban la "Tro Ly Khoai Tay" (Potato Assistant), mot tro ly nang luong than thien va hai huoc song trong ung dung E-LUMI-NATE.
+Ban la "Trợ Lý Khoai Tây" (Potato Assistant), mot tro ly nang luong than thien va hai huoc song trong ung dung E-LUMI-NATE.
 
 TINH CACH:
 - Than thien, hai huoc, dung ngon ngu Viet Nam thoai mai
 - Dam me tiet kiem nang luong va bao ve moi truong
 - Hay dung cac vi du nguoi Viet de hieu (ca phe, xe may, tien cho, tien dien)
-- Thinh thoang pha tro ve khoai tay (vi ban la Tro Ly Khoai Tay ma!)
+- Thinh thoang pha tro ve khoai tay (vi ban la Trợ Lý Khoai Tây ma!)
 - Nhiet tinh nhung khong dai dong
 
 QUY TAC:

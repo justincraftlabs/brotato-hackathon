@@ -3,7 +3,7 @@
 > "Illuminate the waste. Eliminate the bill."
 
 16-hour hackathon. Mobile-first web app. No auth. MVP only.
-AI persona: **"Tro Ly Khoai Tay"** (Potato Assistant) — witty, eco-friendly energy expert speaking Vietnamese.
+AI persona: **"Trợ Lý Khoai Tây"** (Potato Assistant) — witty, eco-friendly energy expert speaking Vietnamese.
 
 ## Quick Start
 
@@ -135,7 +135,7 @@ NEXT_PUBLIC_API_URL=http://localhost:3001
 |----|---------|-------|
 | F1 | Home Setup Wizard — rooms + appliances (type/voice/camera) | Frontend + Backend |
 | F2 | Energy Dashboard — top consumers, EVN tier progress, anomalies, CO2 | Frontend + Backend |
-| F3 | AI Chat — "Tro Ly Khoai Tay" streaming recommendations in Vietnamese | Frontend + AI |
+| F3 | AI Chat — "Trợ Lý Khoai Tây" streaming recommendations in Vietnamese | Frontend + AI |
 | F4 | Green Heatmap Simulator — adjust settings, see VND/CO2 impact live | Frontend + Backend |
 | F5 | Voice Input — Web Speech API for appliance names + chat (vi-VN) | Frontend |
 | F6 | Image Recognition — camera/upload photo → Claude Vision identifies appliance | Frontend + AI |

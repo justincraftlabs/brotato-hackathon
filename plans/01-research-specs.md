@@ -23,7 +23,7 @@ Millions of Vietnamese households receive monthly electricity bills with a singl
 |----|---------|-------------|------|
 | F1 | Home Setup Wizard | Multi-step wizard: select rooms, add appliances per room with wattage + daily usage hours | Yes |
 | F2 | Energy Dashboard | Visual breakdown: top consumers, EVN tier progress, month comparison, anomaly alerts | Yes |
-| F3 | AI Recommendations | "Tro Ly Khoai Tay" gives personalized, device-specific savings tips with VND estimates | Yes |
+| F3 | AI Recommendations | "Trợ Lý Khoai Tây" gives personalized, device-specific savings tips with VND estimates | Yes |
 | F4 | Green Heatmap Simulator | Drag-and-adjust simulation: change appliance settings, see CO2/VND impact in real-time | Yes |
 | F5 | Voice Input | Speech-to-text for adding appliances and chatting with AI (Vietnamese primary) | Yes |
 | F6 | Image Recognition | Camera/upload photo of appliance -> AI Vision identifies type + estimates wattage | Yes |
@@ -358,14 +358,14 @@ const EVN_TIERS: EVNTier[] = [
 | # | Use Case | Model | Input | Output |
 |---|----------|-------|-------|--------|
 | UC1 | Generate Recommendations | `claude-sonnet-4-6` | Home data (rooms, appliances, usage) | Structured JSON: personalized tips per appliance |
-| UC2 | Chat Assistant (Tro Ly Khoai Tay) | `claude-sonnet-4-6` | User message + home context | Streamed Vietnamese text with energy advice |
+| UC2 | Chat Assistant (Trợ Lý Khoai Tây) | `claude-sonnet-4-6` | User message + home context | Streamed Vietnamese text with energy advice |
 | UC3 | Appliance Wattage Estimation | `claude-sonnet-4-6` | Appliance name (Vietnamese) | Estimated wattage, standby wattage, type |
 | UC4 | Appliance Image Recognition | `claude-sonnet-4-6` | Photo of appliance (base64) | Identified appliance name, type, wattage, brand/model |
 
 ### System Prompt: Recommendations (UC1)
 
 ```
-You are "Tro Ly Khoai Tay" (Potato Assistant), a witty and friendly energy advisor for Vietnamese households.
+You are "Trợ Lý Khoai Tây" (Potato Assistant), a witty and friendly energy advisor for Vietnamese households.
 
 CONTEXT:
 You will receive a JSON object describing a Vietnamese household: rooms, appliances, wattage, daily usage hours, and usage habits.
@@ -403,7 +403,7 @@ Return valid JSON array matching this schema:
 ### System Prompt: Chat Assistant (UC2)
 
 ```
-You are "Tro Ly Khoai Tay" (Potato Assistant), a witty and eco-friendly energy advisor living inside the E-LUMI-NATE app.
+You are "Trợ Lý Khoai Tây" (Potato Assistant), a witty and eco-friendly energy advisor living inside the E-LUMI-NATE app.
 
 PERSONALITY:
 - Friendly, humorous, uses Vietnamese casual language

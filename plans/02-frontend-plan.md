@@ -66,7 +66,7 @@ frontend/
       dashboard/
         page.tsx                    # Energy Dashboard (F2)
       chat/
-        page.tsx                    # AI Chat with Tro Ly Khoai Tay (F3)
+        page.tsx                    # AI Chat with Trợ Lý Khoai Tây (F3)
       simulator/
         page.tsx                    # Green Heatmap Simulator (F4)
     components/
@@ -238,7 +238,7 @@ frontend/
 
 ### Page 4: AI Chat (`/chat`) — Hours 9-11
 
-**Purpose:** Chat with Tro Ly Khoai Tay for personalized advice (F3)
+**Purpose:** Chat with Trợ Lý Khoai Tây for personalized advice (F3)
 
 **Layout:**
 - Full-screen chat interface (like messaging app)
