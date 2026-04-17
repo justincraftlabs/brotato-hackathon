@@ -1,53 +1,27 @@
 "use client";
 
-import { Loader2, Lightbulb } from "lucide-react";
+import { Lightbulb, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
+import { RoomAccordionItem } from "@/components/savings/RoomAccordionItem";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { useT } from "@/hooks/use-t";
-import { getRecommendations } from "@/lib/api";
+import { getSavingsSuggestions } from "@/lib/api";
 import { LOCAL_STORAGE_HOME_ID_KEY, NAV_ROUTES } from "@/lib/constants";
 import { formatKwh, formatVnd } from "@/lib/format";
 import type { Translations } from "@/lib/translations";
-import type {
-  Recommendation,
-  RecommendationDifficulty,
-  RecommendationPriority,
-} from "@/lib/types";
-
-interface SuccessData {
-  recommendations: Recommendation[];
-  totalVnd: number;
-  totalKwh: number;
-}
+import type { SavingsSuggestionsResult } from "@/lib/types";
 
 type PageState =
   | { status: "idle" }
   | { status: "loading" }
   | { status: "error"; message: string }
-  | { status: "success"; data: SuccessData };
+  | { status: "success"; data: SavingsSuggestionsResult };
 
 const INITIAL_STATE: PageState = { status: "idle" };
-
-type PriorityVariant = "destructive" | "secondary" | "outline";
-
-const PRIORITY_VARIANT_MAP: Record<RecommendationPriority, PriorityVariant> = {
-  high: "destructive",
-  medium: "secondary",
-  low: "outline",
-};
-
-type DifficultyVariant = "default" | "secondary" | "outline";
-
-const DIFFICULTY_VARIANT_MAP: Record<RecommendationDifficulty, DifficultyVariant> = {
-  easy: "default",
-  medium: "secondary",
-  hard: "outline",
-};
 
 interface NoHomeStateProps {
   t: Translations;
@@ -59,9 +33,7 @@ function NoHomeState({ t }: NoHomeStateProps) {
       <CardContent className="flex flex-col items-center gap-3 p-6 text-center">
         <Lightbulb className="h-10 w-10 text-muted-foreground" />
         <p className="text-lg font-semibold">{t.SUGGESTIONS_NO_HOME_TITLE}</p>
-        <p className="text-sm text-muted-foreground">
-          {t.SUGGESTIONS_NO_HOME_MESSAGE}
-        </p>
+        <p className="text-sm text-muted-foreground">{t.SUGGESTIONS_NO_HOME_MESSAGE}</p>
         <Button asChild>
           <Link href={NAV_ROUTES.SETUP}>{t.SUGGESTIONS_NO_HOME_CTA}</Link>
         </Button>
@@ -80,9 +52,7 @@ function ErrorBanner({ message, onRetry, t }: ErrorBannerProps) {
   return (
     <Card className="border-destructive">
       <CardContent className="flex flex-col items-center gap-3 p-6 text-center">
-        <p className="text-sm font-semibold text-destructive">
-          {t.SUGGESTIONS_ERROR_TITLE}
-        </p>
+        <p className="text-sm font-semibold text-destructive">{t.SUGGESTIONS_ERROR_TITLE}</p>
         <p className="text-xs text-muted-foreground">{message}</p>
         <Button variant="outline" size="sm" onClick={onRetry}>
           {t.SUGGESTIONS_RETRY}
@@ -92,125 +62,23 @@ function ErrorBanner({ message, onRetry, t }: ErrorBannerProps) {
   );
 }
 
-interface EmptyAnalysisProps {
-  onAnalyze: () => void;
-  t: Translations;
-}
-
-function EmptyAnalysis({ onAnalyze, t }: EmptyAnalysisProps) {
-  return (
-    <Card>
-      <CardContent className="flex flex-col items-center gap-3 p-6 text-center">
-        <Lightbulb className="h-10 w-10 text-primary" />
-        <p className="text-lg font-semibold">
-          {t.SUGGESTIONS_EMPTY_STATE_TITLE}
-        </p>
-        <p className="text-sm text-muted-foreground">
-          {t.SUGGESTIONS_EMPTY_STATE_MESSAGE}
-        </p>
-        <Button onClick={onAnalyze}>{t.SUGGESTIONS_ANALYZE_FIRST_BUTTON}</Button>
-      </CardContent>
-    </Card>
-  );
-}
-
 interface TotalSavingsCardProps {
-  totalVnd: number;
-  totalKwh: number;
+  data: SavingsSuggestionsResult;
   t: Translations;
 }
 
-function TotalSavingsCard({ totalVnd, totalKwh, t }: TotalSavingsCardProps) {
+function TotalSavingsCard({ data, t }: TotalSavingsCardProps) {
   return (
     <Card className="border-primary bg-primary/10">
       <CardContent className="p-4">
-        <p className="text-xs text-muted-foreground">
-          {t.SUGGESTIONS_TOTAL_SAVINGS}
-        </p>
+        <p className="text-xs text-muted-foreground">{t.SUGGESTIONS_TOTAL_SAVINGS}</p>
         <p className="mt-1 text-2xl font-bold text-primary">
-          {formatVnd(totalVnd)}
+          {formatVnd(data.grandTotalSavingsVnd)}
         </p>
-        <p className="text-sm text-muted-foreground">{formatKwh(totalKwh)}</p>
+        <p className="text-sm text-muted-foreground">{formatKwh(data.grandTotalSavingsKwh)}</p>
       </CardContent>
     </Card>
   );
-}
-
-interface RecommendationCardProps {
-  recommendation: Recommendation;
-  t: Translations;
-}
-
-function RecommendationCard({ recommendation, t }: RecommendationCardProps) {
-  const priorityLabel: Record<RecommendationPriority, string> = {
-    high: t.SUGGESTIONS_PRIORITY_HIGH,
-    medium: t.SUGGESTIONS_PRIORITY_MEDIUM,
-    low: t.SUGGESTIONS_PRIORITY_LOW,
-  };
-
-  const difficultyLabel: Record<RecommendationDifficulty, string> = {
-    easy: t.SUGGESTIONS_DIFFICULTY_EASY,
-    medium: t.SUGGESTIONS_DIFFICULTY_MEDIUM,
-    hard: t.SUGGESTIONS_DIFFICULTY_HARD,
-  };
-
-  return (
-    <Card>
-      <CardContent className="flex flex-col gap-2 p-4">
-        <p className="font-semibold leading-tight">{recommendation.title}</p>
-        <p className="text-xs text-muted-foreground">
-          {recommendation.description}
-        </p>
-        <div className="flex flex-wrap items-center gap-2">
-          <Badge variant={PRIORITY_VARIANT_MAP[recommendation.priority]}>
-            {priorityLabel[recommendation.priority]}
-          </Badge>
-          <Badge variant={DIFFICULTY_VARIANT_MAP[recommendation.difficulty]}>
-            {difficultyLabel[recommendation.difficulty]}
-          </Badge>
-        </div>
-        <p className="text-sm font-medium text-primary">
-          {formatVnd(recommendation.savingsVnd)}{" "}
-          <span className="text-xs font-normal text-muted-foreground">
-            {t.SUGGESTIONS_SAVINGS_PER_MONTH}
-          </span>
-        </p>
-      </CardContent>
-    </Card>
-  );
-}
-
-interface RoomGroupProps {
-  roomName: string;
-  recommendations: Recommendation[];
-  t: Translations;
-}
-
-function RoomGroup({ roomName, recommendations, t }: RoomGroupProps) {
-  return (
-    <div className="flex flex-col gap-2">
-      <div className="flex items-center gap-2">
-        <p className="font-semibold text-foreground">{roomName}</p>
-        <span className="text-xs text-muted-foreground">
-          {recommendations.length} {t.SUGGESTIONS_TIPS_SUFFIX}
-        </span>
-      </div>
-      {recommendations.map((rec) => (
-        <RecommendationCard key={rec.id} recommendation={rec} t={t} />
-      ))}
-    </div>
-  );
-}
-
-function groupByRoom(recommendations: Recommendation[]): Map<string, Recommendation[]> {
-  const groups = new Map<string, Recommendation[]>();
-
-  for (const rec of recommendations) {
-    const existing = groups.get(rec.roomName) ?? [];
-    groups.set(rec.roomName, [...existing, rec]);
-  }
-
-  return groups;
 }
 
 export default function SuggestionsPage() {
@@ -218,24 +86,17 @@ export default function SuggestionsPage() {
   const [homeId] = useLocalStorage(LOCAL_STORAGE_HOME_ID_KEY);
   const [pageState, setPageState] = useState<PageState>(INITIAL_STATE);
 
-  const fetchRecommendations = useCallback(async (id: string) => {
+  const fetchSuggestions = useCallback(async (id: string, forceRefresh: boolean) => {
     setPageState({ status: "loading" });
 
-    const result = await getRecommendations(id);
+    const result = await getSavingsSuggestions(id, forceRefresh);
 
     if (!result.success) {
       setPageState({ status: "error", message: result.error });
       return;
     }
 
-    setPageState({
-      status: "success",
-      data: {
-        recommendations: result.data.recommendations,
-        totalVnd: result.data.totalPotentialSavingsVnd,
-        totalKwh: result.data.totalPotentialSavingsKwh,
-      },
-    });
+    setPageState({ status: "success", data: result.data });
   }, []);
 
   useEffect(() => {
@@ -245,8 +106,8 @@ export default function SuggestionsPage() {
     if (pageState.status !== "idle") {
       return;
     }
-    fetchRecommendations(homeId);
-  }, [homeId, pageState.status, fetchRecommendations]);
+    fetchSuggestions(homeId, false);
+  }, [homeId, pageState.status, fetchSuggestions]);
 
   if (!homeId) {
     return <NoHomeState t={t} />;
@@ -265,18 +126,22 @@ export default function SuggestionsPage() {
     return (
       <ErrorBanner
         message={pageState.message}
-        onRetry={() => fetchRecommendations(homeId)}
+        onRetry={() => fetchSuggestions(homeId, false)}
         t={t}
       />
     );
   }
 
   if (pageState.status === "idle") {
-    return <EmptyAnalysis onAnalyze={() => fetchRecommendations(homeId)} t={t} />;
+    return (
+      <div className="flex flex-col items-center gap-4 py-10">
+        <Loader2 className="h-6 w-6 animate-spin text-primary" />
+        <p className="text-sm text-muted-foreground">{t.SUGGESTIONS_ANALYZING}</p>
+      </div>
+    );
   }
 
   const { data } = pageState;
-  const grouped = groupByRoom(data.recommendations);
 
   return (
     <div className="flex flex-col gap-4 pb-4">
@@ -285,23 +150,19 @@ export default function SuggestionsPage() {
         <Button
           variant="outline"
           size="sm"
-          onClick={() => fetchRecommendations(homeId)}
+          onClick={() => fetchSuggestions(homeId, true)}
         >
           {t.SUGGESTIONS_ANALYZE_BUTTON}
         </Button>
       </div>
 
-      <TotalSavingsCard
-        totalVnd={data.totalVnd}
-        totalKwh={data.totalKwh}
-        t={t}
-      />
+      <TotalSavingsCard data={data} t={t} />
 
-      {Array.from(grouped.entries()).map(([roomName, recs]) => (
-        <RoomGroup
-          key={roomName}
-          roomName={roomName}
-          recommendations={recs}
+      {data.rooms.map((room, index) => (
+        <RoomAccordionItem
+          key={room.roomName}
+          room={room}
+          defaultOpen={index === 0}
           t={t}
         />
       ))}
