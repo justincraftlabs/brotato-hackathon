@@ -1,12 +1,13 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { Home, Room } from '../types/home';
-import { Recommendation, RecommendationType, RecommendationDifficulty, ApplianceEstimate, ImageRecognitionResult, ChatMessage } from '../types/ai';
+import { Recommendation, RecommendationType, RecommendationDifficulty, ApplianceEstimate, ImageRecognitionResult, ChatMessage, SavingsSuggestionsResult, RoomSuggestion, DeviceSuggestion } from '../types/ai';
 import { calculateMonthlyCost } from './evn-pricing-service';
 import { RECOMMENDATION_SYSTEM_PROMPT, RECOMMENDATION_RETRY_PROMPT } from '../prompts/recommendation';
 import { CHAT_ASSISTANT_SYSTEM_PROMPT } from '../prompts/chat-assistant';
 import { APPLIANCE_ESTIMATOR_PROMPT } from '../prompts/appliance-estimator';
 import { IMAGE_RECOGNIZER_PROMPT } from '../prompts/image-recognizer';
 import { USAGE_HABIT_PARSER_PROMPT } from '../prompts/usage-habit-parser';
+import { SAVINGS_SUGGESTIONS_SYSTEM_PROMPT, SAVINGS_SUGGESTIONS_RETRY_PROMPT } from '../prompts/savings-suggestions';
 
 let _client: Anthropic | null = null;
 
@@ -19,13 +20,15 @@ function getClient(): Anthropic {
   return _client;
 }
 const MODEL_SONNET = 'claude-sonnet-4-6';
-const MAX_TOKENS_STANDARD = 16000;
-const MAX_TOKENS_STREAMING = 64000;
+const MAX_TOKENS_RECOMMENDATIONS = 2000;
+const MAX_TOKENS_ESTIMATE = 512;
+const MAX_TOKENS_STREAMING = 8000;
 const MAX_TOKENS_HABIT_PARSER = 512;
 const MAX_CHAT_HISTORY = 20;
 const WATTS_PER_KW = 1000;
 const HOURS_PER_DAY_FOR_DISPLAY = 1;
 const DAYS_PER_MONTH = 30;
+const RECOMMENDATION_CACHE_TTL_MS = 5 * 60 * 1000;
 
 const JSON_BLOCK_START_MARKER = '```json';
 const JSON_BLOCK_ALT_START_MARKER = '```';
@@ -47,6 +50,59 @@ const VALID_TYPES = new Set(['behavior', 'upgrade', 'schedule', 'vampire']);
 const VALID_DIFFICULTIES = new Set(['easy', 'medium', 'hard']);
 const DEFAULT_TYPE: RecommendationType = 'behavior';
 const DEFAULT_DIFFICULTY: RecommendationDifficulty = 'easy';
+
+interface RawDeviceSuggestion {
+  applianceName: string;
+  tip: string;
+  savingsKwh: number;
+  savingsVnd: number;
+  priority: 'high' | 'medium' | 'low';
+}
+
+interface RawRoomSuggestion {
+  roomName: string;
+  roomType: string;
+  summary: string;
+  totalSavingsKwh: number;
+  totalSavingsVnd: number;
+  devices: RawDeviceSuggestion[];
+}
+
+interface RawSavingsSuggestionsResult {
+  rooms: RawRoomSuggestion[];
+  grandTotalSavingsKwh: number;
+  grandTotalSavingsVnd: number;
+}
+
+const VALID_PRIORITIES = new Set(['high', 'medium', 'low']);
+const DEFAULT_PRIORITY = 'low';
+
+function parseSavingsSuggestionsJson(text: string): SavingsSuggestionsResult {
+  const cleaned = stripMarkdownJsonWrapper(text);
+  const parsed = JSON.parse(cleaned) as RawSavingsSuggestionsResult;
+
+  const rooms: RoomSuggestion[] = parsed.rooms.map((room) => ({
+    roomName: room.roomName,
+    roomType: room.roomType,
+    summary: room.summary,
+    totalSavingsKwh: room.totalSavingsKwh ?? 0,
+    totalSavingsVnd: room.totalSavingsVnd ?? 0,
+    devices: (room.devices ?? []).map((d): DeviceSuggestion => ({
+      applianceName: d.applianceName,
+      tip: d.tip,
+      savingsKwh: d.savingsKwh ?? 0,
+      savingsVnd: d.savingsVnd ?? 0,
+      priority: VALID_PRIORITIES.has(d.priority) ? d.priority : DEFAULT_PRIORITY as 'low',
+    })),
+  }));
+
+  return {
+    rooms,
+    grandTotalSavingsKwh: parsed.grandTotalSavingsKwh ?? 0,
+    grandTotalSavingsVnd: parsed.grandTotalSavingsVnd ?? 0,
+    analyzedAt: new Date().toISOString(),
+  };
+}
 
 function stripMarkdownJsonWrapper(text: string): string {
   let cleaned = text.trim();
@@ -105,13 +161,76 @@ function parseRecommendationsJson(text: string): Recommendation[] {
   return parsed.map(mapRawRecommendation);
 }
 
+interface RecommendationCacheEntry {
+  data: Recommendation[];
+  expiresAt: number;
+}
+
+const recommendationCache = new Map<string, RecommendationCacheEntry>();
+
+function getRecommendationCacheKey(homeData: Home): string {
+  return JSON.stringify(homeData);
+}
+
 export async function generateRecommendations(
   homeData: Home
 ): Promise<Recommendation[]> {
+  const cacheKey = getRecommendationCacheKey(homeData);
+  const cached = recommendationCache.get(cacheKey);
+
+  if (cached && cached.expiresAt > Date.now()) {
+    return cached.data;
+  }
+
+  const homeJson = JSON.stringify(homeData);
+
   const response = await getClient().messages.create({
     model: MODEL_SONNET,
-    max_tokens: MAX_TOKENS_STANDARD,
-    system: RECOMMENDATION_SYSTEM_PROMPT,
+    max_tokens: MAX_TOKENS_RECOMMENDATIONS,
+    system: [{ type: 'text', text: RECOMMENDATION_SYSTEM_PROMPT, cache_control: { type: 'ephemeral' } }],
+    messages: [
+      {
+        role: 'user',
+        content: [{ type: 'text', text: homeJson, cache_control: { type: 'ephemeral' } }],
+      },
+    ],
+  });
+
+  const responseText = extractTextFromResponse(response);
+
+  try {
+    const recommendations = parseRecommendationsJson(responseText);
+    recommendationCache.set(cacheKey, { data: recommendations, expiresAt: Date.now() + RECOMMENDATION_CACHE_TTL_MS });
+    return recommendations;
+  } catch {
+    const retryResponse = await getClient().messages.create({
+      model: MODEL_SONNET,
+      max_tokens: MAX_TOKENS_RECOMMENDATIONS,
+      system: [{ type: 'text', text: RECOMMENDATION_SYSTEM_PROMPT, cache_control: { type: 'ephemeral' } }],
+      messages: [
+        {
+          role: 'user',
+          content: [{ type: 'text', text: homeJson, cache_control: { type: 'ephemeral' } }],
+        },
+        { role: 'assistant', content: responseText },
+        { role: 'user', content: RECOMMENDATION_RETRY_PROMPT },
+      ],
+    });
+
+    const retryText = extractTextFromResponse(retryResponse);
+    const recommendations = parseRecommendationsJson(retryText);
+    recommendationCache.set(cacheKey, { data: recommendations, expiresAt: Date.now() + RECOMMENDATION_CACHE_TTL_MS });
+    return recommendations;
+  }
+}
+
+export async function generateSavingsSuggestions(
+  homeData: Home
+): Promise<SavingsSuggestionsResult> {
+  const response = await getClient().messages.create({
+    model: MODEL_SONNET,
+    max_tokens: MAX_TOKENS_RECOMMENDATIONS,
+    system: SAVINGS_SUGGESTIONS_SYSTEM_PROMPT,
     messages: [
       {
         role: 'user',
@@ -123,12 +242,12 @@ export async function generateRecommendations(
   const responseText = extractTextFromResponse(response);
 
   try {
-    return parseRecommendationsJson(responseText);
+    return parseSavingsSuggestionsJson(responseText);
   } catch {
     const retryResponse = await getClient().messages.create({
       model: MODEL_SONNET,
-      max_tokens: MAX_TOKENS_STANDARD,
-      system: RECOMMENDATION_SYSTEM_PROMPT,
+      max_tokens: MAX_TOKENS_RECOMMENDATIONS,
+      system: SAVINGS_SUGGESTIONS_SYSTEM_PROMPT,
       messages: [
         {
           role: 'user',
@@ -140,13 +259,13 @@ export async function generateRecommendations(
         },
         {
           role: 'user',
-          content: RECOMMENDATION_RETRY_PROMPT,
+          content: SAVINGS_SUGGESTIONS_RETRY_PROMPT,
         },
       ],
     });
 
     const retryText = extractTextFromResponse(retryResponse);
-    return parseRecommendationsJson(retryText);
+    return parseSavingsSuggestionsJson(retryText);
   }
 }
 
@@ -195,7 +314,7 @@ export async function streamChat(
   onChunk: (text: string) => void
 ): Promise<string> {
   const truncatedHistory = history.slice(-MAX_CHAT_HISTORY);
-  const systemPrompt = `${CHAT_ASSISTANT_SYSTEM_PROMPT}\n\n---\n${homeContext}`;
+  const systemPromptText = `${CHAT_ASSISTANT_SYSTEM_PROMPT}\n\n---\n${homeContext}`;
 
   const messages = [
     ...buildChatMessages(truncatedHistory),
@@ -207,7 +326,7 @@ export async function streamChat(
   const stream = getClient().messages.stream({
     model: MODEL_SONNET,
     max_tokens: MAX_TOKENS_STREAMING,
-    system: systemPrompt,
+    system: [{ type: 'text', text: systemPromptText, cache_control: { type: 'ephemeral' } }],
     messages,
   });
 
@@ -238,8 +357,8 @@ export async function estimateAppliance(
 ): Promise<ApplianceEstimate> {
   const response = await getClient().messages.create({
     model: MODEL_SONNET,
-    max_tokens: MAX_TOKENS_STANDARD,
-    system: APPLIANCE_ESTIMATOR_PROMPT,
+    max_tokens: MAX_TOKENS_ESTIMATE,
+    system: [{ type: 'text', text: APPLIANCE_ESTIMATOR_PROMPT, cache_control: { type: 'ephemeral' } }],
     messages: [
       {
         role: 'user',
