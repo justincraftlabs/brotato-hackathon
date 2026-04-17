@@ -5,6 +5,7 @@ import { validate } from '../middleware/validate';
 import { getHome } from '../services/home-service';
 import {
   generateRecommendations,
+  generateSavingsSuggestions,
   streamChat,
   estimateAppliance,
   recognizeAppliance,
@@ -12,8 +13,9 @@ import {
 } from '../services/ai-service';
 import { upload } from '../middleware/upload';
 import { ChatSessionModel } from '../models/chat-session.model';
+import { HomeModel } from '../models/home.model';
 import { ApiSuccessResponse, ApiErrorResponse } from '../types/api';
-import { Recommendation, ApplianceEstimate, ImageRecognitionResult, ChatMessage } from '../types/ai';
+import { Recommendation, ApplianceEstimate, ImageRecognitionResult, ChatMessage, SavingsSuggestionsResult } from '../types/ai';
 
 const HTTP_OK = 200;
 const HTTP_NOT_FOUND = 404;
@@ -46,9 +48,15 @@ const estimateApplianceSchema = z.object({
   name: z.string(),
 });
 
+const savingsSuggestionsSchema = z.object({
+  homeId: z.string(),
+  forceRefresh: z.boolean().optional().default(false),
+});
+
 type RecommendationsBody = z.infer<typeof recommendationsSchema>;
 type ChatBody = z.infer<typeof chatSchema>;
 type EstimateApplianceBody = z.infer<typeof estimateApplianceSchema>;
+type SavingsSuggestionsBody = z.infer<typeof savingsSuggestionsSchema>;
 
 interface RecommendationsResponseData {
   recommendations: Recommendation[];
@@ -286,6 +294,60 @@ router.post(
       };
 
       res.status(HTTP_OK).json(response);
+    }
+  }
+);
+
+router.post(
+  '/savings-suggestions',
+  validate(savingsSuggestionsSchema),
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const { homeId, forceRefresh } = req.body as SavingsSuggestionsBody;
+
+      const homeDoc = await HomeModel.findOne({ homeId }).lean();
+
+      if (!homeDoc) {
+        const response: ApiErrorResponse = {
+          success: false,
+          error: `Home not found: ${homeId}`,
+        };
+        res.status(HTTP_NOT_FOUND).json(response);
+        return;
+      }
+
+      if (homeDoc.savingsSuggestions && !forceRefresh) {
+        const response: ApiSuccessResponse<SavingsSuggestionsResult> = {
+          success: true,
+          data: homeDoc.savingsSuggestions,
+        };
+        res.status(HTTP_OK).json(response);
+        return;
+      }
+
+      const home = await getHome(homeId);
+
+      if (!home) {
+        const response: ApiErrorResponse = {
+          success: false,
+          error: `Home not found: ${homeId}`,
+        };
+        res.status(HTTP_NOT_FOUND).json(response);
+        return;
+      }
+
+      const result = await generateSavingsSuggestions(home);
+
+      await HomeModel.updateOne({ homeId }, { savingsSuggestions: result });
+
+      const response: ApiSuccessResponse<SavingsSuggestionsResult> = {
+        success: true,
+        data: result,
+      };
+
+      res.status(HTTP_OK).json(response);
+    } catch (err) {
+      next(err);
     }
   }
 );
