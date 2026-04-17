@@ -12,7 +12,6 @@ import {
 } from "recharts";
 import type { TooltipContentProps } from "recharts";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useT } from "@/hooks/use-t";
 import { formatKwh, formatVnd } from "@/lib/format";
 import type { TopConsumer } from "@/lib/types";
@@ -84,13 +83,11 @@ export function TopConsumersChart({ consumers }: TopConsumersChartProps) {
   const chartData = toChartData(consumers);
 
   return (
-    <Card className="overflow-hidden rounded-2xl border-0 shadow-[0_2px_12px_-3px_rgba(0,0,0,0.08),0_8px_20px_-4px_rgba(0,0,0,0.04)]">
-      <CardHeader className="px-5 pb-0 pt-5 lg:px-6 lg:pt-6">
-        <CardTitle className="text-base font-bold">
-          {t.DASHBOARD_TOP_CONSUMERS_TITLE}
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="px-5 pb-5 pt-4 lg:px-6 lg:pb-6">
+    <div className="glass rounded-2xl overflow-hidden card-hover-glow">
+      <div className="px-5 pb-0 pt-5 lg:px-6 lg:pt-6">
+        <h3 className="text-base font-bold">{t.DASHBOARD_TOP_CONSUMERS_TITLE}</h3>
+      </div>
+      <div className="px-5 pb-5 pt-4 lg:px-6 lg:pb-6">
         <ResponsiveContainer width="100%" height={CHART_HEIGHT}>
           <BarChart
             data={chartData}
@@ -137,7 +134,7 @@ export function TopConsumersChart({ consumers }: TopConsumersChartProps) {
             </Bar>
           </BarChart>
         </ResponsiveContainer>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }

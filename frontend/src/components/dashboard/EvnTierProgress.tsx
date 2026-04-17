@@ -2,7 +2,6 @@
 
 import { Zap } from "lucide-react";
 
-import { Card, CardContent } from "@/components/ui/card";
 import { useT } from "@/hooks/use-t";
 import { EVN_TIERS } from "@/lib/constants";
 import { cn } from "@/lib/utils";
@@ -50,8 +49,8 @@ export function EvnTierProgress({ evnTier, totalKwh }: EvnTierProgressProps) {
         .replace("{nextTier}", String(evnTier + TIER_INDEX_OFFSET));
 
   return (
-    <Card className="flex-1 overflow-hidden rounded-2xl border-0 shadow-[0_2px_12px_-3px_rgba(0,0,0,0.08),0_8px_20px_-4px_rgba(0,0,0,0.04)]">
-      <CardContent className="flex h-full flex-col gap-4 p-5 lg:p-6">
+    <div className="glass rounded-2xl overflow-hidden flex-1 card-hover-glow">
+      <div className="flex h-full flex-col gap-4 p-5 lg:p-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <p className="text-base font-bold">
@@ -128,7 +127,7 @@ export function EvnTierProgress({ evnTier, totalKwh }: EvnTierProgressProps) {
             {nextTierWarning}
           </p>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }

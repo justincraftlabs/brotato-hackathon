@@ -11,7 +11,6 @@ import {
 } from "recharts";
 import type { TooltipContentProps } from "recharts";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useT } from "@/hooks/use-t";
 import { formatVnd } from "@/lib/format";
 
@@ -101,19 +100,17 @@ export function SavingsForecastChart({ monthlyCost }: SavingsForecastChartProps)
   const fiveYearAt20 = (monthlyCost * RATE_20 * FIVE_YEAR_MONTHS) / MILLION;
 
   return (
-    <Card className="overflow-hidden rounded-2xl border-0 shadow-[0_2px_12px_-3px_rgba(0,0,0,0.08),0_8px_20px_-4px_rgba(0,0,0,0.04)]">
-      <CardHeader className="px-5 pb-0 pt-5 lg:px-6 lg:pt-6">
-        <CardTitle className="text-base font-bold">
-          {t.CHART_FORECAST_TITLE}
-        </CardTitle>
+    <div className="glass rounded-2xl overflow-hidden card-hover-glow">
+      <div className="px-5 pb-0 pt-5 lg:px-6 lg:pt-6">
+        <h3 className="text-base font-bold">{t.CHART_FORECAST_TITLE}</h3>
         <p className="mt-0.5 text-xs text-muted-foreground">
           {t.CHART_FORECAST_5Y_HINT}{" "}
           <span className="font-bold text-primary">
             {formatVnd(fiveYearAt20 * MILLION)}
           </span>
         </p>
-      </CardHeader>
-      <CardContent className="px-5 pb-5 pt-4 lg:px-6 lg:pb-6">
+      </div>
+      <div className="px-5 pb-5 pt-4 lg:px-6 lg:pb-6">
         <ResponsiveContainer width="100%" height={CHART_HEIGHT}>
           <AreaChart
             data={data}
@@ -210,7 +207,7 @@ export function SavingsForecastChart({ monthlyCost }: SavingsForecastChartProps)
             </div>
           ))}
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }

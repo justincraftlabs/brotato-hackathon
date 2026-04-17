@@ -2,7 +2,6 @@
 
 import { TreePine } from "lucide-react";
 
-import { Card, CardContent } from "@/components/ui/card";
 import { useT } from "@/hooks/use-t";
 import { MAX_TREE_ICONS } from "@/lib/constants";
 import { formatCo2 } from "@/lib/format";
@@ -24,8 +23,8 @@ export function Co2TreeVisual({ co2 }: Co2TreeVisualProps) {
   );
 
   return (
-    <Card className="overflow-hidden rounded-2xl border-0 shadow-[0_2px_12px_-3px_rgba(0,0,0,0.08),0_8px_20px_-4px_rgba(0,0,0,0.04)]">
-      <CardContent className="flex flex-col gap-3 p-5 lg:p-6">
+    <div className="glass rounded-2xl overflow-hidden card-hover-glow">
+      <div className="flex flex-col gap-3 p-5 lg:p-6">
         <div className="flex items-center justify-between">
           <p className="text-base font-bold">
             {t.DASHBOARD_CO2_TREE_TITLE}
@@ -49,7 +48,7 @@ export function Co2TreeVisual({ co2 }: Co2TreeVisualProps) {
           )}
         </div>
         <p className="text-xs text-muted-foreground">{equivalentText}</p>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }

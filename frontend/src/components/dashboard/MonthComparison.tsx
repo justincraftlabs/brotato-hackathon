@@ -2,7 +2,6 @@
 
 import { TrendingDown, TrendingUp } from "lucide-react";
 
-import { Card, CardContent } from "@/components/ui/card";
 import { useT } from "@/hooks/use-t";
 import { formatPercent } from "@/lib/format";
 import { cn } from "@/lib/utils";
@@ -26,15 +25,15 @@ export function MonthComparison({ comparison }: MonthComparisonProps) {
   const description = template.replace("{percent}", percentText);
 
   return (
-    <Card
+    <div
       className={cn(
-        "overflow-hidden rounded-2xl border-0 shadow-[0_2px_12px_-3px_rgba(0,0,0,0.08),0_8px_20px_-4px_rgba(0,0,0,0.04)]",
+        "rounded-2xl overflow-hidden card-hover-glow",
         isIncrease
-          ? "bg-red-50 dark:bg-red-950/20"
-          : "bg-primary-light dark:bg-primary/10"
+          ? "bg-red-50/80 border border-red-200/40 dark:bg-red-950/25 dark:border-red-800/20"
+          : "bg-primary/8 border border-primary/12 dark:bg-primary/10 dark:border-primary/15"
       )}
     >
-      <CardContent className="flex items-center gap-4 p-5 lg:p-6">
+      <div className="flex items-center gap-4 p-5 lg:p-6">
         <div
           className={cn(
             "flex h-12 w-12 shrink-0 items-center justify-center rounded-xl",
@@ -58,7 +57,7 @@ export function MonthComparison({ comparison }: MonthComparisonProps) {
           </p>
           <p className="text-sm text-muted-foreground">{description}</p>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }

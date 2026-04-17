@@ -314,8 +314,8 @@ function DashboardContent({ data, t }: DashboardContentProps) {
       {/* Anomaly Alert */}
       <AnomalyAlert anomalies={data.anomalies} />
 
-      {/* Charts Grid — staggered */}
-      <StaggerList className="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-6">
+      {/* Charts Grid — Bento: 1-col → 2-col at md, full-width waterfall */}
+      <StaggerList className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:gap-6">
         <FadeSlide><TopConsumersChart consumers={data.topConsumers} /></FadeSlide>
         <FadeSlide>
           <WasteHotspotChart
@@ -324,27 +324,18 @@ function DashboardContent({ data, t }: DashboardContentProps) {
           />
         </FadeSlide>
         <FadeSlide><SavingsForecastChart monthlyCost={data.totalMonthlyCost} /></FadeSlide>
-        <FadeSlide>
-          <div className="flex flex-col gap-4 lg:gap-6">
+        <FadeSlide className="h-full">
+          <div className="flex h-full flex-col gap-4 lg:gap-6">
             <MonthComparison comparison={data.comparison} />
             <EvnTierProgress evnTier={data.evnTier} totalKwh={data.totalMonthlyKwh} />
             <Co2TreeVisual co2={data.co2} />
           </div>
         </FadeSlide>
-        <FadeSlide className="lg:col-span-2">
+        <FadeSlide className="md:col-span-2">
           <CarbonWaterfallChart co2TotalKg={data.co2.totalKg} consumers={data.topConsumers} />
         </FadeSlide>
       </StaggerList>
 
-      {/* CTAs */}
-      <div className="flex flex-col gap-3 lg:flex-row">
-        <Button asChild className="btn-primary-gradient rounded-xl lg:flex-1">
-          <Link href={NAV_ROUTES.TIPS}>{t.DASHBOARD_CTA_VIEW_SUGGESTIONS}</Link>
-        </Button>
-        <Button variant="outline" asChild className="rounded-xl border-border/60 hover:bg-primary/10 hover:text-primary hover:border-primary/40 lg:flex-1">
-          <Link href={NAV_ROUTES.TIPS}>{t.DASHBOARD_CTA_SIMULATE}</Link>
-        </Button>
-      </div>
     </div>
   );
 }

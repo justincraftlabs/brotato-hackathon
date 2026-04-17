@@ -11,7 +11,6 @@ import {
 } from "recharts";
 import type { TooltipContentProps } from "recharts";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useT } from "@/hooks/use-t";
 import { CO2_EMISSION_FACTOR } from "@/lib/constants";
 import { formatCo2 } from "@/lib/format";
@@ -108,12 +107,10 @@ export function CarbonWaterfallChart({
   if (!chartData.length) return null;
 
   return (
-    <Card className="overflow-hidden rounded-2xl border-0 shadow-[0_2px_12px_-3px_rgba(0,0,0,0.08),0_8px_20px_-4px_rgba(0,0,0,0.04)]">
-      <CardHeader className="px-5 pb-0 pt-5 lg:px-6 lg:pt-6">
+    <div className="glass rounded-2xl overflow-hidden card-hover-glow">
+      <div className="px-5 pb-0 pt-5 lg:px-6 lg:pt-6">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-base font-bold">
-            {t.CHART_CARBON_TITLE}
-          </CardTitle>
+          <h3 className="text-base font-bold">{t.CHART_CARBON_TITLE}</h3>
           <p className="text-sm font-black text-primary">
             {formatCo2(co2TotalKg)}
           </p>
@@ -121,8 +118,8 @@ export function CarbonWaterfallChart({
         <p className="mt-0.5 text-xs text-muted-foreground">
           {t.CHART_CARBON_UNIT}
         </p>
-      </CardHeader>
-      <CardContent className="px-5 pb-5 pt-4 lg:px-6 lg:pb-6">
+      </div>
+      <div className="px-5 pb-5 pt-4 lg:px-6 lg:pb-6">
         <ResponsiveContainer width="100%" height={CHART_HEIGHT}>
           <BarChart
             data={chartData}
@@ -189,7 +186,7 @@ export function CarbonWaterfallChart({
             </Bar>
           </BarChart>
         </ResponsiveContainer>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }
