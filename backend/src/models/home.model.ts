@@ -1,7 +1,9 @@
 import mongoose, { Schema, Document } from 'mongoose';
+import { SavingsSuggestionsResult } from '../types/ai';
 
 export interface HomeDocument extends Document {
   homeId: string;
+  savingsSuggestions?: SavingsSuggestionsResult;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -9,6 +11,7 @@ export interface HomeDocument extends Document {
 const homeSchema = new Schema(
   {
     homeId: { type: String, required: true, unique: true },
+    savingsSuggestions: { type: Schema.Types.Mixed, required: false },
   },
   { timestamps: true }
 );
