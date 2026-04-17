@@ -22,6 +22,7 @@ type PageState =
   | { status: "success"; data: SavingsSuggestionsResult };
 
 const INITIAL_STATE: PageState = { status: "idle" };
+const FIRST_ROOM_INDEX = 0;
 
 interface NoHomeStateProps {
   t: Translations;
@@ -157,7 +158,7 @@ export default function SuggestionsPage() {
         <RoomAccordionItem
           key={`room-${index}`}
           room={room}
-          defaultOpen={index === 0}
+          defaultOpen={index === FIRST_ROOM_INDEX}
           t={t}
         />
       ))}
