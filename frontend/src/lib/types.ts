@@ -150,3 +150,29 @@ export interface SimulationResult {
 export type ApiResponse<T> =
   | { success: true; data: T }
   | { success: false; error: string };
+
+export type SuggestionPriority = 'high' | 'medium' | 'low';
+
+export interface DeviceSuggestion {
+  applianceName: string;
+  tip: string;
+  savingsKwh: number;
+  savingsVnd: number;
+  priority: SuggestionPriority;
+}
+
+export interface RoomSuggestion {
+  roomName: string;
+  roomType: string;
+  summary: string;
+  totalSavingsKwh: number;
+  totalSavingsVnd: number;
+  devices: DeviceSuggestion[];
+}
+
+export interface SavingsSuggestionsResult {
+  rooms: RoomSuggestion[];
+  grandTotalSavingsKwh: number;
+  grandTotalSavingsVnd: number;
+  analyzedAt: string;
+}
