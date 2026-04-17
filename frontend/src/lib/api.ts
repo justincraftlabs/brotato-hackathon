@@ -8,6 +8,7 @@ import type {
   ImageRecognitionResult,
   Recommendation,
   Room,
+  SavingsSuggestionsResult,
   SimulationAdjustment,
   SimulationResult,
 } from "./types";
@@ -267,6 +268,16 @@ export async function updateAppliance(
   return request<Appliance>(`/api/home/${homeId}/appliances/${applianceId}`, {
     method: "PUT",
     body: JSON.stringify(updates),
+  });
+}
+
+export async function getSavingsSuggestions(
+  homeId: string,
+  forceRefresh = false
+): Promise<ApiResponse<SavingsSuggestionsResult>> {
+  return request<SavingsSuggestionsResult>("/api/ai/savings-suggestions", {
+    method: "POST",
+    body: JSON.stringify({ homeId, forceRefresh }),
   });
 }
 
