@@ -54,7 +54,7 @@ backend/
     routes/                     # Express route handlers (thin)
       home.ts                   # POST /setup, POST /:id/appliances, GET /:id
       energy.ts                 # GET /:homeId/dashboard
-      ai.ts                    # POST /recommendations, /chat (SSE), /estimate-appliance, /recognize-appliance
+      ai.ts                    # POST /recommendations, /chat (SSE), /estimate-appliance, /recognize-appliance, /savings-suggestions, /analyze-habit
       simulator.ts              # POST /calculate
     services/                   # Business logic
       home-service.ts
@@ -71,7 +71,14 @@ backend/
       error-handler.ts
       validate.ts               # zod validation factory
       upload.ts                 # multer config for image uploads
-    prompts/                    # System prompts as .ts constants (AI agent owns)
+    prompts/                    # One file per AI use case (AI agent owns)
+      appliance-estimator.ts
+      chat-assistant.ts
+      habit-analyzer.ts
+      image-recognizer.ts
+      recommendation.ts
+      savings-suggestions.ts
+      usage-habit-parser.ts
     types/                      # Shared TypeScript interfaces
     constants/                  # EVN tiers, CO2 factor, appliance defaults
     db/
@@ -85,21 +92,23 @@ frontend/
       dashboard/page.tsx        # Energy Dashboard (F2)
       chat/page.tsx             # AI Chat with Khoai Tay (F3)
       simulator/page.tsx        # Green Heatmap Simulator (F4)
+      suggestions/page.tsx      # Savings Suggestions (UC6)
+      tips/page.tsx             # AI Tips tab view
     components/
       ui/                       # shadcn/ui (auto-generated)
       layout/                   # Header, BottomNav, PageContainer
       setup/                    # RoomSelector, ApplianceForm, VoiceInputButton, ImageCaptureButton
       dashboard/                # EnergyOverview, TopConsumersChart, EvnTierProgress, Co2TreeVisual
       chat/                     # ChatBubble, ChatInput, StreamingText
-      simulator/                # SimulatorSlider, ImpactCard, HeatmapGrid
+      simulator/                # ApplianceAdjuster, ComparisonBar, ImpactSummary
     lib/
       api.ts                    # ALL backend calls go here — never fetch in components
       types.ts                  # Shared interfaces
       constants.ts              # EVN tiers, CO2 factor
       format.ts                 # VND/kWh/% formatting
       speech.ts                 # Web Speech API wrapper
-      image.ts                  # Image resize + base64 conversion
-    hooks/                      # useHome, useDashboard, useChat, useSimulator, useSpeech, useImageCapture
+      image.ts                  # Image resize + base64 conversion (heic2any lazy-imported)
+    hooks/                      # use-t.ts, useChat.ts, useImageCapture.ts, useLocalStorage.ts, useSpeech.ts
 ```
 
 ## Tech Stack
