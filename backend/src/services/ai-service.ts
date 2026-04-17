@@ -1,6 +1,6 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { Home, Room } from '../types/home';
-import { Recommendation, RecommendationType, RecommendationDifficulty, ApplianceEstimate, ImageRecognitionResult, ChatMessage, SavingsSuggestionsResult, RoomSuggestion, DeviceSuggestion } from '../types/ai';
+import { Recommendation, RecommendationType, RecommendationDifficulty, ApplianceEstimate, ImageRecognitionResult, ChatMessage, SavingsSuggestionsResult, RoomSuggestion, DeviceSuggestion, SuggestionPriority } from '../types/ai';
 import { calculateMonthlyCost } from './evn-pricing-service';
 import { RECOMMENDATION_SYSTEM_PROMPT, RECOMMENDATION_RETRY_PROMPT } from '../prompts/recommendation';
 import { CHAT_ASSISTANT_SYSTEM_PROMPT } from '../prompts/chat-assistant';
@@ -75,7 +75,7 @@ interface RawSavingsSuggestionsResult {
 }
 
 const VALID_PRIORITIES = new Set(['high', 'medium', 'low']);
-const DEFAULT_PRIORITY = 'low';
+const DEFAULT_PRIORITY: SuggestionPriority = 'low';
 
 function parseSavingsSuggestionsJson(text: string): SavingsSuggestionsResult {
   const cleaned = stripMarkdownJsonWrapper(text);
@@ -92,7 +92,7 @@ function parseSavingsSuggestionsJson(text: string): SavingsSuggestionsResult {
       tip: d.tip,
       savingsKwh: d.savingsKwh ?? 0,
       savingsVnd: d.savingsVnd ?? 0,
-      priority: VALID_PRIORITIES.has(d.priority) ? d.priority : DEFAULT_PRIORITY as 'low',
+      priority: VALID_PRIORITIES.has(d.priority) ? (d.priority as SuggestionPriority) : DEFAULT_PRIORITY,
     })),
   }));
 
@@ -230,11 +230,11 @@ export async function generateSavingsSuggestions(
   const response = await getClient().messages.create({
     model: MODEL_SONNET,
     max_tokens: MAX_TOKENS_RECOMMENDATIONS,
-    system: SAVINGS_SUGGESTIONS_SYSTEM_PROMPT,
+    system: [{ type: 'text', text: SAVINGS_SUGGESTIONS_SYSTEM_PROMPT, cache_control: { type: 'ephemeral' } }],
     messages: [
       {
         role: 'user',
-        content: JSON.stringify(homeData),
+        content: [{ type: 'text', text: JSON.stringify(homeData), cache_control: { type: 'ephemeral' } }],
       },
     ],
   });
@@ -247,11 +247,11 @@ export async function generateSavingsSuggestions(
     const retryResponse = await getClient().messages.create({
       model: MODEL_SONNET,
       max_tokens: MAX_TOKENS_RECOMMENDATIONS,
-      system: SAVINGS_SUGGESTIONS_SYSTEM_PROMPT,
+      system: [{ type: 'text', text: SAVINGS_SUGGESTIONS_SYSTEM_PROMPT, cache_control: { type: 'ephemeral' } }],
       messages: [
         {
           role: 'user',
-          content: JSON.stringify(homeData),
+          content: [{ type: 'text', text: JSON.stringify(homeData), cache_control: { type: 'ephemeral' } }],
         },
         {
           role: 'assistant',
