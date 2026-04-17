@@ -5,41 +5,44 @@ import {
   Bar,
   BarChart,
   Cell,
-  LabelList,
   ResponsiveContainer,
+  Tooltip,
   XAxis,
   YAxis,
 } from "recharts";
-import type { Props as LabelProps } from "recharts/types/component/Label";
+import type { TooltipContentProps } from "recharts";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useT } from "@/hooks/use-t";
-import {
-  HIGH_CONSUMER_THRESHOLD_PERCENT,
-  TOP_CONSUMERS_CHART_HEIGHT,
-} from "@/lib/constants";
-import { formatPercent } from "@/lib/format";
+import { formatKwh, formatVnd } from "@/lib/format";
 import type { TopConsumer } from "@/lib/types";
 
 interface TopConsumersChartProps {
   consumers: TopConsumer[];
 }
 
-const PRIMARY_GREEN = "#3B8C2A";
-const ACCENT_AMBER = "#EF9F27";
 const MAX_CONSUMERS = 5;
-const FIRST_CONSUMER_INDEX = 0;
+const FIRST_INDEX = 0;
+const HIGH_THRESHOLD = 20;
+const BAR_RADIUS = 8;
+const BAR_SIZE = 36;
+const CHART_HEIGHT = 280;
 
-interface ChartDataItem {
+const GRADIENT_NORMAL_START = "#43A047";
+const GRADIENT_NORMAL_END = "#1B5E20";
+const GRADIENT_WARN_START = "#FFB74D";
+const GRADIENT_WARN_END = "#E65100";
+
+interface ChartItem {
   name: string;
   kwh: number;
+  cost: number;
   percent: number;
-  percentLabel: string;
-  isHighConsumer: boolean;
+  isHigh: boolean;
 }
 
-function toChartData(consumers: TopConsumer[]): ChartDataItem[] {
-  const limited = consumers.slice(FIRST_CONSUMER_INDEX, MAX_CONSUMERS);
+function toChartData(consumers: TopConsumer[]): ChartItem[] {
+  const limited = consumers.slice(FIRST_INDEX, MAX_CONSUMERS);
   const totalKwh = limited.reduce((sum, c) => sum + c.monthlyKwh, 0);
 
   return limited.map((c) => {
@@ -47,31 +50,32 @@ function toChartData(consumers: TopConsumer[]): ChartDataItem[] {
     return {
       name: c.name,
       kwh: Math.round(c.monthlyKwh * 10) / 10,
+      cost: c.monthlyCost,
       percent,
-      percentLabel: formatPercent(percent),
-      isHighConsumer: percent > HIGH_CONSUMER_THRESHOLD_PERCENT,
+      isHigh: percent > HIGH_THRESHOLD,
     };
   });
 }
 
-function renderPercentLabel(props: LabelProps): ReactElement {
-  const x = Number(props.x ?? 0);
-  const y = Number(props.y ?? 0);
-  const width = Number(props.width ?? 0);
-  const height = Number(props.height ?? 0);
-  const value = String(props.value ?? "");
+function CustomTooltip({ active, payload }: TooltipContentProps) {
+  if (!active || !payload?.length) return null;
+  const item = (payload[FIRST_INDEX] as unknown as { payload: ChartItem }).payload;
 
   return (
-    <text
-      x={x + width + 4}
-      y={y + height / 2}
-      fill="currentColor"
-      textAnchor="start"
-      dominantBaseline="middle"
-      className="text-xs fill-muted-foreground"
-    >
-      {value}
-    </text>
+    <div className="rounded-xl border border-border/50 bg-card/95 px-4 py-3 shadow-xl backdrop-blur-sm">
+      <p className="text-sm font-bold">{item.name}</p>
+      <div className="mt-1.5 flex flex-col gap-0.5 text-xs">
+        <span className="text-muted-foreground">
+          {formatKwh(item.kwh)}
+        </span>
+        <span className="text-muted-foreground">
+          {formatVnd(item.cost)}
+        </span>
+        <span className="font-semibold text-primary">
+          {Math.round(item.percent)}%
+        </span>
+      </div>
+    </div>
   );
 }
 
@@ -80,37 +84,54 @@ export function TopConsumersChart({ consumers }: TopConsumersChartProps) {
   const chartData = toChartData(consumers);
 
   return (
-    <Card>
-      <CardHeader className="p-3 pb-0">
-        <CardTitle className="text-sm">
+    <Card className="overflow-hidden rounded-2xl border-0 shadow-[0_2px_12px_-3px_rgba(0,0,0,0.08),0_8px_20px_-4px_rgba(0,0,0,0.04)]">
+      <CardHeader className="px-5 pb-0 pt-5 lg:px-6 lg:pt-6">
+        <CardTitle className="text-base font-bold">
           {t.DASHBOARD_TOP_CONSUMERS_TITLE}
         </CardTitle>
       </CardHeader>
-      <CardContent className="p-3 pt-2">
-        <ResponsiveContainer width="100%" height={TOP_CONSUMERS_CHART_HEIGHT}>
+      <CardContent className="px-5 pb-5 pt-4 lg:px-6 lg:pb-6">
+        <ResponsiveContainer width="100%" height={CHART_HEIGHT}>
           <BarChart
             data={chartData}
             layout="vertical"
-            margin={{ top: 0, right: 40, left: 0, bottom: 0 }}
+            margin={{ top: 0, right: 16, left: 0, bottom: 0 }}
+            barCategoryGap="20%"
           >
+            <defs>
+              <linearGradient id="barGreen" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%" stopColor={GRADIENT_NORMAL_START} />
+                <stop offset="100%" stopColor={GRADIENT_NORMAL_END} />
+              </linearGradient>
+              <linearGradient id="barAmber" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%" stopColor={GRADIENT_WARN_START} />
+                <stop offset="100%" stopColor={GRADIENT_WARN_END} />
+              </linearGradient>
+            </defs>
             <XAxis type="number" hide />
             <YAxis
               type="category"
               dataKey="name"
-              width={80}
-              tick={{ fontSize: 11 }}
+              width={90}
+              tick={{ fontSize: 12, fontWeight: 500, fill: "hsl(var(--foreground))" }}
               tickLine={false}
               axisLine={false}
             />
-            <Bar dataKey="kwh" radius={[0, 4, 4, 0]}>
-              <LabelList
-                dataKey="percentLabel"
-                content={renderPercentLabel}
-              />
+            <Tooltip
+              content={(props) => <CustomTooltip {...props} />}
+              cursor={{ fill: "hsl(var(--muted))", opacity: 0.4, radius: BAR_RADIUS }}
+            />
+            <Bar
+              dataKey="kwh"
+              radius={[0, BAR_RADIUS, BAR_RADIUS, 0]}
+              barSize={BAR_SIZE}
+              animationDuration={1000}
+              animationBegin={100}
+            >
               {chartData.map((entry) => (
                 <Cell
                   key={entry.name}
-                  fill={entry.isHighConsumer ? ACCENT_AMBER : PRIMARY_GREEN}
+                  fill={entry.isHigh ? "url(#barAmber)" : "url(#barGreen)"}
                 />
               ))}
             </Bar>

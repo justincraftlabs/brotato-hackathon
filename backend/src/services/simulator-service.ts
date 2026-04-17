@@ -17,12 +17,19 @@ import { Appliance } from '../types/home';
 
 const MONTHS_PER_YEAR = 12;
 const TWO_DECIMAL_PRECISION = 100;
-const BASE_TEMPERATURE_CELSIUS = 20;
-const SAVINGS_PER_DEGREE = 0.035;
-const MIN_WATTAGE_RATIO = 0.3;
 const HIGH_IMPACT_THRESHOLD = 0.2;
 const MEDIUM_IMPACT_THRESHOLD = 0.1;
 const ZERO_KWH = 0;
+
+const COOLING_TYPE = 'cooling';
+const HEATING_TYPE = 'heating';
+
+const COOLING_AMBIENT_TEMP = 35;
+const COOLING_BASELINE_TEMP = 25;
+const HEATING_AMBIENT_TEMP = 25;
+const HEATING_BASELINE_TEMP = 45;
+const TEMP_FACTOR_MIN = 0;
+const TEMP_FACTOR_MAX = 2;
 
 interface AdjustedAppliance {
   applianceId: string;
@@ -31,14 +38,35 @@ interface AdjustedAppliance {
   simulatedKwh: number;
 }
 
-function applyTemperatureAdjustment(
-  originalWattage: number,
-  newTemperature: number
+function calculateTemperatureFactor(
+  applianceType: string,
+  temperature: number
 ): number {
-  const degreesAboveBase = newTemperature - BASE_TEMPERATURE_CELSIUS;
-  const reductionFactor = 1 - degreesAboveBase * SAVINGS_PER_DEGREE;
-  const clampedFactor = Math.max(reductionFactor, MIN_WATTAGE_RATIO);
-  return originalWattage * clampedFactor;
+  if (applianceType === COOLING_TYPE) {
+    const baselineDelta = COOLING_AMBIENT_TEMP - COOLING_BASELINE_TEMP;
+    if (baselineDelta <= 0) {
+      return 1;
+    }
+    const actualDelta = COOLING_AMBIENT_TEMP - temperature;
+    return Math.max(
+      TEMP_FACTOR_MIN,
+      Math.min(actualDelta / baselineDelta, TEMP_FACTOR_MAX)
+    );
+  }
+
+  if (applianceType === HEATING_TYPE) {
+    const baselineDelta = HEATING_BASELINE_TEMP - HEATING_AMBIENT_TEMP;
+    if (baselineDelta <= 0) {
+      return 1;
+    }
+    const actualDelta = temperature - HEATING_AMBIENT_TEMP;
+    return Math.max(
+      TEMP_FACTOR_MIN,
+      Math.min(actualDelta / baselineDelta, TEMP_FACTOR_MAX)
+    );
+  }
+
+  return 1;
 }
 
 function resolveWattage(
@@ -49,12 +77,14 @@ function resolveWattage(
     return appliance.wattage;
   }
 
+  const baseWattage = adjustment.newWattage ?? appliance.wattage;
+
   if (adjustment.newTemperature !== undefined) {
-    const baseWattage = adjustment.newWattage ?? appliance.wattage;
-    return applyTemperatureAdjustment(baseWattage, adjustment.newTemperature);
+    const factor = calculateTemperatureFactor(appliance.type, adjustment.newTemperature);
+    return baseWattage * factor;
   }
 
-  return adjustment.newWattage ?? appliance.wattage;
+  return baseWattage;
 }
 
 function resolveDailyHours(

@@ -62,7 +62,7 @@ export function RoomSelector({
         {t.LABEL_SELECT_ROOMS}
       </p>
 
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-3">
         {ROOM_TYPES.map((type) => {
           const Icon = ICON_MAP[type];
           const count = getRoomCountForType(type);
@@ -106,7 +106,7 @@ export function RoomSelector({
       </div>
 
       {hasRooms && (
-        <div className="flex flex-col gap-3">
+        <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
           {ROOM_TYPES.map((type) => {
             const typeRooms = getRoomsForType(type);
             if (typeRooms.length === 0) {
@@ -128,8 +128,8 @@ export function RoomSelector({
         </div>
       )}
 
-      <div className="fixed bottom-20 left-0 right-0 z-40 px-4">
-        <div className="mx-auto max-w-lg">
+      <div className="fixed bottom-20 left-0 right-0 z-40 px-4 lg:static lg:bottom-auto lg:z-auto lg:px-0 lg:pt-4">
+        <div className="mx-auto max-w-lg lg:max-w-none">
           <Button
             className="h-12 w-full bg-primary text-primary-foreground hover:bg-primary/90"
             disabled={!hasRooms}

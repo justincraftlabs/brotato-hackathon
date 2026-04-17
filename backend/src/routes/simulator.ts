@@ -8,7 +8,7 @@ import { SimulationResult } from '../types/simulator';
 const HTTP_OK = 200;
 const HTTP_NOT_FOUND = 404;
 const MIN_TEMPERATURE = 16;
-const MAX_TEMPERATURE = 30;
+const MAX_TEMPERATURE = 60;
 const MAX_DAILY_HOURS = 24;
 const MIN_DAILY_HOURS = 0;
 

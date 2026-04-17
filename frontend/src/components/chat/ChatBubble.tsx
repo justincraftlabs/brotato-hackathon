@@ -41,7 +41,7 @@ export function ChatBubble({ role, content, isStreaming }: ChatBubbleProps) {
             alt="Khoai Tây"
             width={POTATO_LOGO_SIZE}
             height={POTATO_LOGO_SIZE}
-            className="mt-1 shrink-0 rounded-full"
+            className="mt-1 h-7 w-7 shrink-0 self-start rounded-full object-cover"
           />
         )}
         <div

@@ -23,10 +23,10 @@ const config: Config = {
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         primary: {
-          DEFAULT: "#3B8C2A",
-          dark: "#3B8C2A",
-          mid: "#639922",
-          light: "#EAF3DE",
+          DEFAULT: "#2E7D32",
+          dark: "#1B5E20",
+          mid: "#43A047",
+          light: "#E8F5E9",
           foreground: "hsl(var(--primary-foreground))",
         },
         secondary: {

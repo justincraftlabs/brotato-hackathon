@@ -64,7 +64,6 @@ import {
 import type { Appliance, Room, RoomType } from "@/lib/types";
 
 import { ApplianceCard } from "./ApplianceCard";
-import { VoiceInputButton } from "./VoiceInputButton";
 
 interface ApplianceFormProps {
   rooms: Room[];
@@ -318,7 +317,7 @@ export function ApplianceFormStep({
   return (
     <div className="flex flex-col gap-4">
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="flex w-full overflow-x-auto">
+        <TabsList className={cn("flex w-full overflow-x-auto", rooms.length <= 1 && "hidden")}>
           {rooms.map((room) => {
             const Icon = ICON_MAP[room.type];
             const applianceCount = appliancesByRoom[room.id]?.length ?? 0;
@@ -434,11 +433,6 @@ export function ApplianceFormStep({
                     <Loader2 className="absolute right-3 top-2.5 h-4 w-4 animate-spin text-muted-foreground" />
                   )}
                 </div>
-                <VoiceInputButton
-                  onTranscript={(text) => {
-                    setForm((prev) => ({ ...prev, name: text }));
-                  }}
-                />
                 <Button
                   type="button"
                   variant="outline"
@@ -663,7 +657,7 @@ export function ApplianceFormStep({
         </DialogContent>
       </Dialog>
 
-      <div className="fixed bottom-20 left-0 right-0 z-40 px-4">
+      <div className="fixed bottom-20 left-0 right-0 z-40 px-4 lg:left-[var(--sidebar-width)]">
         <div className="mx-auto flex max-w-lg gap-3">
           <Button
             variant="outline"

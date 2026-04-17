@@ -1,6 +1,6 @@
 "use client";
 
-import { Home, Lightbulb, MessageCircle, Settings, Sliders } from "lucide-react";
+import { LayoutDashboard, Lightbulb, MessageCircle, Settings } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ComponentType } from "react";
@@ -20,11 +20,10 @@ export function BottomNav() {
   const pathname = usePathname();
 
   const NAV_ITEMS: NavItem[] = [
-    { href: NAV_ROUTES.DASHBOARD, label: t.NAV_OVERVIEW, icon: Home },
-    { href: NAV_ROUTES.CHAT, label: t.NAV_CHAT, icon: MessageCircle },
-    { href: NAV_ROUTES.SIMULATOR, label: t.NAV_SIMULATOR, icon: Sliders },
+    { href: NAV_ROUTES.DASHBOARD, label: t.NAV_OVERVIEW, icon: LayoutDashboard },
     { href: NAV_ROUTES.SETUP, label: t.NAV_SETUP, icon: Settings },
-    { href: NAV_ROUTES.SUGGESTIONS, label: t.NAV_SUGGESTIONS, icon: Lightbulb },
+    { href: NAV_ROUTES.TIPS, label: t.NAV_TIPS, icon: Lightbulb },
+    { href: NAV_ROUTES.ASSISTANT, label: t.NAV_ASSISTANT, icon: MessageCircle },
   ];
 
   return (

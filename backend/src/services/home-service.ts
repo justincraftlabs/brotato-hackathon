@@ -311,6 +311,111 @@ export async function deleteAppliance(
   }
 }
 
+export async function addRoom(
+  homeId: string,
+  room: RoomInput
+): Promise<Room> {
+  const home = await HomeModel.findOne({ homeId }).lean();
+  if (!home) {
+    throw new HomeNotFoundError(homeId);
+  }
+
+  const roomDoc = await RoomModel.create({
+    roomId: uuidv4(),
+    homeId,
+    name: room.name,
+    type: room.type,
+    size: room.size,
+  });
+
+  return buildRoomWithAppliances(
+    {
+      roomId: roomDoc.roomId,
+      homeId: roomDoc.homeId,
+      name: roomDoc.name,
+      type: roomDoc.type,
+      size: roomDoc.size,
+    },
+    []
+  );
+}
+
+export async function updateRoom(
+  homeId: string,
+  roomId: string,
+  updates: Partial<RoomInput>
+): Promise<Room> {
+  const updated = await RoomModel.findOneAndUpdate(
+    { roomId, homeId },
+    updates,
+    { new: true }
+  ).lean();
+
+  if (!updated) {
+    throw new RoomNotFoundError(roomId);
+  }
+
+  const appliances = await ApplianceModel.find({ roomId, homeId }).lean();
+
+  return buildRoomWithAppliances(
+    {
+      roomId: updated.roomId,
+      homeId: updated.homeId,
+      name: updated.name,
+      type: updated.type,
+      size: updated.size,
+    },
+    appliances.map((doc) => ({
+      applianceId: doc.applianceId,
+      roomId: doc.roomId,
+      homeId: doc.homeId,
+      name: doc.name,
+      type: doc.type,
+      wattage: doc.wattage,
+      dailyUsageHours: doc.dailyUsageHours,
+      standbyWattage: doc.standbyWattage,
+      usageHabit: doc.usageHabit,
+      monthlyKwh: doc.monthlyKwh,
+      monthlyCost: doc.monthlyCost,
+    }))
+  );
+}
+
+export async function deleteRoom(
+  homeId: string,
+  roomId: string
+): Promise<void> {
+  const room = await RoomModel.findOne({ roomId, homeId }).lean();
+  if (!room) {
+    throw new RoomNotFoundError(roomId);
+  }
+
+  await ApplianceModel.deleteMany({ roomId, homeId });
+  await RoomModel.deleteOne({ roomId, homeId });
+
+  const remainingAppliances = await ApplianceModel.find({ homeId }).lean();
+  const totalKwh = remainingAppliances.reduce(
+    (sum, a) => sum + a.monthlyKwh,
+    ZERO_KWH
+  );
+
+  if (totalKwh <= ZERO_KWH) {
+    return;
+  }
+
+  const totalCost = calculateMonthlyCost(totalKwh);
+
+  for (const appliance of remainingAppliances) {
+    const newCost = Math.round(
+      (appliance.monthlyKwh / totalKwh) * totalCost
+    );
+    await ApplianceModel.updateOne(
+      { applianceId: appliance.applianceId },
+      { monthlyCost: newCost }
+    );
+  }
+}
+
 export class HomeNotFoundError extends Error {
   constructor(homeId: string) {
     super(`Home not found: ${homeId}`);

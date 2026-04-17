@@ -41,6 +41,10 @@ export const TRANSLATIONS = {
     en: "Select rooms in your home",
   },
   LABEL_SETUP_TITLE: { vi: "Thiết lập nhà của bạn", en: "Set up your home" },
+  LABEL_SETUP_SUBTITLE: {
+    vi: "Thêm phòng và thiết bị để bắt đầu phân tích năng lượng",
+    en: "Add rooms and appliances to start energy analysis",
+  },
   LABEL_AI_SUGGESTION_PREFIX: { vi: "AI gợi ý:", en: "AI suggestion:" },
   LABEL_QUICK_ADD: { vi: "Thêm nhanh", en: "Quick add" },
   LABEL_REVIEW_TITLE: { vi: "Xem lại thông tin", en: "Review information" },
@@ -183,8 +187,16 @@ export const TRANSLATIONS = {
   LABEL_DELETE: { vi: "Xóa", en: "Delete" },
 
   // Setup edit mode
-  SETUP_EDIT_TITLE: { vi: "Quản lý thiết bị", en: "Manage Appliances" },
-  SETUP_SELECT_ROOM: { vi: "Chọn phòng", en: "Select room" },
+  SETUP_EDIT_TITLE: { vi: "Quản lý nhà", en: "Manage Home" },
+  SETUP_SELECT_ROOM: { vi: "Chọn phòng để quản lý thiết bị", en: "Select room to manage appliances" },
+  SETUP_ADD_ROOM: { vi: "Thêm phòng", en: "Add room" },
+  SETUP_EDIT_ROOM: { vi: "Sửa phòng", en: "Edit room" },
+  SETUP_DELETE_ROOM_CONFIRM: {
+    vi: "Xóa phòng này và tất cả thiết bị trong đó?",
+    en: "Delete this room and all its appliances?",
+  },
+  SETUP_DELETING_ROOM: { vi: "Đang xóa phòng...", en: "Deleting room..." },
+  SETUP_ROOM_SIZE_LABEL: { vi: "Kích thước", en: "Size" },
   SETUP_BACK_TO_ROOMS: {
     vi: "Quay lại danh sách phòng",
     en: "Back to rooms",

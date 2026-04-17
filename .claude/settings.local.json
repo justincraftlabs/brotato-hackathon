@@ -31,7 +31,12 @@
       "Bash(echo \"Backend started with PID $!\")",
       "Bash(echo \"Frontend started with PID $!\")",
       "Bash(curl -s http://localhost:3001/api/home)",
-      "Bash(curl -s http://localhost:3001/api/home -X POST -H \"Content-Type: application/json\" -d '{\"name\":\"Test Home\",\"location\":\"Hanoi\",\"monthlyBudget\":500000}')"
+      "Bash(curl -s http://localhost:3001/api/home -X POST -H \"Content-Type: application/json\" -d '{\"name\":\"Test Home\",\"location\":\"Hanoi\",\"monthlyBudget\":500000}')",
+      "Read(//c/Users/hoang.nguyenxuan/Documents/Side/ Projects/brotato-hackathon/backend/src/services/**)",
+      "Read(//c/Users/hoang.nguyenxuan/Documents/Side/ Projects/brotato-hackathon/backend/src/routes/**)",
+      "Read(//c/Users/hoang.nguyenxuan/Documents/Side/ Projects/brotato-hackathon/frontend/src/lib/**)",
+      "Bash(xargs grep *)",
+      "Bash(node -e \"const r = require\\('./node_modules/recharts/package.json'\\); console.log\\(r.version\\)\")"
     ]
   },
   "hooks": {

@@ -47,8 +47,8 @@ export function Header() {
   }
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="flex h-14 items-center justify-between px-4 lg:px-8">
+    <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 lg:hidden">
+      <div className="flex h-14 items-center justify-between px-4">
         <span className="text-lg font-bold tracking-tight">
           E-<span className="text-primary">LUMI</span>-NATE
         </span>

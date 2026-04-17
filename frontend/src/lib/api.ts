@@ -280,6 +280,42 @@ export async function deleteAppliance(
   });
 }
 
+export async function addRoom(
+  homeId: string,
+  room: Pick<Room, "name" | "type" | "size">
+): Promise<ApiResponse<Room>> {
+  return request<Room>(`/api/home/${homeId}/rooms`, {
+    method: "POST",
+    body: JSON.stringify(room),
+  });
+}
+
+interface UpdateRoomPayload {
+  name?: string;
+  type?: Room["type"];
+  size?: Room["size"];
+}
+
+export async function updateRoom(
+  homeId: string,
+  roomId: string,
+  updates: UpdateRoomPayload
+): Promise<ApiResponse<Room>> {
+  return request<Room>(`/api/home/${homeId}/rooms/${roomId}`, {
+    method: "PUT",
+    body: JSON.stringify(updates),
+  });
+}
+
+export async function deleteRoom(
+  homeId: string,
+  roomId: string
+): Promise<ApiResponse<null>> {
+  return request<null>(`/api/home/${homeId}/rooms/${roomId}`, {
+    method: "DELETE",
+  });
+}
+
 export async function getSavingsSuggestions(
   homeId: string,
   forceRefresh = false

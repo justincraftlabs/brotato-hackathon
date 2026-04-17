@@ -87,11 +87,12 @@ export function SetupReview({
   );
 
   return (
-    <div className="flex flex-col gap-4">
-      <p className="text-center text-sm text-muted-foreground">
+    <div className="flex flex-col gap-4 lg:gap-6">
+      <p className="text-center text-sm text-muted-foreground lg:text-left">
         {t.LABEL_REVIEW_TITLE}
       </p>
 
+      <div className="grid grid-cols-1 gap-3 lg:grid-cols-2 lg:gap-4">
       {roomSummaries.map(({ room, appliances, roomKwh, roomCost }) => {
         const Icon = ICON_MAP[room.type];
         const isExpanded = expandedRooms.has(room.id);
@@ -165,11 +166,12 @@ export function SetupReview({
           </Card>
         );
       })}
+      </div>
 
       <Card className="border-primary">
         <CardContent className="p-4">
           <h3 className="mb-3 text-sm font-semibold">{t.LABEL_TOTAL}</h3>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-3 lg:grid-cols-5">
             <SummaryItem
               label={t.LABEL_ROOM_COUNT}
               value={`${rooms.length} ${t.LABEL_ROOM_COUNT}`}
@@ -195,8 +197,8 @@ export function SetupReview({
         </CardContent>
       </Card>
 
-      <div className="fixed bottom-20 left-0 right-0 z-40 px-4">
-        <div className="mx-auto flex max-w-lg gap-3">
+      <div className="fixed bottom-20 left-0 right-0 z-40 px-4 lg:static lg:bottom-auto lg:z-auto lg:px-0 lg:pt-4">
+        <div className="mx-auto flex max-w-lg gap-3 lg:max-w-none">
           <Button
             variant="outline"
             className="h-12 flex-1"

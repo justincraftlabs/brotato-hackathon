@@ -17,6 +17,10 @@ import { formatKwh } from "@/lib/format";
 import {
   COOLING_TYPE,
   HEATING_TYPE,
+  COOLING_TEMP_SLIDER,
+  HEATING_TEMP_SLIDER,
+  DEFAULT_COOLING_TEMP,
+  DEFAULT_HEATING_TEMP,
   SIMULATOR_SLIDER,
 } from "@/lib/simulator-constants";
 import type { Translations } from "@/lib/translations";
@@ -47,6 +51,20 @@ const ZERO_DELTA = 0;
 
 function isTemperatureAdjustable(type: string): boolean {
   return type === COOLING_TYPE || type === HEATING_TYPE;
+}
+
+function getTempSliderConfig(type: string) {
+  if (type === HEATING_TYPE) {
+    return HEATING_TEMP_SLIDER;
+  }
+  return COOLING_TEMP_SLIDER;
+}
+
+function getDefaultTemp(type: string): number {
+  if (type === HEATING_TYPE) {
+    return DEFAULT_HEATING_TEMP;
+  }
+  return DEFAULT_COOLING_TEMP;
 }
 
 function getStatusDotColor(
@@ -111,32 +129,37 @@ function ApplianceRow({ appliance, adjustment, onAdjust, t }: ApplianceRowProps)
         />
       </div>
 
-      {showTempSlider && (
-        <div className="flex flex-col gap-1">
-          <div className="flex items-center justify-between">
-            <span className="text-xs text-muted-foreground">
-              {t.SIMULATOR_TEMPERATURE_LABEL}
-            </span>
-            <span className="text-xs font-semibold text-primary">
-              {adjustment?.newTemperature ?? 24}
-              {"°C"}
-            </span>
+      {showTempSlider && (() => {
+        const tempConfig = getTempSliderConfig(appliance.type);
+        const defaultTemp = getDefaultTemp(appliance.type);
+        const currentTemp = adjustment?.newTemperature ?? defaultTemp;
+
+        return (
+          <div className="flex flex-col gap-1">
+            <div className="flex items-center justify-between">
+              <span className="text-xs text-muted-foreground">
+                {t.SIMULATOR_TEMPERATURE_LABEL}
+              </span>
+              <span className="text-xs font-semibold text-primary">
+                {currentTemp}{"°C"}
+              </span>
+            </div>
+            <Slider
+              min={tempConfig.MIN}
+              max={tempConfig.MAX}
+              step={tempConfig.STEP}
+              value={[currentTemp]}
+              onValueChange={([val]) =>
+                onAdjust(appliance.id, {
+                  ...adjustment,
+                  newTemperature: val,
+                })
+              }
+              aria-label={`${appliance.name} ${t.SIMULATOR_TEMPERATURE_LABEL}`}
+            />
           </div>
-          <Slider
-            min={SIMULATOR_SLIDER.TEMP_MIN}
-            max={SIMULATOR_SLIDER.TEMP_MAX}
-            step={SIMULATOR_SLIDER.TEMP_STEP}
-            value={[adjustment?.newTemperature ?? 24]}
-            onValueChange={([val]) =>
-              onAdjust(appliance.id, {
-                ...adjustment,
-                newTemperature: val,
-              })
-            }
-            aria-label={`${appliance.name} ${t.SIMULATOR_TEMPERATURE_LABEL}`}
-          />
-        </div>
-      )}
+        );
+      })()}
     </div>
   );
 }

@@ -9,6 +9,9 @@ import {
   getHome,
   updateAppliance,
   deleteAppliance,
+  addRoom,
+  updateRoom,
+  deleteRoom,
   HomeNotFoundError,
   RoomNotFoundError,
   ApplianceNotFoundError,
@@ -63,9 +66,23 @@ const updateApplianceSchema = z.object({
   usageHabit: z.string().optional(),
 });
 
+const addRoomSchema = z.object({
+  name: z.string(),
+  type: z.enum(ROOM_TYPES),
+  size: z.enum(ROOM_SIZES),
+});
+
+const updateRoomSchema = z.object({
+  name: z.string().optional(),
+  type: z.enum(ROOM_TYPES).optional(),
+  size: z.enum(ROOM_SIZES).optional(),
+});
+
 type SetupBody = z.infer<typeof setupSchema>;
 type AddAppliancesBody = z.infer<typeof addAppliancesSchema>;
 type UpdateApplianceBody = z.infer<typeof updateApplianceSchema>;
+type AddRoomBody = z.infer<typeof addRoomSchema>;
+type UpdateRoomBody = z.infer<typeof updateRoomSchema>;
 
 const router = Router();
 
@@ -179,6 +196,90 @@ router.delete(
           success: false,
           error: err.message,
         };
+        res.status(HTTP_NOT_FOUND).json(response);
+        return;
+      }
+
+      next(err);
+    }
+  }
+);
+
+router.post(
+  '/:homeId/rooms',
+  validate(addRoomSchema),
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const homeId = req.params.homeId as string;
+      const body = req.body as AddRoomBody;
+
+      const room = await addRoom(homeId, body);
+
+      const response: ApiSuccessResponse<typeof room> = {
+        success: true,
+        data: room,
+      };
+
+      res.status(HTTP_CREATED).json(response);
+    } catch (err) {
+      if (err instanceof HomeNotFoundError) {
+        const response: ApiErrorResponse = { success: false, error: err.message };
+        res.status(HTTP_NOT_FOUND).json(response);
+        return;
+      }
+
+      next(err);
+    }
+  }
+);
+
+router.put(
+  '/:homeId/rooms/:roomId',
+  validate(updateRoomSchema),
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const homeId = req.params.homeId as string;
+      const roomId = req.params.roomId as string;
+      const updates = req.body as UpdateRoomBody;
+
+      const room = await updateRoom(homeId, roomId, updates);
+
+      const response: ApiSuccessResponse<typeof room> = {
+        success: true,
+        data: room,
+      };
+
+      res.status(HTTP_OK).json(response);
+    } catch (err) {
+      if (err instanceof RoomNotFoundError) {
+        const response: ApiErrorResponse = { success: false, error: err.message };
+        res.status(HTTP_NOT_FOUND).json(response);
+        return;
+      }
+
+      next(err);
+    }
+  }
+);
+
+router.delete(
+  '/:homeId/rooms/:roomId',
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const homeId = req.params.homeId as string;
+      const roomId = req.params.roomId as string;
+
+      await deleteRoom(homeId, roomId);
+
+      const response: ApiSuccessResponse<null> = {
+        success: true,
+        data: null,
+      };
+
+      res.status(HTTP_OK).json(response);
+    } catch (err) {
+      if (err instanceof RoomNotFoundError) {
+        const response: ApiErrorResponse = { success: false, error: err.message };
         res.status(HTTP_NOT_FOUND).json(response);
         return;
       }

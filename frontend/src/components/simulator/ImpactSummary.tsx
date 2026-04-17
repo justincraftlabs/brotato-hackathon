@@ -1,6 +1,6 @@
 "use client";
 
-import { Leaf, TrendingDown, Zap } from "lucide-react";
+import { Leaf, TrendingDown, TrendingUp, Zap } from "lucide-react";
 import type { ComponentType } from "react";
 
 import { Card, CardContent } from "@/components/ui/card";
@@ -67,7 +67,7 @@ export function ImpactSummary({
       label: t.SIMULATOR_VND_SAVED,
       value: formatVnd(savingsVnd),
       subtitle: null,
-      icon: TrendingDown,
+      icon: savingsVnd >= ZERO_DELTA ? TrendingDown : TrendingUp,
       delta: savingsVnd,
     },
     {

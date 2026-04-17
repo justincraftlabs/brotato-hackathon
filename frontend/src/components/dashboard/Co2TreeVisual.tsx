@@ -24,26 +24,26 @@ export function Co2TreeVisual({ co2 }: Co2TreeVisualProps) {
   );
 
   return (
-    <Card>
-      <CardContent className="flex flex-col gap-2 p-3">
+    <Card className="overflow-hidden rounded-2xl border-0 shadow-[0_2px_12px_-3px_rgba(0,0,0,0.08),0_8px_20px_-4px_rgba(0,0,0,0.04)]">
+      <CardContent className="flex flex-col gap-3 p-5 lg:p-6">
         <div className="flex items-center justify-between">
-          <p className="text-sm font-semibold">
+          <p className="text-base font-bold">
             {t.DASHBOARD_CO2_TREE_TITLE}
           </p>
-          <p className="text-sm font-bold text-primary">
+          <p className="text-base font-black text-primary">
             {formatCo2(co2.totalKg)}
           </p>
         </div>
-        <div className="flex flex-wrap items-center gap-1">
+        <div className="flex flex-wrap items-center gap-1.5">
           {Array.from({ length: visibleTrees }).map((_, index) => (
             <TreePine
               key={index}
-              className="h-5 w-5 text-primary"
+              className="h-6 w-6 text-primary"
               aria-hidden="true"
             />
           ))}
           {hasOverflow && (
-            <span className="text-sm font-medium text-muted-foreground">
+            <span className="text-sm font-bold text-muted-foreground">
               {t.DASHBOARD_CO2_TREE_OVERFLOW}
             </span>
           )}
