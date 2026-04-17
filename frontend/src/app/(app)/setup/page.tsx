@@ -3,6 +3,7 @@
 import { useCallback, useState } from "react";
 import { useRouter } from "next/navigation";
 
+import { EditModeView } from "@/components/setup/EditModeView";
 import { StepIndicator } from "@/components/setup/StepIndicator";
 import { RoomSelector } from "@/components/setup/RoomSelector";
 import { ApplianceFormStep } from "@/components/setup/ApplianceForm";
@@ -39,7 +40,7 @@ function generateApplianceId(): string {
   return `appliance-${Date.now()}-${applianceCounter}`;
 }
 
-export default function SetupPage() {
+function FreshWizard() {
   const router = useRouter();
   const t = useT();
   const [, setHomeId] = useLocalStorage(LOCAL_STORAGE_HOME_ID_KEY);
@@ -235,4 +236,14 @@ export default function SetupPage() {
       </div>
     </div>
   );
+}
+
+export default function SetupPage() {
+  const [homeId] = useLocalStorage(LOCAL_STORAGE_HOME_ID_KEY);
+
+  if (homeId) {
+    return <EditModeView homeId={homeId} />;
+  }
+
+  return <FreshWizard />;
 }
