@@ -32,7 +32,7 @@ const THEME_LIGHT = "light";
 const SIDEBAR_STORAGE_KEY = "sidebar-expanded";
 const SIDEBAR_EXPANDED_WIDTH = 240;
 const SIDEBAR_MINI_WIDTH = 68;
-const LOGO_SIZE = 32;
+const LOGO_SIZE = 28;
 
 const SIDEBAR_SPRING: Parameters<typeof motion.aside>[0]["transition"] = {
   type: "spring",
@@ -144,7 +144,7 @@ export function Sidebar() {
             alt="E-LUMI-NATE"
             width={LOGO_SIZE}
             height={LOGO_SIZE}
-            className="shrink-0 rounded-full ring-2 ring-primary/30"
+            className="shrink-0 rounded-full object-cover"
           />
           <AnimatePresence initial={false}>
             {expanded && (
