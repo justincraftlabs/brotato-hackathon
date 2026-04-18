@@ -1,4 +1,5 @@
 import type { RoomType } from "./types";
+import type { Language } from "./translations";
 
 export const STEP_ROOM_LABEL = "Phòng";
 export const STEP_APPLIANCE_LABEL = "Thiết bị";
@@ -73,21 +74,21 @@ export const APPLIANCE_TYPE_LABELS: Record<ApplianceType, string> = {
 };
 
 export interface AppliancePreset {
-  name: string;
+  name: Record<Language, string>;
   type: ApplianceType;
   wattage: number;
   dailyHours: number;
 }
 
 export const APPLIANCE_PRESETS: AppliancePreset[] = [
-  { name: "Điều hòa", type: "cooling", wattage: 1500, dailyHours: 8 },
-  { name: "Tủ lạnh", type: "kitchen", wattage: 150, dailyHours: 24 },
-  { name: "Máy giặt", type: "laundry", wattage: 500, dailyHours: 1 },
-  { name: "Quạt", type: "cooling", wattage: 60, dailyHours: 8 },
-  { name: "Đèn LED", type: "lighting", wattage: 10, dailyHours: 6 },
-  { name: "Tivi", type: "entertainment", wattage: 120, dailyHours: 4 },
-  { name: "Nồi cơm", type: "kitchen", wattage: 700, dailyHours: 1 },
-  { name: "Bình nóng lạnh", type: "heating", wattage: 2500, dailyHours: 0.5 },
+  { name: { vi: "Điều hòa", en: "Air conditioner" }, type: "cooling", wattage: 1500, dailyHours: 8 },
+  { name: { vi: "Tủ lạnh", en: "Refrigerator" }, type: "kitchen", wattage: 150, dailyHours: 24 },
+  { name: { vi: "Máy giặt", en: "Washing machine" }, type: "laundry", wattage: 500, dailyHours: 1 },
+  { name: { vi: "Quạt", en: "Fan" }, type: "cooling", wattage: 60, dailyHours: 8 },
+  { name: { vi: "Đèn LED", en: "LED light" }, type: "lighting", wattage: 10, dailyHours: 6 },
+  { name: { vi: "Tivi", en: "TV" }, type: "entertainment", wattage: 120, dailyHours: 4 },
+  { name: { vi: "Nồi cơm", en: "Rice cooker" }, type: "kitchen", wattage: 700, dailyHours: 1 },
+  { name: { vi: "Bình nóng lạnh", en: "Water heater" }, type: "heating", wattage: 2500, dailyHours: 0.5 },
 ];
 
 export const ROOM_TYPE_ICONS: Record<RoomType, string> = {

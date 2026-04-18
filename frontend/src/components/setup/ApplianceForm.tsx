@@ -45,6 +45,7 @@ import {
 import { analyzeHabit, estimateAppliance } from "@/lib/api";
 import type { HabitAnalysis } from "@/lib/types";
 import { useT } from "@/hooks/use-t";
+import { useLanguage } from "@/contexts/language-context";
 import { useImageCapture } from "@/hooks/useImageCapture";
 import { cn } from "@/lib/cn";
 import {
@@ -131,6 +132,7 @@ export function ApplianceFormStep({
   hideNavigation = false,
 }: ApplianceFormProps) {
   const t = useT();
+  const { lang } = useLanguage();
   const APPLIANCE_TYPES = Object.keys(t.APPLIANCE_TYPE_LABELS) as ApplianceType[];
 
   const [activeTab, setActiveTab] = useState(rooms[FIRST_TAB_INDEX]?.id ?? "");
@@ -202,7 +204,7 @@ export function ApplianceFormStep({
   function handlePreset(preset: typeof APPLIANCE_PRESETS[number]) {
     setForm({
       ...form,
-      name: preset.name,
+      name: preset.name[lang],
       type: preset.type,
       wattage: String(preset.wattage),
       dailyUsageHours: preset.dailyHours,
@@ -505,7 +507,7 @@ export function ApplianceFormStep({
                 <div className="flex flex-wrap gap-2">
                   {APPLIANCE_PRESETS.map((preset) => (
                     <Badge
-                      key={preset.name}
+                      key={preset.name.vi}
                       variant="outline"
                       className="cursor-pointer px-3 py-1.5 text-xs hover:bg-primary hover:text-primary-foreground"
                       onClick={() => handlePreset(preset)}
@@ -519,7 +521,7 @@ export function ApplianceFormStep({
                         handlePreset(preset);
                       }}
                     >
-                      {preset.name}
+                      {preset.name[lang]}
                     </Badge>
                   ))}
                 </div>
