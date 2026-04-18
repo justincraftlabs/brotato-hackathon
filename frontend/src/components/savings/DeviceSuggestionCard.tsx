@@ -38,7 +38,7 @@ function getPriorityLabel(priority: SuggestionPriority, t: Translations): string
   return t.SUGGESTIONS_PRIORITY_LOW;
 }
 
-export function DeviceSuggestionCard({ device, homeId, roomName, onActivated, t }: DeviceSuggestionCardProps) {
+export function DeviceSuggestionCard({ device, roomName, onActivated, t }: DeviceSuggestionCardProps) {
   const { activate, activatedKeys } = useSchedules();
   const priorityLabel = getPriorityLabel(device.priority, t);
   const [activating, setActivating] = useState(false);
