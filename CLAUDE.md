@@ -292,6 +292,10 @@ For implementation details beyond what's here, see `plans/`:
 - [specs/simulator/](specs/simulator/) — F4 Green Heatmap Simulator
 - [specs/testing/](specs/testing/) — Unit + E2E testing strategy (Jest, supertest, RTL, Playwright)
 - [specs/verification-matrix.md](specs/verification-matrix.md) — REQ → AC → method → evidence trace for every spec
+- [specs/security-review.md](specs/security-review.md) — OWASP Top 10 sweep + CI security gates
+- [specs/ai-provenance.md](specs/ai-provenance.md) — AI-drafted vs human-authored artefacts + prompt iteration log
+- [RETROSPECTIVE.md](RETROSPECTIVE.md) — hackathon lessons learned (what worked, what didn't, what we'd change)
+- [demo-script.md](demo-script.md) — 5-minute English pitch script for final demo
 
 ## Gotchas
 
