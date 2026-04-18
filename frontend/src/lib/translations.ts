@@ -387,6 +387,10 @@ export const TRANSLATIONS = {
     vi: "Không thể nhận dạng thiết bị",
     en: "Cannot recognize appliance",
   },
+  IMAGE_ERROR_HEIC: {
+    vi: "Không thể chuyển đổi file HEIC. Vui lòng dùng ảnh JPEG hoặc PNG.",
+    en: "Cannot convert HEIC file. Please use JPEG or PNG instead.",
+  },
   IMAGE_BRAND_LABEL: { vi: "Hãng", en: "Brand" },
   IMAGE_MODEL_LABEL: { vi: "Mẫu", en: "Model" },
 
