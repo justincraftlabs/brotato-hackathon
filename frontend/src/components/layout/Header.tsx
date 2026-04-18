@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/language-context";
+import { useT } from "@/hooks/use-t";
 import type { Language } from "@/lib/translations";
 
 const THEME_DARK = "dark";
@@ -22,15 +23,8 @@ const NEXT_LANGUAGE: Record<Language, Language> = {
   en: "vi",
 };
 
-const SWITCH_TO_LANGUAGE_LABEL: Record<Language, string> = {
-  vi: "Chuyển sang tiếng Anh",
-  en: "Chuyển sang tiếng Việt",
-};
-
-const SWITCH_TO_DARK_LABEL = "Chuyển sang chế độ tối";
-const SWITCH_TO_LIGHT_LABEL = "Chuyển sang chế độ sáng";
-
 export function Header() {
+  const t = useT();
   const { theme, setTheme } = useTheme();
   const { lang, setLang } = useLanguage();
   const [mounted, setMounted] = useState(false);
@@ -60,7 +54,7 @@ export function Header() {
             size="sm"
             onClick={toggleLanguage}
             className="h-8 w-10 rounded-lg text-xs font-semibold text-muted-foreground hover:bg-primary/10 hover:text-primary"
-            aria-label={SWITCH_TO_LANGUAGE_LABEL[lang]}
+            aria-label={t.HEADER_SWITCH_LANGUAGE}
           >
             {LANGUAGE_LABELS[lang]}
           </Button>
@@ -71,7 +65,7 @@ export function Header() {
               size="icon"
               onClick={toggleTheme}
               className="h-8 w-8 rounded-lg text-muted-foreground hover:bg-primary/10 hover:text-primary"
-              aria-label={theme === THEME_DARK ? SWITCH_TO_LIGHT_LABEL : SWITCH_TO_DARK_LABEL}
+              aria-label={theme === THEME_DARK ? t.HEADER_SWITCH_TO_LIGHT : t.HEADER_SWITCH_TO_DARK}
             >
               {theme === THEME_DARK ? (
                 <Sun className="h-4 w-4" />

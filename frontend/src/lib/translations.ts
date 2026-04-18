@@ -404,6 +404,9 @@ export const TRANSLATIONS = {
 
   // Accessibility
   ALT_POTATO_LOGO: { vi: "Khoai Tây", en: "Brotato" },
+  HEADER_SWITCH_LANGUAGE: { vi: "Chuyển sang tiếng Anh", en: "Switch to Vietnamese" },
+  HEADER_SWITCH_TO_DARK: { vi: "Chuyển sang chế độ tối", en: "Switch to dark mode" },
+  HEADER_SWITCH_TO_LIGHT: { vi: "Chuyển sang chế độ sáng", en: "Switch to light mode" },
 
   // Room energy heatmap
   CHART_HEATMAP_TITLE: { vi: "Bản đồ nhiệt theo phòng", en: "Room Energy Heatmap" },

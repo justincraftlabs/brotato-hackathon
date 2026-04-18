@@ -38,7 +38,6 @@
       "Bash(xargs grep *)",
       "Bash(node -e \"const r = require\\('./node_modules/recharts/package.json'\\); console.log\\(r.version\\)\")",
       "Bash(mkdir -p /Users/dattran/Data/Source/R)",
-      "Bash(D/brotato-hackathon/docs/superpowers/specs)",
       "Bash(git remote *)",
       "Bash(git push *)"
     ]

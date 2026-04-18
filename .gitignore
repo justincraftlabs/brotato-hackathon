@@ -8,3 +8,8 @@ dist/
 data/
 
 **/package-lock.json
+
+# Private/local Claude config
+.claude/CLAUDE.local.md
+.claude/settings.local.json
+.claude/memory.md

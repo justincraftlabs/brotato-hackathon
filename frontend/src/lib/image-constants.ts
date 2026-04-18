@@ -8,18 +8,7 @@ export const ACCEPTED_CAMERA_TYPES = "image/*";
 export const HEIC_MIME_TYPES = ['image/heic', 'image/heif'] as const;
 
 export const IMAGE_LABELS = {
-  CAMERA_BUTTON: "Chụp ảnh thiết bị",
-  PROCESSING: "Đang nhận dạng...",
-  USE_RESULT: "Sử dụng",
-  RETRY: "Thử lại",
-  CONFIDENCE_HIGH: "Độ tin cậy cao",
-  CONFIDENCE_MEDIUM: "Độ tin cậy trung bình",
-  CONFIDENCE_LOW: "Độ tin cậy thấp",
-  FILE_TOO_LARGE: "Ảnh quá lớn, tối đa 5MB",
-  ERROR_PROCESSING: "Không thể nhận dạng thiết bị",
   WATTAGE_SUFFIX: "W",
-  BRAND_LABEL: "Hãng",
-  MODEL_LABEL: "Mẫu",
 } as const;
 
 export const CONFIDENCE_THRESHOLD_HIGH = 0.8;
