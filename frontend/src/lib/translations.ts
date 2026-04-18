@@ -74,6 +74,14 @@ export const TRANSLATIONS = {
     vi: "Mỗi phòng cần ít nhất 1 thiết bị",
     en: "Each room needs at least 1 appliance",
   },
+  LABEL_EMPTY_APPLIANCES_TITLE: {
+    vi: "Chưa có thiết bị nào",
+    en: "No appliances yet",
+  },
+  LABEL_EMPTY_APPLIANCES_DESCRIPTION: {
+    vi: "Thêm thiết bị đầu tiên để bắt đầu phân tích năng lượng cho căn phòng này.",
+    en: "Add your first appliance to start analyzing energy usage for this room.",
+  },
 
   // Navigation
   NAV_OVERVIEW: { vi: "Dashboard", en: "Dashboard" },

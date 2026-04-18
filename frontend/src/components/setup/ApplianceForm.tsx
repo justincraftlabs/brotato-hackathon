@@ -13,6 +13,7 @@ import {
   RotateCcw,
   Sofa,
   Sparkles,
+  Zap,
 } from "lucide-react";
 import type { ComponentType } from "react";
 
@@ -424,9 +425,32 @@ export function ApplianceFormStep({
             <TabsContent key={room.id} value={room.id}>
               <div className="flex flex-col gap-2 pt-2">
                 {roomAppliances.length === 0 && (
-                  <p className="py-6 text-center text-sm text-muted-foreground">
-                    {t.LABEL_NO_APPLIANCE_WARNING}
-                  </p>
+                  <div className="card-depth mt-2 flex flex-col items-center gap-4 rounded-2xl px-6 py-10 text-center sm:py-14">
+                    <div className="relative flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 ring-1 ring-primary/20">
+                      <Zap className="h-7 w-7 text-primary" />
+                      <span className="absolute -right-1 -top-1 flex h-6 w-6 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-sm">
+                        <Plus className="h-3.5 w-3.5" />
+                      </span>
+                    </div>
+                    <div className="flex flex-col gap-1">
+                      <h3 className="text-base font-semibold sm:text-lg">
+                        {t.LABEL_EMPTY_APPLIANCES_TITLE}
+                      </h3>
+                      <p className="max-w-sm text-sm text-muted-foreground">
+                        {t.LABEL_EMPTY_APPLIANCES_DESCRIPTION}
+                      </p>
+                      <p className="text-xs text-muted-foreground/70">
+                        {t.LABEL_NO_APPLIANCE_WARNING}
+                      </p>
+                    </div>
+                    <Button
+                      className="btn-primary-gradient mt-1 gap-1.5"
+                      onClick={() => openAddDialog(room.id)}
+                    >
+                      <Plus className="h-4 w-4" />
+                      {t.BUTTON_ADD_APPLIANCE}
+                    </Button>
+                  </div>
                 )}
 
                 {roomAppliances.length > 0 && (
@@ -456,26 +480,28 @@ export function ApplianceFormStep({
                   </>
                 )}
 
-                {/* Add button: full-width dashed on mobile, compact on desktop */}
-                <div className="flex items-center justify-between pt-1">
-                  <Button
-                    variant="outline"
-                    className="h-10 w-full border-dashed md:hidden"
-                    onClick={() => openAddDialog(room.id)}
-                  >
-                    <Plus className="mr-2 h-4 w-4" />
-                    {t.BUTTON_ADD_APPLIANCE}
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="hidden gap-1.5 md:flex"
-                    onClick={() => openAddDialog(room.id)}
-                  >
-                    <Plus className="h-3.5 w-3.5" />
-                    {t.BUTTON_ADD_APPLIANCE}
-                  </Button>
-                </div>
+                {/* Add button: hidden when empty (CTA lives in empty state card). Full-width dashed on mobile, compact on desktop. */}
+                {roomAppliances.length > 0 && (
+                  <div className="flex items-center justify-between pt-1">
+                    <Button
+                      variant="outline"
+                      className="h-10 w-full border-dashed md:hidden"
+                      onClick={() => openAddDialog(room.id)}
+                    >
+                      <Plus className="mr-2 h-4 w-4" />
+                      {t.BUTTON_ADD_APPLIANCE}
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="hidden gap-1.5 md:flex"
+                      onClick={() => openAddDialog(room.id)}
+                    >
+                      <Plus className="h-3.5 w-3.5" />
+                      {t.BUTTON_ADD_APPLIANCE}
+                    </Button>
+                  </div>
+                )}
               </div>
             </TabsContent>
           );

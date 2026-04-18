@@ -101,29 +101,31 @@ function PricingDialog({ open, onClose, activeTier }: PricingDialogProps) {
                     )}
                   >
                     {/* Tier number */}
-                    <td className={cn("py-2.5", isActive && "rounded-l-lg bg-primary/10")}>
-                      <div className="flex items-center gap-1.5">
-                        <span
-                          className={cn(
-                            "flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-black",
-                            isActive
-                              ? "bg-primary text-primary-foreground shadow-[0_0_8px_hsl(var(--primary)/0.5)]"
-                              : "bg-muted text-muted-foreground"
-                          )}
-                        >
-                          {tier.tier}
-                        </span>
-                        {isActive && (
-                          <span className="truncate rounded-full bg-primary/15 px-1.5 py-0.5 text-[9px] font-bold text-primary">
-                            {t.DASHBOARD_EVN_TIER_DIALOG_CURRENT_BADGE}
-                          </span>
+                    <td className={cn("py-2.5 pl-2", isActive && "rounded-l-lg bg-primary/10")}>
+                      <span
+                        className={cn(
+                          "flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[11px] font-black",
+                          isActive
+                            ? "bg-primary text-primary-foreground shadow-[0_0_10px_hsl(var(--primary)/0.55)] ring-2 ring-primary/25 ring-offset-1 ring-offset-background"
+                            : "bg-muted text-muted-foreground"
                         )}
-                      </div>
+                      >
+                        {tier.tier}
+                      </span>
                     </td>
 
                     {/* Usage range */}
                     <td className={cn("py-2.5 text-muted-foreground", isActive && "bg-primary/10")}>
-                      {usageLabel(tier.minKwh, tier.maxKwh)}
+                      <div className="flex items-center gap-2">
+                        <span className={cn(isActive && "font-semibold text-foreground")}>
+                          {usageLabel(tier.minKwh, tier.maxKwh)}
+                        </span>
+                        {isActive && (
+                          <span className="whitespace-nowrap rounded-full bg-primary/15 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-primary">
+                            {t.DASHBOARD_EVN_TIER_DIALOG_CURRENT_BADGE}
+                          </span>
+                        )}
+                      </div>
                     </td>
 
                     {/* Price range */}

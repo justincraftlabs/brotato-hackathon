@@ -743,16 +743,6 @@ export function EditModeView({ homeId }: EditModeViewProps) {
               t={t}
             />
           ))}
-
-          <Button
-            variant="outline"
-            size="sm"
-            className="mt-1 w-fit gap-1.5"
-            onClick={() => setAddDialogOpen(true)}
-          >
-            <Plus className="h-3.5 w-3.5" />
-            {t.SETUP_ADD_ROOM}
-          </Button>
         </div>
 
         {/* Mobile: card grid */}
