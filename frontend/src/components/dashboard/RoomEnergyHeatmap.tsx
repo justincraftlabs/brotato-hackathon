@@ -1,8 +1,8 @@
 "use client";
 
-import { Info, Map as MapIcon } from "lucide-react";
+import { motion } from "framer-motion";
+import { Flame, Info } from "lucide-react";
 import { useState } from "react";
-import { ResponsiveContainer, Treemap, Tooltip } from "recharts";
 
 import {
   Dialog,
@@ -13,155 +13,50 @@ import {
 } from "@/components/ui/dialog";
 import { useT } from "@/hooks/use-t";
 import { formatKwh, formatVnd } from "@/lib/format";
+import { cn } from "@/lib/utils";
 import type { RoomStat } from "@/lib/types";
 
 interface RoomEnergyHeatmapProps {
   roomStats: RoomStat[];
 }
 
-interface TreemapEntry extends RoomStat {
-  size: number;
+interface RankedRoom extends RoomStat {
+  rank: number;
   sharePercent: number;
-  [key: string]: unknown;
 }
 
-function buildTreemapData(roomStats: RoomStat[], totalKwh: number): TreemapEntry[] {
-  return roomStats.map((r) => ({
-    ...r,
-    size: r.totalKwh,
-    sharePercent: totalKwh > 0 ? Math.round((r.totalKwh / totalKwh) * 1000) / 10 : 0,
-  }));
+const MAX_VISIBLE_ROOMS = 6;
+const BAR_ANIMATION_STAGGER = 0.07;
+const BAR_ANIMATION_DURATION = 0.7;
+
+function rankRooms(rooms: RoomStat[]): RankedRoom[] {
+  const total = rooms.reduce((sum, r) => sum + r.totalKwh, 0);
+  return [...rooms]
+    .sort((a, b) => b.totalKwh - a.totalKwh)
+    .map((r, i) => ({
+      ...r,
+      rank: i + 1,
+      sharePercent: total > 0 ? (r.totalKwh / total) * 100 : 0,
+    }));
 }
-
-// Hottest (index 0) → red/orange; coolest (last) → green
-const HEAT_COLORS = [
-  "hsl(0 75% 48%)",
-  "hsl(20 82% 50%)",
-  "hsl(38 88% 48%)",
-  "hsl(60 75% 42%)",
-  "hsl(142 55% 40%)",
-];
-
-function heatColor(index: number, total: number): string {
-  const slot = Math.min(
-    Math.floor((index / Math.max(total - 1, 1)) * (HEAT_COLORS.length - 1)),
-    HEAT_COLORS.length - 1
-  );
-  return HEAT_COLORS[slot];
-}
-
-interface TreemapContentProps {
-  x?: number;
-  y?: number;
-  width?: number;
-  height?: number;
-  name?: string;
-  value?: number;
-  sharePercent?: number;
-  index?: number;
-  root?: { children?: unknown[] };
-}
-
-function TreemapCell(props: TreemapContentProps) {
-  const { x = 0, y = 0, width = 0, height = 0, name = "", value = 0, sharePercent = 0, index = 0, root } = props;
-  const total = (root?.children ?? []).length;
-  const fill = heatColor(index, total);
-
-  if (width < 40 || height < 24) return <g />;
-
-  return (
-    <g>
-      <rect
-        x={x + 1}
-        y={y + 1}
-        width={width - 2}
-        height={height - 2}
-        fill={fill}
-        fillOpacity={0.85}
-        rx={6}
-        ry={6}
-      />
-      <text
-        x={x + 9}
-        y={y + 18}
-        fill="white"
-        fontSize={11}
-        fontWeight={700}
-        style={{ textShadow: "0 1px 3px rgba(0,0,0,0.6)" }}
-      >
-        {name}
-      </text>
-      {height > 42 && (
-        <text
-          x={x + 9}
-          y={y + 32}
-          fill="white"
-          fillOpacity={0.88}
-          fontSize={10}
-          style={{ textShadow: "0 1px 2px rgba(0,0,0,0.5)" }}
-        >
-          {formatKwh(value)}
-        </text>
-      )}
-      {height > 56 && width > 60 && (
-        <text
-          x={x + 9}
-          y={y + 46}
-          fill="white"
-          fillOpacity={0.72}
-          fontSize={9}
-          style={{ textShadow: "0 1px 2px rgba(0,0,0,0.5)" }}
-        >
-          {sharePercent}%
-        </text>
-      )}
-    </g>
-  );
-}
-
-interface TooltipPayload {
-  payload?: TreemapEntry;
-}
-
-interface HeatmapTooltipProps {
-  active?: boolean;
-  payload?: TooltipPayload[];
-  applianceLabel: string;
-}
-
-function HeatmapTooltip({ active, payload, applianceLabel }: HeatmapTooltipProps) {
-  if (!active || !payload?.length) return null;
-  const d = payload[0]?.payload;
-  if (!d) return null;
-  return (
-    <div className="rounded-xl border border-border/50 bg-card/95 px-3 py-2.5 shadow-xl backdrop-blur-sm">
-      <p className="text-sm font-bold">{d.roomName}</p>
-      <div className="mt-1 flex flex-col gap-0.5 text-xs text-muted-foreground">
-        <span>{formatKwh(d.totalKwh)} ({d.sharePercent}%)</span>
-        <span>{formatVnd(d.totalCost)}</span>
-        <span>{d.applianceCount} {applianceLabel}</span>
-      </div>
-    </div>
-  );
-}
-
-const CHART_MIN_HEIGHT = 220;
 
 export function RoomEnergyHeatmap({ roomStats }: RoomEnergyHeatmapProps) {
   const t = useT();
   const [dialogOpen, setDialogOpen] = useState(false);
 
-  const totalKwh = roomStats.reduce((sum, r) => sum + r.totalKwh, 0);
-  const data = buildTreemapData(roomStats, totalKwh);
+  const ranked = rankRooms(roomStats);
+  if (ranked.length === 0) return null;
 
-  if (data.length === 0) return null;
+  const topShare = ranked[0]?.sharePercent ?? 0;
+  const visible = ranked.slice(0, MAX_VISIBLE_ROOMS);
 
   return (
     <>
-      <div className="glass rounded-2xl overflow-hidden card-hover-glow h-full flex flex-col">
-        <div className="shrink-0 px-4 pt-4 pb-0 lg:px-5 lg:pt-5">
+      <div className="glass rounded-2xl card-hover-glow h-full flex flex-col p-4 lg:p-5">
+        {/* Header */}
+        <div className="shrink-0">
           <div className="flex items-center gap-2">
-            <MapIcon className="h-4 w-4 text-primary shrink-0" />
+            <Flame className="h-4 w-4 text-primary shrink-0" />
             <h3 className="text-sm font-bold">{t.CHART_HEATMAP_TITLE}</h3>
             <button
               type="button"
@@ -177,30 +72,69 @@ export function RoomEnergyHeatmap({ roomStats }: RoomEnergyHeatmapProps) {
           </p>
         </div>
 
-        <div
-          className="flex-1 px-3 pb-4 pt-3 lg:px-4 lg:pb-5"
-          style={{ minHeight: CHART_MIN_HEIGHT }}
-        >
-          <ResponsiveContainer width="100%" height="100%">
-            <Treemap
-              data={data}
-              dataKey="size"
-              content={<TreemapCell />}
-              isAnimationActive
-              animationDuration={800}
-            >
-              <Tooltip
-                content={(p) => (
-                  <HeatmapTooltip
-                    active={p.active}
-                    payload={p.payload as unknown as TooltipPayload[]}
-                    applianceLabel={t.LABEL_APPLIANCE_COUNT}
-                  />
-                )}
-              />
-            </Treemap>
-          </ResponsiveContainer>
-        </div>
+        {/* Ranked rooms */}
+        <ul className="mt-4 flex flex-1 flex-col gap-2.5">
+          {visible.map((room) => {
+            const isTop = room.rank === 1;
+            const barWidthPercent = topShare > 0 ? (room.sharePercent / topShare) * 100 : 0;
+
+            return (
+              <li
+                key={room.roomName}
+                className="group rounded-xl border border-border/40 bg-card/40 px-3 py-2.5 transition-colors hover:border-primary/40"
+              >
+                <div className="flex items-center gap-3">
+                  {/* Rank badge */}
+                  <div
+                    className={cn(
+                      "flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-[11px] font-bold",
+                      isTop
+                        ? "bg-amber-500/15 text-amber-500 ring-1 ring-amber-500/40"
+                        : "bg-muted/60 text-muted-foreground"
+                    )}
+                  >
+                    {room.rank}
+                  </div>
+
+                  <div className="min-w-0 flex-1">
+                    {/* Name + share */}
+                    <div className="flex items-baseline justify-between gap-2">
+                      <span className="truncate text-sm font-semibold">{room.roomName}</span>
+                      <span className="shrink-0 text-xs font-bold tabular-nums">
+                        {room.sharePercent.toFixed(1)}%
+                      </span>
+                    </div>
+
+                    {/* Animated bar */}
+                    <div className="relative mt-2 h-1.5 overflow-hidden rounded-full bg-muted/40">
+                      <motion.div
+                        initial={{ width: 0 }}
+                        animate={{ width: `${barWidthPercent}%` }}
+                        transition={{
+                          duration: BAR_ANIMATION_DURATION,
+                          delay: room.rank * BAR_ANIMATION_STAGGER,
+                          ease: [0.22, 1, 0.36, 1],
+                        }}
+                        className={cn(
+                          "absolute inset-y-0 left-0 rounded-full",
+                          isTop
+                            ? "bg-gradient-to-r from-amber-500 to-orange-500 shadow-[0_0_10px_hsl(38_85%_55%/0.35)]"
+                            : "bg-gradient-to-r from-primary/60 to-primary"
+                        )}
+                      />
+                    </div>
+
+                    {/* Stats */}
+                    <div className="mt-1.5 flex items-center justify-between gap-2 text-[11px] text-muted-foreground tabular-nums">
+                      <span>{formatKwh(room.totalKwh)}</span>
+                      <span>{formatVnd(room.totalCost)}</span>
+                    </div>
+                  </div>
+                </div>
+              </li>
+            );
+          })}
+        </ul>
       </div>
 
       <Dialog open={dialogOpen} onOpenChange={(v) => !v && setDialogOpen(false)}>
@@ -208,7 +142,7 @@ export function RoomEnergyHeatmap({ roomStats }: RoomEnergyHeatmapProps) {
           <div className="border-b border-border/40 bg-primary/8 px-5 py-4">
             <DialogHeader className="gap-0.5">
               <DialogTitle className="flex items-center gap-2 text-base font-bold">
-                <MapIcon className="h-4 w-4 shrink-0 text-primary" />
+                <Flame className="h-4 w-4 shrink-0 text-primary" />
                 {t.CHART_HEATMAP_INFO_TITLE}
               </DialogTitle>
               <DialogDescription className="text-xs">
@@ -218,14 +152,6 @@ export function RoomEnergyHeatmap({ roomStats }: RoomEnergyHeatmapProps) {
           </div>
 
           <div className="px-5 py-4">
-            <p className="mb-3 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
-              {t.CHART_HEATMAP_INFO_COLOR_LABEL}
-            </p>
-            <div className="flex items-center gap-2 mb-1.5">
-              <div className="h-3 flex-1 rounded-full bg-gradient-to-r from-[hsl(0_75%_48%)] via-[hsl(38_88%_48%)] to-[hsl(142_55%_40%)]" />
-            </div>
-            <p className="text-xs text-muted-foreground mb-4">{t.CHART_HEATMAP_INFO_COLOR_DESC}</p>
-
             <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
               {t.CHART_HEATMAP_INFO_SIZE_LABEL}
             </p>

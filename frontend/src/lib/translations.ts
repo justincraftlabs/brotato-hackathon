@@ -409,15 +409,15 @@ export const TRANSLATIONS = {
   HEADER_SWITCH_TO_LIGHT: { vi: "Chuyển sang chế độ sáng", en: "Switch to light mode" },
 
   // Room energy heatmap
-  CHART_HEATMAP_TITLE: { vi: "Bản đồ nhiệt theo phòng", en: "Room Energy Heatmap" },
+  CHART_HEATMAP_TITLE: { vi: "Tiêu thụ theo phòng", en: "Energy by Room" },
   CHART_HEATMAP_SUBTITLE: { vi: "Phòng nào đang tiêu thụ nhiều nhất?", en: "Which room consumes the most?" },
-  CHART_HEATMAP_INFO_TITLE: { vi: "Bản đồ nhiệt theo phòng", en: "Room Energy Heatmap" },
-  CHART_HEATMAP_INFO_SUBTITLE: { vi: "Cách đọc bản đồ nhiệt điện năng", en: "How to read the energy heatmap" },
-  CHART_HEATMAP_INFO_SIZE_LABEL: { vi: "Kích thước ô", en: "Cell size" },
-  CHART_HEATMAP_INFO_SIZE_DESC: { vi: "Ô càng lớn = tiêu thụ kWh càng nhiều trong tháng", en: "Larger cell = higher monthly kWh consumption" },
+  CHART_HEATMAP_INFO_TITLE: { vi: "Xếp hạng tiêu thụ theo phòng", en: "Room Energy Ranking" },
+  CHART_HEATMAP_INFO_SUBTITLE: { vi: "Cách đọc bảng xếp hạng tiêu thụ", en: "How to read the consumption ranking" },
+  CHART_HEATMAP_INFO_SIZE_LABEL: { vi: "Thanh tiêu thụ", en: "Consumption bar" },
+  CHART_HEATMAP_INFO_SIZE_DESC: { vi: "Thanh càng dài = phòng tiêu thụ càng nhiều kWh trong tháng. Phòng đứng đầu được làm nổi bật bằng màu cam.", en: "Longer bar = higher monthly kWh consumption. The top consumer is highlighted in amber." },
   CHART_HEATMAP_INFO_COLOR_LABEL: { vi: "Màu sắc", en: "Color scale" },
-  CHART_HEATMAP_INFO_COLOR_DESC: { vi: "Đỏ/cam = tiêu thụ cao nhất → xanh lá = thấp nhất", en: "Red/orange = highest → green = lowest consumption" },
-  CHART_HEATMAP_INFO_TIP: { vi: "Hover vào từng ô để xem kWh, chi phí và số thiết bị trong phòng đó.", en: "Hover each cell to see kWh, cost, and appliance count for that room." },
+  CHART_HEATMAP_INFO_COLOR_DESC: { vi: "Cam = phòng tiêu thụ cao nhất; xanh lá = các phòng còn lại.", en: "Amber = top consumer; green = other rooms." },
+  CHART_HEATMAP_INFO_TIP: { vi: "Phần trăm bên phải cho biết phòng đó chiếm bao nhiêu trong tổng tiêu thụ điện của nhà.", en: "The percentage on the right shows the room's share of total household consumption." },
   CHART_HEATMAP_INFO_FOOTER: { vi: "Dữ liệu dựa trên ước tính tiêu thụ hàng tháng của từng thiết bị.", en: "Data based on monthly consumption estimates per appliance." },
 
   // Monthly bill projection
@@ -496,7 +496,7 @@ export const TRANSLATIONS = {
 
   // TopConsumers info dialog
   CHART_CONSUMERS_INFO_TITLE: { vi: "Thiết bị tiêu thụ nhiều nhất", en: "Top Energy Consumers" },
-  CHART_CONSUMERS_INFO_SUBTITLE: { vi: "Top 5 theo kWh tiêu thụ/tháng", en: "Top 5 by monthly kWh" },
+  CHART_CONSUMERS_INFO_SUBTITLE: { vi: "Top 10 theo kWh tiêu thụ/tháng", en: "Top 10 by monthly kWh" },
   CHART_CONSUMERS_INFO_NORMAL: { vi: "Bình thường", en: "Normal" },
   CHART_CONSUMERS_INFO_NORMAL_DESC: { vi: "≤ 20% tổng tiêu thụ", en: "≤ 20% of total" },
   CHART_CONSUMERS_INFO_HIGH: { vi: "Tiêu thụ cao", en: "High usage" },
@@ -551,7 +551,7 @@ export const TRANSLATIONS = {
   // CarbonWaterfall info dialog
   CHART_CARBON_INFO_TITLE: { vi: "Dấu chân Carbon chi tiết", en: "Carbon Footprint Details" },
   CHART_CARBON_INFO_SUBTITLE: { vi: "CO₂ phát thải từ từng thiết bị/tháng", en: "CO₂ emitted per appliance per month" },
-  CHART_CARBON_INFO_SCALE_HINT: { vi: "Đỏ → phát thải nhiều nhất · Xanh → ít nhất", en: "Red = highest emitters · Green = lowest" },
+  CHART_CARBON_INFO_SCALE_HINT: { vi: "Cam = phát thải nhiều nhất · Xanh = thấp hoặc gộp khác", en: "Amber = highest emitter · Green = lower / grouped" },
   CHART_CARBON_INFO_CONTEXT: { vi: "Hộ gia đình VN thải TB ~150 kg CO₂/tháng từ điện", en: "Avg. Vietnamese household emits ~150 kg CO₂/month" },
   CHART_CARBON_INFO_FOOTER: { vi: "0.913 kg CO₂/kWh — lưới điện Việt Nam. Nguồn: Bộ TN&MT 2023", en: "0.913 kg CO₂/kWh — Vietnam grid. Source: MONRE 2023" },
 

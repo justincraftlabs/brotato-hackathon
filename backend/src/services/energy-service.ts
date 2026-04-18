@@ -17,7 +17,7 @@ import {
 } from '../types/energy';
 import { Appliance, Room } from '../types/home';
 
-const TOP_CONSUMERS_LIMIT = 5;
+const TOP_CONSUMERS_LIMIT = 10;
 const TOP_VAMPIRES_LIMIT = 5;
 const HOURS_PER_DAY = 24;
 const DAYS_PER_MONTH = 30;
