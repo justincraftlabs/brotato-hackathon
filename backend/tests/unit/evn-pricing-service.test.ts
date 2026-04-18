@@ -21,7 +21,7 @@ describe('evn-pricing-service', () => {
 
   describe('calculateSizeFactor', () => {
     it('returns neutral factor for non-area-sensitive appliances', () => {
-      expect(calculateSizeFactor('lighting', 'lighting')).toBe(1);
+      expect(calculateSizeFactor('medium', 'lighting')).toBe(1);
     });
 
     it('scales up for large cooling rooms', () => {

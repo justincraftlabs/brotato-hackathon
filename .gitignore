@@ -13,3 +13,6 @@ data/
 .claude/CLAUDE.local.md
 .claude/settings.local.json
 .claude/memory.md
+
+frontend/playwright-report/
+frontend/test-results/
