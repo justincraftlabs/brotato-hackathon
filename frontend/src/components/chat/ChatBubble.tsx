@@ -4,6 +4,7 @@ import Image from "next/image";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
+import { useT } from "@/hooks/use-t";
 import { cn } from "@/lib/utils";
 
 const POTATO_LOGO_SRC = "/logo.png";
@@ -21,6 +22,7 @@ interface ChatBubbleProps {
 const ROLE_USER: ChatRole = "user";
 
 export function ChatBubble({ role, content, isStreaming }: ChatBubbleProps) {
+  const t = useT();
   const isUser = role === ROLE_USER;
 
   const showTypingIndicator = isStreaming && content.length === 0;
@@ -38,7 +40,7 @@ export function ChatBubble({ role, content, isStreaming }: ChatBubbleProps) {
         {!isUser && (
           <Image
             src={POTATO_LOGO_SRC}
-            alt="Khoai Tây"
+            alt={t.ALT_POTATO_LOGO}
             width={POTATO_LOGO_SIZE}
             height={POTATO_LOGO_SIZE}
             className="mt-1 h-7 w-7 shrink-0 self-start rounded-full object-cover"

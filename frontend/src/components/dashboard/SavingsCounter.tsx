@@ -3,6 +3,7 @@
 import { Leaf, Loader2, Zap, TrendingDown } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
+import { useT } from "@/hooks/use-t";
 import { getScheduleSavings } from "@/lib/api";
 import { formatKwh, formatVnd } from "@/lib/format";
 import type { SavingsTotals } from "@/lib/types";
@@ -54,6 +55,7 @@ interface SavingsCounterProps {
 }
 
 export function SavingsCounter({ homeId }: SavingsCounterProps) {
+  const t = useT();
   const [data, setData] = useState<SavingsTotals | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -75,7 +77,7 @@ export function SavingsCounter({ homeId }: SavingsCounterProps) {
     return (
       <div className="glass rounded-2xl p-4 flex items-center gap-2 text-muted-foreground">
         <Loader2 className="h-4 w-4 animate-spin" />
-        <span className="text-sm">Đang tải tiết kiệm thực tế...</span>
+        <span className="text-sm">{t.SAVINGS_COUNTER_LOADING}</span>
       </div>
     );
   }
@@ -86,10 +88,10 @@ export function SavingsCounter({ homeId }: SavingsCounterProps) {
     <div className="glass rounded-2xl p-4">
       <div className="mb-3 flex items-center gap-2">
         <TrendingDown className="h-4 w-4 text-primary" />
-        <p className="text-sm font-semibold text-primary">Đã tiết kiệm được</p>
+        <p className="text-sm font-semibold text-primary">{t.SAVINGS_COUNTER_TITLE}</p>
         {totals.completionCount > 0 && (
           <span className="ml-auto rounded-full bg-primary/15 px-2 py-0.5 text-[10px] font-semibold text-primary">
-            {totals.completionCount} hành động
+            {totals.completionCount} {t.SAVINGS_COUNTER_ACTIONS_SUFFIX}
           </span>
         )}
       </div>
@@ -100,7 +102,7 @@ export function SavingsCounter({ homeId }: SavingsCounterProps) {
           <p className="text-lg font-bold text-primary leading-tight">
             <CounterValue value={totals.totalSavingsVnd} format={formatVnd} />
           </p>
-          <p className="text-[10px] text-muted-foreground">VND tiết kiệm</p>
+          <p className="text-[10px] text-muted-foreground">{t.SAVINGS_COUNTER_VND_LABEL}</p>
         </div>
 
         <div className="flex flex-col items-center gap-1 rounded-xl bg-chart-1/10 p-3 text-center">
@@ -108,7 +110,7 @@ export function SavingsCounter({ homeId }: SavingsCounterProps) {
           <p className="text-lg font-bold text-chart-1 leading-tight">
             <CounterValue value={totals.totalSavingsKwh} format={formatKwh} />
           </p>
-          <p className="text-[10px] text-muted-foreground">kWh tiết kiệm</p>
+          <p className="text-[10px] text-muted-foreground">{t.SAVINGS_COUNTER_KWH_LABEL}</p>
         </div>
 
         <div className="flex flex-col items-center gap-1 rounded-xl bg-chart-3/10 p-3 text-center">
@@ -116,13 +118,13 @@ export function SavingsCounter({ homeId }: SavingsCounterProps) {
           <p className="text-lg font-bold text-chart-3 leading-tight">
             🌳 {totals.treesEquivalent.toFixed(1)}
           </p>
-          <p className="text-[10px] text-muted-foreground">cây tương đương</p>
+          <p className="text-[10px] text-muted-foreground">{t.SAVINGS_COUNTER_TREES_LABEL}</p>
         </div>
       </div>
 
       {totals.completionCount === 0 && (
         <p className="mt-3 text-center text-xs text-muted-foreground">
-          Nhấn "Đã làm ✓" trên nhắc nhở để ghi nhận tiết kiệm
+          {t.SAVINGS_COUNTER_EMPTY_HINT}
         </p>
       )}
     </div>

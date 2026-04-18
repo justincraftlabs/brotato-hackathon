@@ -4,6 +4,7 @@ import { X, CheckCircle2, Zap } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
+import { useT } from "@/hooks/use-t";
 import { completeScheduleApp } from "@/lib/api";
 import { formatVnd } from "@/lib/format";
 import type { ScheduleFiredEvent } from "@/lib/types";
@@ -16,6 +17,7 @@ interface ScheduleToastProps {
 }
 
 export function ScheduleToast({ event, onDismiss }: ScheduleToastProps) {
+  const t = useT();
   const [completing, setCompleting] = useState(false);
   const [done, setDone] = useState(false);
 
@@ -46,19 +48,19 @@ export function ScheduleToast({ event, onDismiss }: ScheduleToastProps) {
           <Zap className="h-5 w-5 text-primary" />
         </div>
         <div className="min-w-0 flex-1">
-          <p className="text-xs font-semibold text-primary">⚡ Nhắc nhở tiết kiệm điện!</p>
+          <p className="text-xs font-semibold text-primary">{t.SCHEDULE_TOAST_TITLE}</p>
           <p className="mt-0.5 text-sm font-medium leading-snug">{event.title}</p>
           <p className="mt-0.5 text-xs text-muted-foreground">
             {event.roomName} — {event.applianceName}
           </p>
           <p className="mt-1 text-xs text-primary font-semibold">
-            Tiết kiệm: {formatVnd(event.savingsVnd)}/tháng
+            {t.SCHEDULE_TOAST_SAVINGS_PREFIX}: {formatVnd(event.savingsVnd)}{t.VAMPIRE_INFO_PER_MONTH}
           </p>
         </div>
         <button
           onClick={() => onDismiss(event.scheduleId)}
           className="shrink-0 text-muted-foreground hover:text-foreground"
-          aria-label="Đóng"
+          aria-label={t.SCHEDULE_TOAST_CLOSE}
         >
           <X className="h-4 w-4" />
         </button>
@@ -71,7 +73,7 @@ export function ScheduleToast({ event, onDismiss }: ScheduleToastProps) {
         onClick={handleDone}
       >
         <CheckCircle2 className="h-4 w-4" />
-        {done ? "Đã ghi nhận!" : completing ? "Đang ghi nhận..." : "Đã làm ✓"}
+        {done ? t.SCHEDULE_TOAST_LOGGED : completing ? t.SCHEDULE_TOAST_DOING : t.SCHEDULE_TOAST_DONE}
       </Button>
     </div>
   );

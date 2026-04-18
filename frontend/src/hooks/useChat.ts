@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 
+import { useT } from "@/hooks/use-t";
 import { streamChat } from "@/lib/api";
 import { CHAT_LABELS } from "@/lib/constants";
 
@@ -44,6 +45,7 @@ function loadMessages(homeId: string): ChatMessage[] {
 }
 
 export function useChat(homeId: string) {
+  const t = useT();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isStreaming, setIsStreaming] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
@@ -113,7 +115,7 @@ export function useChat(homeId: string) {
           setMessages((prev) =>
             prev.map((msg) =>
               msg.id === assistantMessageId
-                ? { ...msg, content: CHAT_LABELS.ERROR_MESSAGE }
+                ? { ...msg, content: t.CHAT_ERROR_MESSAGE }
                 : msg
             )
           );
@@ -141,7 +143,7 @@ export function useChat(homeId: string) {
             setMessages((prev) =>
               prev.map((msg) =>
                 msg.id === assistantMessageId
-                  ? { ...msg, content: CHAT_LABELS.ERROR_MESSAGE }
+                  ? { ...msg, content: t.CHAT_ERROR_MESSAGE }
                   : msg
               )
             );
@@ -163,7 +165,7 @@ export function useChat(homeId: string) {
         setMessages((prev) =>
           prev.map((msg) =>
             msg.id === assistantMessageId
-              ? { ...msg, content: CHAT_LABELS.ERROR_MESSAGE }
+              ? { ...msg, content: t.CHAT_ERROR_MESSAGE }
               : msg
           )
         );
@@ -171,7 +173,7 @@ export function useChat(homeId: string) {
         setIsStreaming(false);
       }
     },
-    [homeId]
+    [homeId, t]
   );
 
   return { messages, isStreaming, isInitialized, sendMessage, setMessages, clearSession };

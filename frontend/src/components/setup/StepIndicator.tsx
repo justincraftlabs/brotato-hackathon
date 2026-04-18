@@ -1,16 +1,20 @@
 "use client";
 
+import { useT } from "@/hooks/use-t";
 import { cn } from "@/lib/utils";
-import { STEP_LABELS, TOTAL_STEPS } from "@/lib/setup-constants";
+import { TOTAL_STEPS } from "@/lib/setup-constants";
 
 interface StepIndicatorProps {
   currentStep: number;
 }
 
 export function StepIndicator({ currentStep }: StepIndicatorProps) {
+  const t = useT();
+  const steps = [t.STEP_ROOM_LABEL, t.STEP_APPLIANCE_LABEL, t.STEP_CONFIRM_LABEL];
+
   return (
     <div className="flex items-center justify-center gap-3 py-4">
-      {STEP_LABELS.map((label, index) => {
+      {steps.map((label, index) => {
         const isCompleted = index < currentStep;
         const isActive = index === currentStep;
         const stepNumber = index + 1;

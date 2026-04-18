@@ -188,7 +188,7 @@ export function VampireAppliances({
                 <p className="text-sm font-bold text-amber-400">
                   {formatVnd(totalStandbyCost)}
                   <span className="ml-1 text-xs font-normal text-muted-foreground">
-                    · {formatKwh(totalStandbyKwh)}/tháng
+                    · {formatKwh(totalStandbyKwh)}{t.VAMPIRE_INFO_PER_MONTH}
                   </span>
                 </p>
               </div>

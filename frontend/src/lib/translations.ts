@@ -382,6 +382,29 @@ export const TRANSLATIONS = {
   IMAGE_BRAND_LABEL: { vi: "Hãng", en: "Brand" },
   IMAGE_MODEL_LABEL: { vi: "Mẫu", en: "Model" },
 
+  // Savings counter (dashboard)
+  SAVINGS_COUNTER_LOADING: { vi: "Đang tải tiết kiệm thực tế...", en: "Loading actual savings..." },
+  SAVINGS_COUNTER_TITLE: { vi: "Đã tiết kiệm được", en: "Total saved" },
+  SAVINGS_COUNTER_ACTIONS_SUFFIX: { vi: "hành động", en: "actions" },
+  SAVINGS_COUNTER_VND_LABEL: { vi: "VND tiết kiệm", en: "VND saved" },
+  SAVINGS_COUNTER_KWH_LABEL: { vi: "kWh tiết kiệm", en: "kWh saved" },
+  SAVINGS_COUNTER_TREES_LABEL: { vi: "cây tương đương", en: "trees equivalent" },
+  SAVINGS_COUNTER_EMPTY_HINT: {
+    vi: "Nhấn \"Đã làm ✓\" trên nhắc nhở để ghi nhận tiết kiệm",
+    en: "Tap \"Done ✓\" on a reminder to log your savings",
+  },
+
+  // Schedule toast notification
+  SCHEDULE_TOAST_TITLE: { vi: "⚡ Nhắc nhở tiết kiệm điện!", en: "⚡ Energy-saving reminder!" },
+  SCHEDULE_TOAST_SAVINGS_PREFIX: { vi: "Tiết kiệm", en: "Savings" },
+  SCHEDULE_TOAST_CLOSE: { vi: "Đóng", en: "Close" },
+  SCHEDULE_TOAST_DONE: { vi: "Đã làm ✓", en: "Done ✓" },
+  SCHEDULE_TOAST_DOING: { vi: "Đang ghi nhận...", en: "Logging..." },
+  SCHEDULE_TOAST_LOGGED: { vi: "Đã ghi nhận!", en: "Logged!" },
+
+  // Accessibility
+  ALT_POTATO_LOGO: { vi: "Khoai Tây", en: "Brotato" },
+
   // Room energy heatmap
   CHART_HEATMAP_TITLE: { vi: "Bản đồ nhiệt theo phòng", en: "Room Energy Heatmap" },
   CHART_HEATMAP_SUBTITLE: { vi: "Phòng nào đang tiêu thụ nhiều nhất?", en: "Which room consumes the most?" },
