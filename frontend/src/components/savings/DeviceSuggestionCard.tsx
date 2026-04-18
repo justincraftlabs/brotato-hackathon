@@ -105,11 +105,11 @@ export function DeviceSuggestionCard({ device, homeId, roomName, onActivated, t 
             onClick={handleActivate}
           >
             {activated ? (
-              <><CheckCircle2 className="h-3.5 w-3.5" /> Đã lên lịch</>
+              <><CheckCircle2 className="h-3.5 w-3.5" /> {t.ACTIVATE_DEVICE_SCHEDULED}</>
             ) : activating ? (
               <><Loader2 className="h-3.5 w-3.5 animate-spin" /> ...</>
             ) : (
-              <><Bell className="h-3.5 w-3.5" /> Kích hoạt</>
+              <><Bell className="h-3.5 w-3.5" /> {t.ACTIVATE_DEVICE_BUTTON}</>
             )}
           </Button>
         </div>

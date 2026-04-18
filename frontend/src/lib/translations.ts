@@ -565,6 +565,74 @@ export const TRANSLATIONS = {
   EFFICIENCY_HINT_MED: { vi: "Gần tới Khoai Vàng rồi! ⭐", en: "Almost at Gold Potato! ⭐" },
   EFFICIENCY_HINT_HIGH: { vi: "Hướng tới Bạch Kim! 💎", en: "Aiming for Platinum! 💎" },
   EFFICIENCY_HINT_MAX: { vi: "Bạn đang ở đỉnh cao! 🎉", en: "You're at the top! 🎉" },
+
+  // Schedules page
+  SCHEDULES_PAGE_TITLE: { vi: "Lịch nhắc nhở", en: "Schedule Reminders" },
+  SCHEDULES_PAGE_STATS: {
+    vi: "{active} đang hoạt động / {total} tổng cộng",
+    en: "{active} active / {total} total",
+  },
+  SCHEDULES_REFRESH: { vi: "Làm mới", en: "Refresh" },
+  SCHEDULES_NO_HOME_TITLE: { vi: "Chưa có dữ liệu nhà", en: "No home data" },
+  SCHEDULES_NO_HOME_MESSAGE: {
+    vi: "Hãy thiết lập nhà trước",
+    en: "Please set up your home first",
+  },
+  SCHEDULES_NO_HOME_CTA: { vi: "Thiết lập ngay", en: "Set up now" },
+  SCHEDULES_DEMO_TITLE: { vi: "🎬 Chế độ Demo", en: "🎬 Demo Mode" },
+  SCHEDULES_DEMO_DESCRIPTION: {
+    vi: "Kích hoạt tất cả nhắc nhở ngay lập tức — gửi Slack + in-app toast.",
+    en: "Fire all reminders instantly — sends Slack + in-app toast.",
+  },
+  SCHEDULES_DEMO_SENT: {
+    vi: "Đã gửi {count} nhắc nhở lên Slack! 🎉",
+    en: "Sent {count} reminders to Slack! 🎉",
+  },
+  SCHEDULES_DEMO_FIRING: { vi: "Đang gửi...", en: "Sending..." },
+  SCHEDULES_DEMO_FIRE_ALL: {
+    vi: "Demo: Kích hoạt tất cả ngay 🔥",
+    en: "Demo: Fire all now 🔥",
+  },
+  SCHEDULES_LOADING: { vi: "Đang tải...", en: "Loading..." },
+  SCHEDULES_EMPTY_TITLE: { vi: "Chưa có lịch nào", en: "No schedules yet" },
+  SCHEDULES_EMPTY_MESSAGE: {
+    vi: "Vào trang Gợi ý và nhấn \"Kích hoạt tất cả 🚀\" để tạo lịch.",
+    en: "Go to Tips page and click \"Activate all 🚀\" to create schedules.",
+  },
+  SCHEDULES_EMPTY_CTA: { vi: "Đến Gợi ý", en: "Go to Tips" },
+  SCHEDULES_SAVINGS_LABEL: { vi: "Tiết kiệm:", en: "Savings:" },
+  SCHEDULES_SAVINGS_SUFFIX: { vi: "/tháng", en: "/month" },
+  SCHEDULES_BUTTON_PAUSE: { vi: "Tạm dừng", en: "Pause" },
+  SCHEDULES_BUTTON_ACTIVATE: { vi: "Kích hoạt", en: "Activate" },
+  SCHEDULES_BUTTON_DEMO: { vi: "Demo 🔥", en: "Demo 🔥" },
+  SCHEDULES_TYPE_BEHAVIOR: { vi: "Thói quen", en: "Behavior" },
+  SCHEDULES_TYPE_UPGRADE: { vi: "Nâng cấp", en: "Upgrade" },
+  SCHEDULES_TYPE_SCHEDULE: { vi: "Lịch hẹn", en: "Schedule" },
+  SCHEDULES_TYPE_VAMPIRE: { vi: "Điện ma cà rồng", en: "Vampire Power" },
+  SCHEDULES_STATUS_ACTIVE: { vi: "Đang hoạt động", en: "Active" },
+  SCHEDULES_STATUS_PAUSED: { vi: "Tạm dừng", en: "Paused" },
+  SCHEDULES_STATUS_COMPLETED: { vi: "Hoàn thành", en: "Completed" },
+
+  // ActivateAllButton
+  ACTIVATE_ALL_SUCCESS_TITLE: {
+    vi: "Tất cả {count} nhắc nhở đã được lên lịch! 🎉",
+    en: "All {count} reminders scheduled! 🎉",
+  },
+  ACTIVATE_ALL_SUCCESS_CTA: {
+    vi: "Nhấn đây để xem trang Lịch →",
+    en: "Click here to view Schedules →",
+  },
+  ACTIVATE_ALL_LOADING: { vi: "Đang kích hoạt...", en: "Activating..." },
+  ACTIVATE_ALL_BUTTON: {
+    vi: "Kích hoạt tất cả 🚀 ({count})",
+    en: "Activate all 🚀 ({count})",
+  },
+  ACTIVATE_ALL_ERROR: {
+    vi: "Không thể kích hoạt lịch. Thử lại sau.",
+    en: "Could not activate schedules. Try again later.",
+  },
+  ACTIVATE_DEVICE_SCHEDULED: { vi: "Đã lên lịch", en: "Scheduled" },
+  ACTIVATE_DEVICE_BUTTON: { vi: "Kích hoạt", en: "Activate" },
 } as const;
 
 type FlatTranslation = {

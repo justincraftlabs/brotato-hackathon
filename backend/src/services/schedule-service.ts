@@ -48,13 +48,35 @@ export async function createSchedule(input: CreateScheduleInput): Promise<Schedu
   return doc;
 }
 
+async function findExistingSchedule(
+  input: CreateScheduleInput
+): Promise<ScheduleDocument | null> {
+  return ScheduleModel.findOne({
+    homeId: input.homeId,
+    roomName: input.roomName,
+    applianceName: input.applianceName,
+    type: input.type,
+  });
+}
+
+async function createOrGetSchedule(
+  input: CreateScheduleInput
+): Promise<{ doc: ScheduleDocument; created: boolean }> {
+  const existing = await findExistingSchedule(input);
+  if (existing) return { doc: existing, created: false };
+  const doc = await createSchedule(input);
+  return { doc, created: true };
+}
+
 export async function activateAll(inputs: CreateScheduleInput[]): Promise<ScheduleDocument[]> {
-  const docs = await Promise.all(inputs.map(createSchedule));
+  const results = await Promise.all(inputs.map(createOrGetSchedule));
 
-  const upgradeSchedules = docs.filter((d) => d.type === 'upgrade');
-  await Promise.all(upgradeSchedules.map((s) => fireSchedule(s.scheduleId)));
+  const newlyCreatedUpgrades = results
+    .filter(({ doc, created }) => created && doc.type === 'upgrade')
+    .map(({ doc }) => doc);
+  await Promise.all(newlyCreatedUpgrades.map((s) => fireSchedule(s.scheduleId)));
 
-  return docs;
+  return results.map(({ doc }) => doc);
 }
 
 export async function listSchedules(homeId: string): Promise<ScheduleDocument[]> {

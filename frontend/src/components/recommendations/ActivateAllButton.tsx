@@ -6,36 +6,33 @@ import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { useSchedules } from "@/contexts/schedules-context";
+import { useT } from "@/hooks/use-t";
 import { NAV_ROUTES } from "@/lib/constants";
 import type { ActivateAllItem } from "@/lib/types";
 
 interface ActivateAllButtonProps {
   homeId: string;
-  /** Only the unactivated (pending) items. Pass [] when all are already activated. */
   items: ActivateAllItem[];
-  /** How many schedules are already activated (for display in the success banner). */
   totalActivated?: number;
   onActivated?: (count: number) => void;
 }
 
 type LoadingState = "idle" | "loading" | "error";
 
-export function ActivateAllButton({ homeId, items, totalActivated = 0, onActivated }: ActivateAllButtonProps) {
+export function ActivateAllButton({ items, totalActivated = 0, onActivated }: ActivateAllButtonProps) {
+  const t = useT();
   const { activate } = useSchedules();
   const [loadingState, setLoadingState] = useState<LoadingState>("idle");
-  const [errorMsg, setErrorMsg] = useState<string>("");
 
-  // Derive display state directly from props — always reflects current context
   const allDone = items.length === 0 && totalActivated > 0;
 
   async function handleActivate() {
-    if (items.length === 0) return;
+    if (items.length === 0 || loadingState === "loading") return;
     setLoadingState("loading");
 
     const created = await activate(items);
 
     if (created.length === 0) {
-      setErrorMsg("Không thể kích hoạt lịch. Thử lại sau.");
       setLoadingState("error");
       return;
     }
@@ -53,9 +50,9 @@ export function ActivateAllButton({ homeId, items, totalActivated = 0, onActivat
         <CheckCircle2 className="h-5 w-5 shrink-0" />
         <div className="flex-1">
           <p className="text-sm font-semibold">
-            Tất cả {totalActivated} nhắc nhở đã được lên lịch! 🎉
+            {t.ACTIVATE_ALL_SUCCESS_TITLE.replace("{count}", String(totalActivated))}
           </p>
-          <p className="text-xs opacity-75">Nhấn đây để xem trang Lịch →</p>
+          <p className="text-xs opacity-75">{t.ACTIVATE_ALL_SUCCESS_CTA}</p>
         </div>
       </Link>
     );
@@ -73,10 +70,12 @@ export function ActivateAllButton({ homeId, items, totalActivated = 0, onActivat
         ) : (
           <Rocket className="h-4 w-4" />
         )}
-        {loadingState === "loading" ? "Đang kích hoạt..." : `Kích hoạt tất cả 🚀 (${items.length})`}
+        {loadingState === "loading"
+          ? t.ACTIVATE_ALL_LOADING
+          : t.ACTIVATE_ALL_BUTTON.replace("{count}", String(items.length))}
       </Button>
       {loadingState === "error" && (
-        <p className="text-xs text-destructive text-center">{errorMsg}</p>
+        <p className="text-xs text-destructive text-center">{t.ACTIVATE_ALL_ERROR}</p>
       )}
     </div>
   );
