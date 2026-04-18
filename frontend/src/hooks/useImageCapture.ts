@@ -5,7 +5,7 @@ import { useCallback, useState } from "react";
 import { useLanguage } from "@/contexts/language-context";
 import { useT } from "@/hooks/use-t";
 import { recognizeAppliance } from "@/lib/api";
-import { base64ToFile, resizeImageToBase64 } from "@/lib/image";
+import { base64ToFile, HeicConversionError, resizeImageToBase64 } from "@/lib/image";
 import type { ImageRecognitionResult } from "@/lib/types";
 
 interface UseImageCaptureReturn {
@@ -46,8 +46,13 @@ export function useImageCapture(): UseImageCaptureReturn {
         }
 
         setRecognitionResult(result.data);
-      } catch {
-        setError(t.IMAGE_ERROR_PROCESSING);
+      } catch (err) {
+        console.error("Image processing error:", err);
+        if (err instanceof HeicConversionError) {
+          setError(t.IMAGE_ERROR_HEIC);
+        } else {
+          setError(t.IMAGE_ERROR_PROCESSING);
+        }
       } finally {
         setIsProcessing(false);
       }

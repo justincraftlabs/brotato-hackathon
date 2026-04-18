@@ -10,6 +10,13 @@ import {
   type SupportedMediaType,
 } from "./image-constants";
 
+export class HeicConversionError extends Error {
+  constructor(cause?: unknown) {
+    super(`HEIC conversion failed: ${cause instanceof Error ? cause.message : String(cause)}`);
+    this.name = "HeicConversionError";
+  }
+}
+
 function isHeicFile(file: File): boolean {
   const lowerName = file.name.toLowerCase();
   return (
@@ -19,13 +26,44 @@ function isHeicFile(file: File): boolean {
   );
 }
 
-async function convertHeicToJpeg(file: File): Promise<File> {
-  const heic2any = (await import("heic2any")).default;
-  const result = await heic2any({ blob: file, toType: "image/jpeg", quality: 0.9 });
-  const blob = Array.isArray(result) ? result[0] : result;
-  return new File([blob], file.name.replace(/\.heic$/i, ".jpg").replace(/\.heif$/i, ".jpg"), {
-    type: MEDIA_TYPE_JPEG,
+function heicOutputName(file: File): string {
+  return file.name.replace(/\.heic$/i, ".jpg").replace(/\.heif$/i, ".jpg");
+}
+
+async function convertHeicViaNativeRenderer(file: File): Promise<File> {
+  const bitmap = await createImageBitmap(file);
+  const canvas = document.createElement("canvas");
+  canvas.width = bitmap.width;
+  canvas.height = bitmap.height;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) throw new Error("No canvas context");
+  ctx.drawImage(bitmap, 0, 0);
+  bitmap.close();
+  return new Promise((resolve, reject) => {
+    canvas.toBlob((blob) => {
+      if (!blob) {
+        reject(new Error("Canvas toBlob failed"));
+        return;
+      }
+      resolve(new File([blob], heicOutputName(file), { type: MEDIA_TYPE_JPEG }));
+    }, CANVAS_OUTPUT_TYPE, CANVAS_QUALITY);
   });
+}
+
+async function convertHeicToJpeg(file: File): Promise<File> {
+  try {
+    const heic2any = (await import("heic2any")).default;
+    const result = await heic2any({ blob: file, toType: "image/jpeg", quality: 0.9 });
+    const blob = Array.isArray(result) ? result[0] : result;
+    return new File([blob], heicOutputName(file), { type: MEDIA_TYPE_JPEG });
+  } catch {
+    // heic2any failed — fall back to browser-native rendering (works in Safari/macOS)
+    try {
+      return await convertHeicViaNativeRenderer(file);
+    } catch (nativeErr) {
+      throw new HeicConversionError(nativeErr);
+    }
+  }
 }
 
 export async function resizeImageToBase64(file: File): Promise<string> {
