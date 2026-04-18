@@ -1,5 +1,6 @@
 import { API_BASE } from "./constants";
 import type {
+  ActivateAllItem,
   ApiResponse,
   Appliance,
   ApplianceEstimate,
@@ -10,6 +11,8 @@ import type {
   Recommendation,
   Room,
   SavingsSuggestionsResult,
+  SavingsTotals,
+  Schedule,
   SimulationAdjustment,
   SimulationResult,
 } from "./types";
@@ -348,4 +351,89 @@ export async function calculateSimulation(
     method: "POST",
     body: JSON.stringify({ homeId, adjustments }),
   });
+}
+
+// ─── Schedules ────────────────────────────────────────────────────────────────
+
+export async function activateAllSchedules(
+  homeId: string,
+  items: ActivateAllItem[]
+): Promise<ApiResponse<Schedule[]>> {
+  return request<Schedule[]>("/api/schedules/activate-all", {
+    method: "POST",
+    body: JSON.stringify({ homeId, items }),
+  });
+}
+
+export async function listSchedules(
+  homeId: string
+): Promise<ApiResponse<Schedule[]>> {
+  return request<Schedule[]>(`/api/schedules?homeId=${encodeURIComponent(homeId)}`, {
+    method: "GET",
+  });
+}
+
+export async function toggleSchedule(
+  scheduleId: string
+): Promise<ApiResponse<Schedule>> {
+  return request<Schedule>(`/api/schedules/${scheduleId}/toggle`, {
+    method: "PATCH",
+  });
+}
+
+export async function deleteScheduleApi(
+  scheduleId: string
+): Promise<ApiResponse<null>> {
+  return request<null>(`/api/schedules/${scheduleId}`, {
+    method: "DELETE",
+  });
+}
+
+export async function deleteAllSchedules(
+  homeId: string
+): Promise<ApiResponse<null>> {
+  return request<null>(
+    `/api/schedules?homeId=${encodeURIComponent(homeId)}`,
+    { method: "DELETE" }
+  );
+}
+
+export async function fireScheduleApi(
+  scheduleId: string
+): Promise<ApiResponse<null>> {
+  return request<null>(`/api/schedules/${scheduleId}/fire`, {
+    method: "POST",
+  });
+}
+
+export async function fireAllSchedules(
+  homeId: string
+): Promise<ApiResponse<{ queued: number }>> {
+  return request<{ queued: number }>(
+    `/api/schedules/fire-all?homeId=${encodeURIComponent(homeId)}`,
+    { method: "POST" }
+  );
+}
+
+export async function completeScheduleApp(
+  scheduleId: string
+): Promise<ApiResponse<null>> {
+  return request<null>(`/api/schedules/${scheduleId}/complete-app`, {
+    method: "POST",
+  });
+}
+
+export async function getScheduleSavings(
+  homeId: string
+): Promise<ApiResponse<SavingsTotals>> {
+  return request<SavingsTotals>(
+    `/api/schedules/savings?homeId=${encodeURIComponent(homeId)}`,
+    { method: "GET" }
+  );
+}
+
+export function connectScheduleEvents(homeId: string): EventSource {
+  return new EventSource(
+    `${API_BASE}/api/schedules/events?homeId=${encodeURIComponent(homeId)}`
+  );
 }

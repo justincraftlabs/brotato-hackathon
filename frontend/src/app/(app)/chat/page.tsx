@@ -2,8 +2,9 @@
 
 import { RotateCcw } from "lucide-react";
 import Link from "next/link";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
+import { ChatActionCard, type ActionStatus } from "@/components/chat/ChatActionCard";
 import { ChatBubble } from "@/components/chat/ChatBubble";
 import { ChatInput } from "@/components/chat/ChatInput";
 import { IotActionCard } from "@/components/chat/IotActionCard";
@@ -12,6 +13,13 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useChat, type ChatMessage } from "@/hooks/useChat";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { useT } from "@/hooks/use-t";
+import {
+  hasActionInProgress,
+  parseChatContent,
+  stripPartialActionTag,
+  type ChatAction,
+} from "@/lib/chat-action";
+import { applyChatAction } from "@/lib/chat-action-apply";
 import { LOCAL_STORAGE_HOME_ID_KEY, NAV_ROUTES } from "@/lib/constants";
 import type { Translations } from "@/lib/translations";
 
@@ -55,6 +63,8 @@ function EmptyState({ t }: EmptyStateProps) {
   );
 }
 
+const ROOM_NOT_FOUND_PLACEHOLDER = "{name}";
+
 export default function ChatPage() {
   const t = useT();
   const [homeId] = useLocalStorage(LOCAL_STORAGE_HOME_ID_KEY);
@@ -65,6 +75,8 @@ export default function ChatPage() {
   const { messages, isStreaming, isInitialized, sendMessage, setMessages, clearSession } = useChat(
     homeId ?? ""
   );
+
+  const [actionStatus, setActionStatus] = useState<Record<string, ActionStatus>>({});
 
   useEffect(() => {
     if (!homeId || !isInitialized || welcomeSetRef.current) return;
@@ -92,8 +104,31 @@ export default function ChatPage() {
 
   const handleNewChat = useCallback(() => {
     clearSession();
+    setActionStatus({});
     setMessages([{ id: "welcome", role: ROLE_ASSISTANT, content: t.CHAT_WELCOME_MESSAGE }]);
   }, [clearSession, setMessages, t.CHAT_WELCOME_MESSAGE]);
+
+  const handleApply = useCallback(
+    async (messageId: string, action: ChatAction) => {
+      if (!homeId) return;
+      setActionStatus((prev) => ({ ...prev, [messageId]: { state: "applying" } }));
+      const result = await applyChatAction(homeId, action);
+      if (result.success) {
+        setActionStatus((prev) => ({ ...prev, [messageId]: { state: "applied" } }));
+        return;
+      }
+      const message = formatApplyError(result.errorKey, result.detail, t);
+      setActionStatus((prev) => ({
+        ...prev,
+        [messageId]: { state: "failed", message },
+      }));
+    },
+    [homeId, t]
+  );
+
+  const handleCancel = useCallback((messageId: string) => {
+    setActionStatus((prev) => ({ ...prev, [messageId]: { state: "cancelled" } }));
+  }, []);
 
   if (!homeId) {
     return <EmptyState t={t} />;
@@ -122,18 +157,14 @@ export default function ChatPage() {
         className="min-h-0 flex-1 overflow-y-auto flex flex-col gap-3 px-2 py-4"
       >
         {messages.map((msg: ChatMessage, index: number) => (
-          <div key={msg.id} className="flex flex-col">
-            <ChatBubble
-              role={msg.role}
-              content={msg.content}
-              isStreaming={isStreaming && index === lastMessageIndex}
-            />
-            {msg.role === ROLE_ASSISTANT &&
-              (!isStreaming || index !== lastMessageIndex) &&
-              hasIotActionContent(msg.content) && (
-                <IotActionCard />
-              )}
-          </div>
+          <MessageRow
+            key={msg.id}
+            msg={msg}
+            isLastStreaming={isStreaming && index === lastMessageIndex}
+            status={actionStatus[msg.id] ?? { state: "pending" }}
+            onApply={handleApply}
+            onCancel={handleCancel}
+          />
         ))}
       </div>
       <ChatInput
@@ -144,4 +175,63 @@ export default function ChatPage() {
       />
     </div>
   );
+}
+
+interface MessageRowProps {
+  msg: ChatMessage;
+  isLastStreaming: boolean;
+  status: ActionStatus;
+  onApply: (messageId: string, action: ChatAction) => void;
+  onCancel: (messageId: string) => void;
+}
+
+function MessageRow({ msg, isLastStreaming, status, onApply, onCancel }: MessageRowProps) {
+  const { visibleContent, action } = useMemo(() => {
+    if (msg.role !== ROLE_ASSISTANT) {
+      return { visibleContent: msg.content, action: null };
+    }
+    if (isLastStreaming && hasActionInProgress(msg.content)) {
+      return { visibleContent: stripPartialActionTag(msg.content), action: null };
+    }
+    return parseChatContent(msg.content);
+  }, [msg.content, msg.role, isLastStreaming]);
+
+  const showIotCard =
+    msg.role === ROLE_ASSISTANT &&
+    !isLastStreaming &&
+    action === null &&
+    hasIotActionContent(visibleContent);
+
+  return (
+    <div className="flex flex-col">
+      <ChatBubble
+        role={msg.role}
+        content={visibleContent}
+        isStreaming={isLastStreaming}
+      />
+      {msg.role === ROLE_ASSISTANT && action !== null && !isLastStreaming && (
+        <ChatActionCard
+          action={action}
+          status={status}
+          onApply={() => onApply(msg.id, action)}
+          onCancel={() => onCancel(msg.id)}
+        />
+      )}
+      {showIotCard && <IotActionCard />}
+    </div>
+  );
+}
+
+function formatApplyError(
+  errorKey: "ROOM_NOT_FOUND" | "APPLIANCE_NOT_FOUND" | "API_ERROR",
+  detail: string,
+  t: Translations
+): string {
+  if (errorKey === "ROOM_NOT_FOUND") {
+    return t.CHAT_ACTION_ROOM_NOT_FOUND.replace(ROOM_NOT_FOUND_PLACEHOLDER, detail);
+  }
+  if (errorKey === "APPLIANCE_NOT_FOUND") {
+    return t.CHAT_ACTION_APPLIANCE_NOT_FOUND.replace(ROOM_NOT_FOUND_PLACEHOLDER, detail);
+  }
+  return detail;
 }

@@ -10,12 +10,19 @@ import { DeviceSuggestionCard } from "./DeviceSuggestionCard";
 
 interface RoomAccordionItemProps {
   room: RoomSuggestion;
+  homeId: string;
+  activatedKeys?: Set<string>;
+  onActivated?: (roomName: string, applianceName: string, item: import("@/lib/types").ActivateAllItem) => void;
   defaultOpen?: boolean;
   t: Translations;
 }
 
-export function RoomAccordionItem({ room, defaultOpen = false, t }: RoomAccordionItemProps) {
+export function RoomAccordionItem({ room, homeId, activatedKeys, onActivated, defaultOpen = false, t }: RoomAccordionItemProps) {
   const [isOpen, setIsOpen] = useState(defaultOpen);
+
+  const pendingCount = room.devices.filter(
+    (d) => !activatedKeys?.has(`${room.roomName}:${d.applianceName}`)
+  ).length;
 
   return (
     <div className="overflow-hidden rounded-lg border border-border">
@@ -28,7 +35,7 @@ export function RoomAccordionItem({ room, defaultOpen = false, t }: RoomAccordio
         <div className="flex items-center gap-2">
           <p className="font-semibold">{room.roomName}</p>
           <span className="text-xs text-muted-foreground">
-            {room.devices.length} {t.SUGGESTIONS_TIPS_SUFFIX}
+            {pendingCount} {t.SUGGESTIONS_TIPS_SUFFIX}
           </span>
         </div>
         <div className="flex items-center gap-2 shrink-0">
@@ -50,12 +57,14 @@ export function RoomAccordionItem({ room, defaultOpen = false, t }: RoomAccordio
       {isOpen && (
         <div className="flex flex-col gap-2 bg-background px-4 pb-4 pt-2">
           <p className="text-xs text-muted-foreground italic">{room.summary}</p>
-          {/* Desktop: 2-column grid; mobile: single column */}
-          <div className="grid grid-cols-1 gap-2 lg:grid-cols-2">
+          <div className="flex flex-col gap-2">
             {room.devices.map((device, index) => (
               <DeviceSuggestionCard
                 key={`${device.applianceName}-${index}`}
                 device={device}
+                homeId={homeId}
+                roomName={room.roomName}
+                onActivated={onActivated}
                 t={t}
               />
             ))}

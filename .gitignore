@@ -6,3 +6,5 @@ dist/
 .next/
 .DS_Store
 data/
+
+**/package-lock.json

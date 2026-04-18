@@ -9,6 +9,7 @@ import { RoomAccordionItem } from "@/components/savings/RoomAccordionItem";
 import { ApplianceAdjuster } from "@/components/simulator/ApplianceAdjuster";
 import { ComparisonBar } from "@/components/simulator/ComparisonBar";
 import { ImpactSummary } from "@/components/simulator/ImpactSummary";
+import { ActivateAllButton } from "@/components/recommendations/ActivateAllButton";
 import { IotSuggestionsPanel } from "@/components/tips/IotSuggestionsPanel";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -27,7 +28,8 @@ import {
 import { LOCAL_STORAGE_HOME_ID_KEY, NAV_ROUTES } from "@/lib/constants";
 import { formatKwh, formatVnd } from "@/lib/format";
 import type { Translations } from "@/lib/translations";
-import type { Home, SavingsSuggestionsResult } from "@/lib/types";
+import type { ActivateAllItem, Home, SavingsSuggestionsResult } from "@/lib/types";
+import { useSchedules } from "@/contexts/schedules-context";
 
 /* ---------- Types ---------- */
 
@@ -174,11 +176,21 @@ function SimulatorSkeletonLoader() {
 
 interface SuggestionsContentProps {
   state: SuggestionsState;
+  homeId: string;
   onRefresh: () => void;
   t: Translations;
 }
 
-function SuggestionsContent({ state, onRefresh, t }: SuggestionsContentProps) {
+function SuggestionsContent({ state, homeId, onRefresh, t }: SuggestionsContentProps) {
+  const { activatedKeys } = useSchedules();
+
+  const handleDeviceActivated = useCallback(
+    (_roomName: string, _applianceName: string, _item: ActivateAllItem) => {
+      // activate is called inside DeviceSuggestionCard via context
+    },
+    []
+  );
+
   if (state.status === "loading" || state.status === "idle") {
     return <SuggestionsSkeletonLoader />;
   }
@@ -198,6 +210,21 @@ function SuggestionsContent({ state, onRefresh, t }: SuggestionsContentProps) {
   }
 
   const { data } = state;
+
+  const activateItems: ActivateAllItem[] = data.rooms.flatMap((room) =>
+    room.devices.map((device) => ({
+      applianceName: device.applianceName,
+      roomName: room.roomName,
+      type: "behavior" as const,
+      title: device.tip,
+      savingsKwh: device.savingsKwh,
+      savingsVnd: device.savingsVnd,
+    }))
+  );
+
+  const pendingItems = activateItems.filter(
+    (item) => !activatedKeys.has(`${item.roomName}:${item.applianceName}`)
+  );
 
   return (
     <div className="flex flex-col gap-4">
@@ -223,10 +250,19 @@ function SuggestionsContent({ state, onRefresh, t }: SuggestionsContentProps) {
         </div>
       </div>
 
+      <ActivateAllButton
+        homeId={homeId}
+        items={pendingItems}
+        totalActivated={activatedKeys.size}
+      />
+
       {data.rooms.map((room, index) => (
         <RoomAccordionItem
           key={`room-${index}`}
           room={room}
+          homeId={homeId}
+          activatedKeys={activatedKeys}
+          onActivated={handleDeviceActivated}
           defaultOpen={index === FIRST_ROOM_INDEX}
           t={t}
         />
@@ -240,6 +276,7 @@ function SuggestionsContent({ state, onRefresh, t }: SuggestionsContentProps) {
 interface TipsTabContentProps {
   suggestionsState: SuggestionsState;
   homeData: Home | null;
+  homeId: string;
   iotLoading: boolean;
   onRefresh: () => void;
   t: Translations;
@@ -248,6 +285,7 @@ interface TipsTabContentProps {
 function TipsTabContent({
   suggestionsState,
   homeData,
+  homeId,
   iotLoading,
   onRefresh,
   t,
@@ -264,6 +302,7 @@ function TipsTabContent({
         </div>
         <SuggestionsContent
           state={suggestionsState}
+          homeId={homeId}
           onRefresh={onRefresh}
           t={t}
         />
@@ -408,6 +447,7 @@ export default function TipsPage() {
   const { lang } = useLanguage();
   const router = useRouter();
   const [homeId] = useLocalStorage(LOCAL_STORAGE_HOME_ID_KEY);
+  const { clearAll } = useSchedules();
   const searchParams = useSearchParams();
   const tabFromUrl = searchParams.get("tab") === TAB_SIMULATOR ? TAB_SIMULATOR : TAB_SUGGESTIONS;
   const [activeTab, setActiveTab] = useState(tabFromUrl);
@@ -495,8 +535,12 @@ export default function TipsPage() {
           <TipsTabContent
             suggestionsState={suggestionsState}
             homeData={homeData}
+            homeId={homeId}
             iotLoading={iotLoading}
-            onRefresh={() => fetchSuggestions(homeId, true)}
+            onRefresh={async () => {
+              await clearAll();
+              fetchSuggestions(homeId, true);
+            }}
             t={t}
           />
         </TabsContent>

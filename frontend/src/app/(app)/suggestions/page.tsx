@@ -170,6 +170,7 @@ export default function SuggestionsPage() {
         <RoomAccordionItem
           key={`room-${index}`}
           room={room}
+          homeId={homeId}
           defaultOpen={index === FIRST_ROOM_INDEX}
           t={t}
         />

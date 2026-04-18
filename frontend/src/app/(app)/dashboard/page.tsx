@@ -21,6 +21,7 @@ import { FixedBottomActions } from "@/components/dashboard/FixedBottomActions";
 import { MonthComparison } from "@/components/dashboard/MonthComparison";
 import { MonthlyBillProjection } from "@/components/dashboard/MonthlyBillProjection";
 import { RoomEnergyHeatmap } from "@/components/dashboard/RoomEnergyHeatmap";
+import { SavingsCounter } from "@/components/dashboard/SavingsCounter";
 import { SavingsForecastChart } from "@/components/dashboard/SavingsForecastChart";
 import { TopConsumersChart } from "@/components/dashboard/TopConsumersChart";
 import { VampireAppliances } from "@/components/dashboard/VampireAppliances";
@@ -284,11 +285,12 @@ function ErrorBanner({ message, onRetry, t }: ErrorBannerProps) {
 /* ---------- Dashboard Content ---------- */
 
 interface DashboardContentProps {
+  homeId: string;
   data: DashboardData;
   t: Translations;
 }
 
-function DashboardContent({ data, t }: DashboardContentProps) {
+function DashboardContent({ homeId, data, t }: DashboardContentProps) {
   return (
     <div className="flex flex-col gap-4">
       {/* Stat Cards — 2×2 on mobile, 4-col on lg */}
@@ -372,6 +374,9 @@ function DashboardContent({ data, t }: DashboardContentProps) {
         </FadeSlide>
 
         <FadeSlide className="md:col-span-2">
+          <SavingsCounter homeId={homeId} />
+        </FadeSlide>
+        <FadeSlide className="md:col-span-2">
           <CarbonWaterfallChart co2TotalKg={data.co2.totalKg} consumers={data.topConsumers} />
         </FadeSlide>
       </StaggerList>
@@ -431,7 +436,7 @@ export default function DashboardPage() {
           />
         )}
         {pageState.status === "success" && (
-          <DashboardContent data={pageState.data} t={t} />
+          <DashboardContent homeId={homeId} data={pageState.data} t={t} />
         )}
       </CrossFade>
 

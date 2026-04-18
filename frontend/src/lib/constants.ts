@@ -51,7 +51,8 @@ export const NAV_ROUTES = {
   DASHBOARD: "/dashboard",
   CHAT: "/chat",
   SIMULATOR: "/tips?tab=simulator",
-  SUGGESTIONS: "/suggestions",
+  SUGGESTIONS: "/tips?tab=suggestions",
+  SCHEDULES: "/schedules",
   TIPS: "/tips",
   ASSISTANT: "/chat",
 } as const;

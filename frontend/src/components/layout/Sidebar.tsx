@@ -2,6 +2,7 @@
 
 import { AnimatePresence, motion } from "framer-motion";
 import {
+  Bell,
   ChevronLeft,
   ChevronRight,
   LayoutDashboard,
@@ -68,7 +69,8 @@ type NavLabelKey =
   | "NAV_ASSISTANT"
   | "NAV_TIPS"
   | "NAV_SIMULATOR"
-  | "NAV_SETUP";
+  | "NAV_SETUP"
+  | "NAV_SCHEDULES";
 
 interface NavItemDef {
   href: string;
@@ -81,6 +83,7 @@ const NAV_ITEMS: NavItemDef[] = [
   { href: NAV_ROUTES.ASSISTANT, labelKey: "NAV_ASSISTANT", icon: MessageCircle },
   { href: NAV_ROUTES.TIPS, labelKey: "NAV_TIPS", icon: Lightbulb },
   { href: NAV_ROUTES.SETUP, labelKey: "NAV_SETUP", icon: Settings },
+  { href: NAV_ROUTES.SCHEDULES, labelKey: "NAV_SCHEDULES", icon: Bell },
 ];
 
 export function Sidebar() {
