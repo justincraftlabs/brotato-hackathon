@@ -32,7 +32,7 @@ export function calculateMonthlyCost(totalKwh: number): number {
 
     const tierRange = tier.maxKwh === Infinity
       ? remainingKwh
-      : tier.maxKwh - tier.minKwh + 1;
+      : tier.maxKwh - tier.minKwh;
     const kwhInTier = Math.min(remainingKwh, tierRange);
     totalCost += kwhInTier * tier.pricePerKwh;
     remainingKwh -= kwhInTier;

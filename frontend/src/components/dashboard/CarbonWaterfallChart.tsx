@@ -1,5 +1,7 @@
 "use client";
 
+import { Flame, Info } from "lucide-react";
+import { useState } from "react";
 import {
   Bar,
   BarChart,
@@ -11,6 +13,13 @@ import {
 } from "recharts";
 import type { TooltipContentProps } from "recharts";
 
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { useT } from "@/hooks/use-t";
 import { CO2_EMISSION_FACTOR } from "@/lib/constants";
 import { formatCo2 } from "@/lib/format";
@@ -102,91 +111,149 @@ export function CarbonWaterfallChart({
   consumers,
 }: CarbonWaterfallChartProps) {
   const t = useT();
+  const [dialogOpen, setDialogOpen] = useState(false);
   const chartData = toChartData(consumers, co2TotalKg, t.CHART_WASTE_OTHER);
 
   if (!chartData.length) return null;
 
   return (
-    <div className="glass rounded-2xl overflow-hidden card-hover-glow">
-      <div className="px-5 pb-0 pt-5 lg:px-6 lg:pt-6">
-        <div className="flex items-center justify-between">
-          <h3 className="text-base font-bold">{t.CHART_CARBON_TITLE}</h3>
-          <p className="text-sm font-black text-primary">
-            {formatCo2(co2TotalKg)}
+    <>
+      <div className="glass rounded-2xl overflow-hidden card-hover-glow">
+        <div className="px-5 pb-0 pt-5 lg:px-6 lg:pt-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <h3 className="text-base font-bold">{t.CHART_CARBON_TITLE}</h3>
+              <button
+                type="button"
+                onClick={() => setDialogOpen(true)}
+                title={t.CHART_CARBON_INFO_SUBTITLE}
+                className="flex h-5 w-5 items-center justify-center rounded-full text-muted-foreground/60 transition-all duration-150 hover:bg-primary/10 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+              >
+                <Info className="h-3.5 w-3.5" />
+              </button>
+            </div>
+            <p className="text-sm font-black text-primary">
+              {formatCo2(co2TotalKg)}
+            </p>
+          </div>
+          <p className="mt-0.5 text-xs text-muted-foreground">
+            {t.CHART_CARBON_UNIT}
           </p>
         </div>
-        <p className="mt-0.5 text-xs text-muted-foreground">
-          {t.CHART_CARBON_UNIT}
-        </p>
-      </div>
-      <div className="px-5 pb-5 pt-4 lg:px-6 lg:pb-6">
-        <ResponsiveContainer width="100%" height={CHART_HEIGHT}>
-          <BarChart
-            data={chartData}
-            layout="vertical"
-            margin={{ top: 0, right: 40, left: 0, bottom: 0 }}
-            barCategoryGap="20%"
-          >
-            <defs>
-              {GRADIENT_COLORS.map((color, index) => (
-                <linearGradient
-                  key={`carbon-grad-${index}`}
-                  id={`carbonGrad${index}`}
-                  x1="0"
-                  y1="0"
-                  x2="1"
-                  y2="0"
-                >
-                  <stop offset="0%" stopColor={color.start} />
-                  <stop offset="100%" stopColor={color.end} />
-                </linearGradient>
-              ))}
-            </defs>
-            <XAxis type="number" hide />
-            <YAxis
-              type="category"
-              dataKey="name"
-              width={Y_AXIS_WIDTH}
-              tick={{
-                fontSize: 12,
-                fontWeight: 500,
-                fill: "hsl(var(--foreground))",
-              }}
-              tickLine={false}
-              axisLine={false}
-            />
-            <Tooltip
-              content={(props) => <CustomTooltip {...props} />}
-              cursor={{
-                fill: "hsl(var(--muted))",
-                opacity: 0.4,
-                radius: BAR_RADIUS,
-              }}
-            />
-            <Bar
-              dataKey="co2Kg"
-              radius={[0, BAR_RADIUS, BAR_RADIUS, 0]}
-              barSize={BAR_SIZE}
-              animationDuration={1000}
-              animationBegin={100}
-              label={{
-                position: "right",
-                fontSize: 11,
-                fontWeight: 700,
-                fill: "hsl(var(--muted-foreground))",
-                formatter: (value: unknown) => `${Math.round((Number(value) / co2TotalKg) * 100)}%`,
-              }}
+        <div className="px-5 pb-5 pt-4 lg:px-6 lg:pb-6">
+          <ResponsiveContainer width="100%" height={CHART_HEIGHT}>
+            <BarChart
+              data={chartData}
+              layout="vertical"
+              margin={{ top: 0, right: 40, left: 0, bottom: 0 }}
+              barCategoryGap="20%"
             >
-              {chartData.map((_, index) => (
-                <Cell
-                  key={`cell-${index}`}
-                  fill={`url(#carbonGrad${index % GRADIENT_COLORS.length})`}
-                />
-              ))}
-            </Bar>
-          </BarChart>
-        </ResponsiveContainer>
+              <defs>
+                {GRADIENT_COLORS.map((color, index) => (
+                  <linearGradient
+                    key={`carbon-grad-${index}`}
+                    id={`carbonGrad${index}`}
+                    x1="0"
+                    y1="0"
+                    x2="1"
+                    y2="0"
+                  >
+                    <stop offset="0%" stopColor={color.start} />
+                    <stop offset="100%" stopColor={color.end} />
+                  </linearGradient>
+                ))}
+              </defs>
+              <XAxis type="number" hide />
+              <YAxis
+                type="category"
+                dataKey="name"
+                width={Y_AXIS_WIDTH}
+                tick={{
+                  fontSize: 12,
+                  fontWeight: 500,
+                  fill: "hsl(var(--foreground))",
+                }}
+                tickLine={false}
+                axisLine={false}
+              />
+              <Tooltip
+                content={(props) => <CustomTooltip {...props} />}
+                cursor={{
+                  fill: "hsl(var(--muted))",
+                  opacity: 0.4,
+                  radius: BAR_RADIUS,
+                }}
+              />
+              <Bar
+                dataKey="co2Kg"
+                radius={[0, BAR_RADIUS, BAR_RADIUS, 0]}
+                barSize={BAR_SIZE}
+                animationDuration={1000}
+                animationBegin={100}
+                label={{
+                  position: "right",
+                  fontSize: 11,
+                  fontWeight: 700,
+                  fill: "hsl(var(--muted-foreground))",
+                  formatter: (value: unknown) => `${Math.round((Number(value) / co2TotalKg) * 100)}%`,
+                }}
+              >
+                {chartData.map((_, index) => (
+                  <Cell
+                    key={`cell-${index}`}
+                    fill={`url(#carbonGrad${index % GRADIENT_COLORS.length})`}
+                  />
+                ))}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
       </div>
-    </div>
+
+      <Dialog open={dialogOpen} onOpenChange={(v) => !v && setDialogOpen(false)}>
+        <DialogContent className="max-w-sm overflow-hidden rounded-2xl border-border/60 bg-card p-0 sm:rounded-2xl">
+          {/* Header strip */}
+          <div className="border-b border-border/40 bg-primary/8 px-5 py-4">
+            <DialogHeader className="gap-0.5">
+              <DialogTitle className="flex items-center gap-2 text-base font-bold">
+                <Flame className="h-4 w-4 shrink-0 text-primary" />
+                {t.CHART_CARBON_INFO_TITLE}
+              </DialogTitle>
+              <DialogDescription className="text-xs">
+                {t.CHART_CARBON_INFO_SUBTITLE}
+              </DialogDescription>
+            </DialogHeader>
+          </div>
+
+          {/* Content */}
+          <div className="flex flex-col gap-3 px-5 py-4">
+            {/* Color scale */}
+            <div>
+              <p className="mb-2 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+                Thang màu
+              </p>
+              <div className="flex items-center gap-2">
+                <div className="h-3 flex-1 rounded-full bg-gradient-to-r from-[#C62828] via-[#F9A825] to-[#558B2F]" />
+              </div>
+              <p className="mt-1.5 text-xs text-muted-foreground">{t.CHART_CARBON_INFO_SCALE_HINT}</p>
+            </div>
+
+            {/* Context */}
+            <div className="rounded-xl border border-border/40 bg-muted/30 px-3.5 py-3">
+              <p className="text-xs leading-relaxed text-muted-foreground">
+                🌍 {t.CHART_CARBON_INFO_CONTEXT}
+              </p>
+            </div>
+          </div>
+
+          {/* Footer */}
+          <div className="border-t border-border/30 bg-muted/30 px-4 py-2.5">
+            <p className="text-[10px] leading-relaxed text-muted-foreground">
+              * {t.CHART_CARBON_INFO_FOOTER}
+            </p>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }

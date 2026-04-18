@@ -9,6 +9,8 @@ QUY TAC PHAN TICH:
 4. Neu thiet bi khong du thong tin de goi y, bo qua (de mang devices trong)
 5. Viet tieng Viet, giong than thien, nhe nhang hai huoc
 6. "priority" la "high" neu tiet kiem > 20,000d/thang, "medium" neu 5,000-20,000d, "low" neu < 5,000d
+7. QUAN TRONG - DIEN MA (VAMPIRE POWER): Neu thiet bi co standbyWattage > 0, BAT BUOC phai them tip ve viec rut phich cap / dung o dien co cong tac khi khong su dung. Tinh tiet kiem: (standbyWattage / 1000) * 24 * 30 * gia_dien. Day la co hoi tiet kiem de dang nhat vi chi can thay doi thoi quen nho.
+8. Uu tien goi y ve dien ma (standby) truoc cac goi y khac neu tiet kiem > 5,000d/thang
 
 BIEU GIA EVN 2024 (VND/kWh):
 Bac 1: 0-50 kWh = 1.893 | Bac 2: 51-100 = 1.956 | Bac 3: 101-200 = 2.271

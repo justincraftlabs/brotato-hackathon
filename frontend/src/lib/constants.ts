@@ -10,17 +10,22 @@ export interface EvnTier {
   tier: number;
   minKwh: number;
   maxKwh: number;
+  /** Current 2026 applicable rate (used for all calculations) */
   pricePerKwh: number;
+  /** [oldRate, newRate] — displayed in the pricing info table */
+  priceRange: readonly [number, number];
 }
 
-export const EVN_TIERS: EvnTier[] = [
-  { tier: 1, minKwh: 0, maxKwh: 50, pricePerKwh: 1893 },
-  { tier: 2, minKwh: 50, maxKwh: 100, pricePerKwh: 1956 },
-  { tier: 3, minKwh: 100, maxKwh: 200, pricePerKwh: 2271 },
-  { tier: 4, minKwh: 200, maxKwh: 300, pricePerKwh: 2860 },
-  { tier: 5, minKwh: 300, maxKwh: 400, pricePerKwh: 3197 },
-  { tier: 6, minKwh: 400, maxKwh: Infinity, pricePerKwh: 3302 },
-];
+// Source: EVN residential tariff 2026 (Biểu giá điện sinh hoạt 6 bậc)
+// Prices exclude 10% VAT.
+export const EVN_TIERS: readonly EvnTier[] = [
+  { tier: 1, minKwh: 0,   maxKwh: 50,       pricePerKwh: 1984, priceRange: [1826, 1984] },
+  { tier: 2, minKwh: 50,  maxKwh: 100,      pricePerKwh: 2050, priceRange: [1892, 2050] },
+  { tier: 3, minKwh: 100, maxKwh: 200,      pricePerKwh: 2380, priceRange: [2109, 2380] },
+  { tier: 4, minKwh: 200, maxKwh: 300,      pricePerKwh: 2998, priceRange: [2667, 2998] },
+  { tier: 5, minKwh: 300, maxKwh: 400,      pricePerKwh: 3350, priceRange: [3015, 3350] },
+  { tier: 6, minKwh: 400, maxKwh: Infinity, pricePerKwh: 3967, priceRange: [3151, 3967] },
+] as const;
 
 export const ROOM_TYPE_LABELS: Record<RoomType, string> = {
   bedroom: "Phòng ngủ",
@@ -45,7 +50,7 @@ export const NAV_ROUTES = {
   SETUP: "/setup",
   DASHBOARD: "/dashboard",
   CHAT: "/chat",
-  SIMULATOR: "/simulator",
+  SIMULATOR: "/tips?tab=simulator",
   SUGGESTIONS: "/suggestions",
   SCHEDULES: "/schedules",
   TIPS: "/tips",

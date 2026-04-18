@@ -69,14 +69,40 @@ export interface ComparisonData {
   status: 'above' | 'below' | 'average';
 }
 
+export interface VampireAppliance {
+  applianceId: string;
+  name: string;
+  roomName: string;
+  standbyWattage: number;
+  monthlyStandbyKwh: number;
+  monthlyStandbyCost: number;
+  standbyRatio: number;
+}
+
+export interface VampireData {
+  topVampires: VampireAppliance[];
+  totalStandbyKwh: number;
+  totalStandbyCost: number;
+  vampirePercent: number;
+}
+
+export interface RoomStat {
+  roomName: string;
+  totalKwh: number;
+  totalCost: number;
+  applianceCount: number;
+}
+
 export interface DashboardData {
   totalMonthlyKwh: number;
   totalMonthlyCost: number;
   evnTier: number;
   topConsumers: TopConsumer[];
+  roomStats: RoomStat[];
   comparison: ComparisonData;
   anomalies: Anomaly[];
   co2: Co2Data;
+  vampireData: VampireData;
 }
 
 export interface Recommendation {

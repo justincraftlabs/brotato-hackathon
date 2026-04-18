@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { streamChat } from "@/lib/api";
 import { CHAT_LABELS } from "@/lib/constants";
@@ -20,10 +20,61 @@ function createMessageId(): string {
   return `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
 }
 
+function sessionKey(homeId: string): string {
+  return `chat_session_id_${homeId}`;
+}
+
+function messagesKey(homeId: string): string {
+  return `chat_messages_${homeId}`;
+}
+
+function loadSessionId(homeId: string): string {
+  if (typeof window === "undefined" || !homeId) return "";
+  return localStorage.getItem(sessionKey(homeId)) ?? "";
+}
+
+function loadMessages(homeId: string): ChatMessage[] {
+  if (typeof window === "undefined" || !homeId) return [];
+  try {
+    const raw = localStorage.getItem(messagesKey(homeId));
+    return raw ? (JSON.parse(raw) as ChatMessage[]) : [];
+  } catch {
+    return [];
+  }
+}
+
 export function useChat(homeId: string) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isStreaming, setIsStreaming] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
   const sessionIdRef = useRef<string>("");
+  const skipNextSaveRef = useRef(false);
+
+  useEffect(() => {
+    if (!homeId) return;
+    skipNextSaveRef.current = true;
+    const stored = loadMessages(homeId);
+    sessionIdRef.current = loadSessionId(homeId);
+    setMessages(stored);
+    setIsInitialized(true);
+  }, [homeId]);
+
+  useEffect(() => {
+    if (!homeId) return;
+    if (skipNextSaveRef.current) {
+      skipNextSaveRef.current = false;
+      return;
+    }
+    localStorage.setItem(messagesKey(homeId), JSON.stringify(messages));
+  }, [homeId, messages]);
+
+  const clearSession = useCallback(() => {
+    if (!homeId) return;
+    localStorage.removeItem(sessionKey(homeId));
+    localStorage.removeItem(messagesKey(homeId));
+    sessionIdRef.current = "";
+    setMessages([]);
+  }, [homeId]);
 
   const sendMessage = useCallback(
     async (message: string) => {
@@ -53,6 +104,9 @@ export function useChat(homeId: string) {
         const newSessionId = response.headers.get(CHAT_LABELS.SESSION_HEADER);
         if (newSessionId) {
           sessionIdRef.current = newSessionId;
+          if (homeId) {
+            localStorage.setItem(sessionKey(homeId), newSessionId);
+          }
         }
 
         if (!response.body) {
@@ -120,5 +174,5 @@ export function useChat(homeId: string) {
     [homeId]
   );
 
-  return { messages, isStreaming, sendMessage, setMessages };
+  return { messages, isStreaming, isInitialized, sendMessage, setMessages, clearSession };
 }

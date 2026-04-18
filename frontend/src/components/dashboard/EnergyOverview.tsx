@@ -2,7 +2,6 @@
 
 import { DollarSign, Leaf, Zap } from "lucide-react";
 
-import { Card, CardContent } from "@/components/ui/card";
 import { useT } from "@/hooks/use-t";
 import { formatCo2, formatKwh, formatVnd } from "@/lib/format";
 import type { DashboardData } from "@/lib/types";
@@ -20,13 +19,13 @@ interface SummaryCardProps {
 
 function SummaryCard({ icon, label, value, colorClass }: SummaryCardProps) {
   return (
-    <Card className="flex-1">
-      <CardContent className="flex flex-col items-center gap-1 p-3">
+    <div className="card-depth card-hover-glow flex-1 rounded-2xl">
+      <div className="flex flex-col items-center gap-1 p-3">
         <div className={colorClass}>{icon}</div>
         <p className="text-xs text-muted-foreground">{label}</p>
         <p className="text-sm font-bold">{value}</p>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }
 

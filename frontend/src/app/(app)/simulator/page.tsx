@@ -16,7 +16,9 @@ import {
   calculateCo2,
   calculateMonthlyCost,
   calculateMonthlyKwh,
+  calculateTemperatureFactor,
 } from "@/lib/calculations";
+import { BarChart2, SlidersHorizontal } from "lucide-react";
 import { LOCAL_STORAGE_HOME_ID_KEY, NAV_ROUTES } from "@/lib/constants";
 import type { Translations } from "@/lib/translations";
 import type { Home } from "@/lib/types";
@@ -24,6 +26,7 @@ import type { Home } from "@/lib/types";
 interface ApplianceAdjustment {
   newDailyHours?: number;
   newTemperature?: number;
+  standbyOff?: boolean;
 }
 
 interface SimulationSnapshot {
@@ -40,6 +43,12 @@ type PageState =
 
 const INITIAL_STATE: PageState = { status: "idle" };
 const SKELETON_COUNT = 3;
+const STANDBY_HOURS_PER_DAY = 24;
+const STANDBY_DAYS_PER_MONTH = 30;
+
+function calcStandbyKwh(standbyWattage: number): number {
+  return (standbyWattage / 1000) * STANDBY_HOURS_PER_DAY * STANDBY_DAYS_PER_MONTH;
+}
 
 function recalculateSimulation(
   homeData: Home,
@@ -51,8 +60,14 @@ function recalculateSimulation(
     for (const appliance of room.appliances) {
       const adj = adjustments[appliance.id];
       const hours = adj?.newDailyHours ?? appliance.dailyUsageHours;
-      const kwh = calculateMonthlyKwh(appliance.wattage, hours);
-      totalKwh += kwh;
+      const tempFactor =
+        adj?.newTemperature !== undefined
+          ? calculateTemperatureFactor(appliance.type, adj.newTemperature)
+          : 1;
+      const effectiveWattage = appliance.wattage * tempFactor;
+      const activeKwh = calculateMonthlyKwh(effectiveWattage, hours);
+      const standbyKwh = adj?.standbyOff ? 0 : calcStandbyKwh(appliance.standbyWattage);
+      totalKwh += activeKwh + standbyKwh;
     }
   }
 
@@ -63,21 +78,7 @@ function recalculateSimulation(
 }
 
 function calculateOriginalSnapshot(homeData: Home): SimulationSnapshot {
-  let totalKwh = 0;
-
-  for (const room of homeData.rooms) {
-    for (const appliance of room.appliances) {
-      totalKwh += calculateMonthlyKwh(
-        appliance.wattage,
-        appliance.dailyUsageHours
-      );
-    }
-  }
-
-  const totalCost = calculateMonthlyCost(totalKwh);
-  const totalCo2Kg = calculateCo2(totalKwh);
-
-  return { totalKwh, totalCost, totalCo2Kg };
+  return recalculateSimulation(homeData, {});
 }
 
 function SimulatorSkeleton() {
@@ -214,26 +215,98 @@ export default function SimulatorPage() {
   const savingsCo2Kg = original.totalCo2Kg - adjusted.totalCo2Kg;
 
   return (
-    <div className="flex flex-col gap-4 pb-4">
-      <ImpactSummary
-        savingsKwh={savingsKwh}
-        savingsVnd={savingsVnd}
-        savingsCo2Kg={savingsCo2Kg}
-      />
+    <div className="pb-4">
+      {/* ── Desktop: sticky left panel + scrollable right ── */}
+      <div className="hidden lg:flex lg:flex-row lg:items-start lg:gap-6">
+        {/* Left sticky panel */}
+        <div className="sticky top-0 flex w-72 shrink-0 flex-col gap-4 xl:w-80">
+          <ImpactSummary
+            savingsKwh={savingsKwh}
+            savingsVnd={savingsVnd}
+            savingsCo2Kg={savingsCo2Kg}
+            originalKwh={original.totalKwh}
+            originalCost={original.totalCost}
+            originalCo2={original.totalCo2Kg}
+          />
+          <ComparisonBar
+            originalCost={original.totalCost}
+            adjustedCost={adjusted.totalCost}
+            originalCo2={original.totalCo2Kg}
+            adjustedCo2={adjusted.totalCo2Kg}
+            onReset={handleReset}
+          />
+        </div>
 
-      <ApplianceAdjuster
-        rooms={homeData.rooms}
-        adjustments={adjustments}
-        onAdjust={handleAdjust}
-      />
+        {/* Right scrollable content */}
+        <div className="flex flex-1 flex-col gap-4">
+          <div>
+            <h1 className="text-2xl font-bold lg:text-3xl">
+              {t.SIMULATOR_PAGE_TITLE}
+            </h1>
+            <p className="mt-1 text-sm text-muted-foreground">
+              {t.TIPS_PAGE_SUBTITLE}
+            </p>
+          </div>
+          <ApplianceAdjuster
+            rooms={homeData.rooms}
+            adjustments={adjustments}
+            onAdjust={handleAdjust}
+          />
+        </div>
+      </div>
 
-      <ComparisonBar
-        originalCost={original.totalCost}
-        adjustedCost={adjusted.totalCost}
-        originalCo2={original.totalCo2Kg}
-        adjustedCo2={adjusted.totalCo2Kg}
-        onReset={handleReset}
-      />
+      {/* ── Mobile: stacked layout ── */}
+      <div className="flex flex-col gap-4 lg:hidden">
+        {/* Page header */}
+        <div>
+          <h1 className="text-xl font-bold">{t.SIMULATOR_PAGE_TITLE}</h1>
+          <p className="mt-0.5 text-xs text-muted-foreground">
+            {t.TIPS_PAGE_SUBTITLE}
+          </p>
+        </div>
+
+        {/* Sticky impact summary */}
+        <div className="sticky top-0 z-10">
+          <ImpactSummary
+            savingsKwh={savingsKwh}
+            savingsVnd={savingsVnd}
+            savingsCo2Kg={savingsCo2Kg}
+            originalKwh={original.totalKwh}
+            originalCost={original.totalCost}
+            originalCo2={original.totalCo2Kg}
+          />
+        </div>
+
+        {/* Section: Appliances */}
+        <div className="flex items-center gap-2 mt-1">
+          <SlidersHorizontal className="h-4 w-4 text-primary" />
+          <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+            {t.SIMULATOR_ADJUST_SECTION}
+          </h2>
+        </div>
+
+        <ApplianceAdjuster
+          rooms={homeData.rooms}
+          adjustments={adjustments}
+          onAdjust={handleAdjust}
+        />
+
+        {/* Section: Comparison */}
+        <div className="flex items-center gap-2">
+          <BarChart2 className="h-4 w-4 text-primary" />
+          <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+            {t.SIMULATOR_COMPARISON_SECTION}
+          </h2>
+        </div>
+
+        <ComparisonBar
+          originalCost={original.totalCost}
+          adjustedCost={adjusted.totalCost}
+          originalCo2={original.totalCo2Kg}
+          adjustedCo2={adjusted.totalCo2Kg}
+          onReset={handleReset}
+        />
+      </div>
     </div>
   );
 }
