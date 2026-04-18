@@ -8,13 +8,15 @@ AI persona: **"Trợ Lý Khoai Tây"** (Brotato Assistant) — witty, eco-friend
 ## Quick Start
 
 ```bash
-# MongoDB (must be running first)
-mongod --dbpath ./data/db
+# MongoDB (must be running first) — pick one:
+docker compose up -d          # uses ./docker-compose.yml
+# OR: mongod --dbpath ./data/db
 
 # Backend (terminal 1)
 cd backend
 cp .env.example .env          # fill ANTHROPIC_API_KEY
 npm install
+npm run seed                  # optional: seed demo home
 npm run dev                   # http://localhost:3001
 
 # Frontend (terminal 2)
@@ -38,6 +40,8 @@ Express.js API Server (:3001)
         +--- MongoDB (mongoose) → persistent data
         |
         +--- Web Speech API (browser-native, no backend)
+        |
+        +--- node-cron (every minute) → fires due schedules via SSE + Slack webhook
 ```
 
 **Boundaries:**
@@ -50,23 +54,28 @@ Express.js API Server (:3001)
 ```
 backend/
   src/
-    index.ts                    # Entry point
+    index.ts                    # Entry point + node-cron schedule checker
     routes/                     # Express route handlers (thin)
       home.ts                   # POST /setup, POST /:id/appliances, GET /:id
       energy.ts                 # GET /:homeId/dashboard
-      ai.ts                    # POST /recommendations, /chat (SSE), /estimate-appliance, /recognize-appliance, /savings-suggestions, /analyze-habit
+      ai.ts                     # POST /recommendations, /chat (SSE), /estimate-appliance, /recognize-appliance, /savings-suggestions, /analyze-habit
       simulator.ts              # POST /calculate
+      schedules.ts              # CRUD + SSE /events + /fire-all + /:id/complete (Slack redirect)
     services/                   # Business logic
       home-service.ts
       energy-service.ts
       ai-service.ts             # Claude API calls (AI agent owns this)
       simulator-service.ts
       evn-pricing-service.ts    # EVN tiered pricing calculator
+      schedule-service.ts       # create/activate/fire/complete schedules
+      notification-service.ts   # SSE client registry + Slack webhook fan-out
     models/                     # Mongoose schemas
       home.model.ts
       room.model.ts
       appliance.model.ts
       chat-session.model.ts
+      schedule.model.ts
+      completion.model.ts
     middleware/
       error-handler.ts
       validate.ts               # zod validation factory
@@ -79,36 +88,54 @@ backend/
       recommendation.ts
       savings-suggestions.ts
       usage-habit-parser.ts
+    seed/
+      demo-home.ts              # run: npm run seed
     types/                      # Shared TypeScript interfaces
-    constants/                  # EVN tiers, CO2 factor, appliance defaults
+    constants/                  # EVN tiers, CO2 factor, appliance defaults, room sizes
     db/
       connection.ts             # MongoDB connection
 
 frontend/
   src/
     app/
-      page.tsx                  # Landing
-      setup/page.tsx            # Home Setup Wizard (F1)
-      dashboard/page.tsx        # Energy Dashboard (F2)
-      chat/page.tsx             # AI Chat with Khoai Tay (F3)
-      simulator/page.tsx        # Green Heatmap Simulator (F4)
-      suggestions/page.tsx      # Savings Suggestions (UC6)
-      tips/page.tsx             # AI Tips tab view
+      page.tsx                  # Landing (shows "Back to dashboard" if homeId in localStorage)
+      layout.tsx                # Root layout (ThemeProvider, LanguageProvider)
+      (app)/                    # Route group: shared Sidebar + Header + BottomNav + SchedulesProvider
+        layout.tsx
+        setup/page.tsx          # F1 Home Setup Wizard
+        dashboard/page.tsx      # F2 Energy Dashboard
+        chat/page.tsx           # F3 AI Chat with Khoai Tay
+        simulator/page.tsx      # F4 Green Heatmap Simulator
+        suggestions/page.tsx    # UC6 Savings Suggestions
+        schedules/page.tsx      # F7 Scheduled reminders (Bell icon in nav)
+        tips/page.tsx           # AI Tips tab view
+    contexts/
+      language-context.tsx      # vi/en toggle
+      schedules-context.tsx     # global schedules state + SSE subscription
     components/
       ui/                       # shadcn/ui (auto-generated)
-      layout/                   # Header, BottomNav, PageContainer
-      setup/                    # RoomSelector, ApplianceForm, VoiceInputButton, ImageCaptureButton
-      dashboard/                # EnergyOverview, TopConsumersChart, EvnTierProgress, Co2TreeVisual
-      chat/                     # ChatBubble, ChatInput, StreamingText
+      layout/                   # Header, BottomNav, PageContainer, Sidebar, SideNav, ThemeProvider
+      setup/                    # RoomSelector, ApplianceForm, ApplianceCard, EditModeView, SetupReview, StepIndicator, VoiceInputButton, ImageCaptureButton
+      dashboard/                # EnergyOverview, TopConsumersChart, EvnTierProgress, Co2TreeVisual, AnomalyAlert, CarbonWaterfallChart, EfficiencyGauge, FixedBottomActions, MonthComparison, MonthlyBillProjection, RoomEnergyHeatmap, SavingsCounter, SavingsForecastChart, VampireAppliances, WasteHotspotChart
+      chat/                     # ChatBubble, ChatInput, ChatActionCard, IotActionCard, RecommendationCards
       simulator/                # ApplianceAdjuster, ComparisonBar, ImpactSummary
+      schedule/                 # ScheduleToast, ScheduleToastContainer
+      savings/                  # DeviceSuggestionCard, RoomAccordionItem
+      recommendations/          # ActivateAllButton
+      tips/                     # IotSuggestionsPanel
     lib/
       api.ts                    # ALL backend calls go here — never fetch in components
       types.ts                  # Shared interfaces
-      constants.ts              # EVN tiers, CO2 factor
+      constants.ts              # EVN tiers, CO2, nav routes, localStorage keys
       format.ts                 # VND/kWh/% formatting
-      speech.ts                 # Web Speech API wrapper
-      image.ts                  # Image resize + base64 conversion (heic2any lazy-imported)
-    hooks/                      # use-t.ts, useChat.ts, useImageCapture.ts, useLocalStorage.ts, useSpeech.ts
+      speech.ts + speech-constants.ts       # Web Speech API wrapper
+      image.ts + image-constants.ts         # Image resize + base64 (heic2any lazy-imported)
+      calculations.ts                       # Energy math helpers
+      chat-action.ts + chat-action-apply.ts # IoT / schedule action handling from chat
+      translations.ts                       # vi/en strings
+      cn.ts + utils.ts                      # Tailwind class merging
+      setup-constants.ts + simulator-constants.ts
+    hooks/                      # use-t, useChat, useImageCapture, useLocalStorage, useSpeech, useScheduledEvents
 ```
 
 ## Tech Stack
@@ -133,6 +160,8 @@ PORT=3001
 ANTHROPIC_API_KEY=sk-ant-...
 MONGODB_URI=mongodb://localhost:27017/e-lumi-nate
 NODE_ENV=development
+SLACK_WEBHOOK_URL=https://hooks.slack.com/...   # optional: schedule fire notifications
+FRONTEND_URL=http://localhost:3000              # used by /schedules/:id/complete redirect
 
 # frontend/.env.local
 NEXT_PUBLIC_API_URL=http://localhost:3001
@@ -148,6 +177,7 @@ NEXT_PUBLIC_API_URL=http://localhost:3001
 | F4 | Green Heatmap Simulator — adjust settings, see VND/CO2 impact live | Frontend + Backend |
 | F5 | Voice Input — Web Speech API for appliance names + chat (vi-VN) | Frontend |
 | F6 | Image Recognition — camera/upload photo → Claude Vision identifies appliance | Frontend + AI |
+| F7 | Schedules — activate recommendations as scheduled reminders with SSE toast + optional Slack webhook | Frontend + Backend |
 
 **Out of scope:** auth, real weather API, push notifications, PWA, social sharing.
 
@@ -267,6 +297,9 @@ For implementation details beyond what's here, see `plans/`:
 - **ESLint skipped during builds** — `eslint: { ignoreDuringBuilds: true }` is set in `next.config.mjs` due to pre-existing lint errors. Fix before removing this flag.
 - **Client-only libraries in hooks** — any `useState` initializer that accesses `window`/`document` directly (not inside `useEffect`) will break SSR. Always guard with `typeof window === "undefined"`.
 - **UC5 weighted average formula**: `[(weekday_hours × 5) + (weekend_hours × 2)] / 7` — natural language habit text is parsed by Claude, not regex.
+- **SSE route order in `schedules.ts`**: `/events`, `/savings`, `/activate-all`, `/fire-all` MUST be registered BEFORE `/:scheduleId` routes, or Express will match them as scheduleIds.
+- **Schedule cron fires every minute** via `node-cron` in `backend/src/index.ts`. `scheduledTime` is stored as a string (HH:mm) — compared against current local time in `checkAndFireDue()`.
+- **Slack webhook is optional** — if `SLACK_WEBHOOK_URL` is unset, `postToSlack()` returns early; SSE push to connected frontend clients still happens.
 
 ## Agent Roles (reference)
 
