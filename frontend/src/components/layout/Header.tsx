@@ -1,6 +1,7 @@
 "use client";
 
 import { Moon, Sun } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
@@ -12,6 +13,7 @@ import type { Language } from "@/lib/translations";
 
 const THEME_DARK = "dark";
 const THEME_LIGHT = "light";
+const LOGO_SIZE = 28;
 
 const LANGUAGE_LABELS: Record<Language, string> = {
   vi: "VI",
@@ -44,8 +46,21 @@ export function Header() {
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/50 glass-strong lg:hidden">
       <div className="flex h-14 items-center justify-between px-4">
-        <Link href="/dashboard" className="text-lg font-bold tracking-tight hover:opacity-80 transition-opacity">
-          E-<span className="text-primary drop-shadow-[0_0_8px_hsl(var(--primary)/0.5)]">LUMI</span>-NATE
+        <Link
+          href="/dashboard"
+          className="flex items-center gap-2 hover:opacity-80 transition-opacity"
+        >
+          <Image
+            src="/logo.png"
+            alt="E-LUMI-NATE"
+            width={LOGO_SIZE}
+            height={LOGO_SIZE}
+            className="shrink-0 rounded-full object-cover"
+            priority
+          />
+          <span className="text-lg font-bold tracking-tight">
+            E-<span className="text-primary drop-shadow-[0_0_8px_hsl(var(--primary)/0.5)]">LUMI</span>-NATE
+          </span>
         </Link>
 
         <div className="flex items-center gap-1">

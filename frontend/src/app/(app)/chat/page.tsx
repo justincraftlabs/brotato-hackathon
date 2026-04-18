@@ -86,6 +86,20 @@ const SUCCESS_SIZE_PLACEHOLDER = "{size}";
 const SUCCESS_APPLIANCE_PLACEHOLDER = "{appliance}";
 const SUCCESS_COUNT_PLACEHOLDER = "{count}";
 
+function actionStatusStorageKey(homeId: string): string {
+  return `chat_action_status_${homeId}`;
+}
+
+function loadActionStatus(homeId: string): Record<string, ActionStatus> {
+  if (typeof window === "undefined" || !homeId) return {};
+  try {
+    const raw = window.localStorage.getItem(actionStatusStorageKey(homeId));
+    return raw ? (JSON.parse(raw) as Record<string, ActionStatus>) : {};
+  } catch {
+    return {};
+  }
+}
+
 function createSystemMessageId(): string {
   return `system-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
 }
@@ -150,6 +164,25 @@ export default function ChatPage() {
   );
 
   const [actionStatus, setActionStatus] = useState<Record<string, ActionStatus>>({});
+  const skipNextActionStatusSaveRef = useRef(false);
+
+  useEffect(() => {
+    if (!homeId) return;
+    skipNextActionStatusSaveRef.current = true;
+    setActionStatus(loadActionStatus(homeId));
+  }, [homeId]);
+
+  useEffect(() => {
+    if (!homeId) return;
+    if (skipNextActionStatusSaveRef.current) {
+      skipNextActionStatusSaveRef.current = false;
+      return;
+    }
+    window.localStorage.setItem(
+      actionStatusStorageKey(homeId),
+      JSON.stringify(actionStatus)
+    );
+  }, [homeId, actionStatus]);
 
   useEffect(() => {
     if (!homeId || !isInitialized || welcomeSetRef.current) return;
@@ -177,9 +210,12 @@ export default function ChatPage() {
 
   const handleNewChat = useCallback(() => {
     clearSession();
+    if (homeId) {
+      window.localStorage.removeItem(actionStatusStorageKey(homeId));
+    }
     setActionStatus({});
     setMessages([{ id: "welcome", role: ROLE_ASSISTANT, content: t.CHAT_WELCOME_MESSAGE }]);
-  }, [clearSession, setMessages, t.CHAT_WELCOME_MESSAGE]);
+  }, [clearSession, homeId, setMessages, t.CHAT_WELCOME_MESSAGE]);
 
   const handleApply = useCallback(
     async (messageId: string, action: ChatAction) => {
