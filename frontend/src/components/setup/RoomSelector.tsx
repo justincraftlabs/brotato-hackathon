@@ -45,7 +45,6 @@ export function RoomSelector({
 }: RoomSelectorProps) {
   const t = useT();
   const ROOM_TYPES = Object.keys(t.ROOM_TYPE_LABELS) as RoomType[];
-  const ROOM_SIZES = Object.keys(t.ROOM_SIZE_LABELS) as RoomSize[];
   const hasRooms = rooms.length > 0;
 
   function getRoomCountForType(type: RoomType): number {

@@ -42,7 +42,7 @@ OUTPUT FORMAT (JSON thuan, KHONG markdown, KHONG giai thich):
   "grandTotalSavingsVnd": 0
 }`;
 
-const SAVINGS_SUGGESTIONS_SYSTEM_PROMPT_EN = `You are "Potato Assistant", a witty, eco-friendly energy expert for Vietnamese households.
+const SAVINGS_SUGGESTIONS_SYSTEM_PROMPT_EN = `You are "Brotato Assistant", a witty, eco-friendly energy expert for Vietnamese households.
 
 TASK: Analyze every room and every appliance, then give concrete, actionable electricity-saving tips.
 

@@ -230,10 +230,12 @@ export async function estimateAppliance(
 }
 
 export async function recognizeAppliance(
-  imageFile: File
+  imageFile: File,
+  language: "vi" | "en" = "vi"
 ): Promise<ApiResponse<ImageRecognitionResult>> {
   const formData = new FormData();
   formData.append("image", imageFile);
+  formData.append("language", language);
 
   try {
     const response = await fetch(`${API_BASE}/api/ai/recognize-appliance`, {
@@ -288,10 +290,23 @@ export async function addRoom(
   homeId: string,
   room: Pick<Room, "name" | "type" | "size">
 ): Promise<ApiResponse<Room>> {
-  return request<Room>(`/api/home/${homeId}/rooms`, {
+  const response = await request<BackendRoom>(`/api/home/${homeId}/rooms`, {
     method: "POST",
     body: JSON.stringify(room),
   });
+  if (!response.success) {
+    return response;
+  }
+  const raw = response.data;
+  return {
+    success: true,
+    data: {
+      id: raw.roomId,
+      name: raw.name,
+      type: raw.type,
+      size: raw.size,
+    },
+  };
 }
 
 interface UpdateRoomPayload {

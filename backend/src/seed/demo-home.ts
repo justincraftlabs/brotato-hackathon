@@ -4,7 +4,7 @@ import { HomeModel } from '../models/home.model';
 import { RoomModel } from '../models/room.model';
 import { ApplianceModel } from '../models/appliance.model';
 import {
-  calculateApplianceMonthlyKwh,
+  calculateApplianceMonthlyKwhForRoom,
   calculateMonthlyCost,
 } from '../services/evn-pricing-service';
 import { CO2_EMISSION_FACTOR_KG_PER_KWH } from '../constants/co2';
@@ -137,9 +137,11 @@ function buildApplianceDocs(
     }
 
     for (const appliance of room.appliances) {
-      const monthlyKwh = calculateApplianceMonthlyKwh(
+      const monthlyKwh = calculateApplianceMonthlyKwhForRoom(
         appliance.wattage,
-        appliance.dailyUsageHours
+        appliance.dailyUsageHours,
+        room.size,
+        appliance.type
       );
 
       const proportionalCost =
@@ -170,9 +172,11 @@ function calculateTotalKwh(rooms: SeedRoom[]): number {
   let total = 0;
   for (const room of rooms) {
     for (const appliance of room.appliances) {
-      total += calculateApplianceMonthlyKwh(
+      total += calculateApplianceMonthlyKwhForRoom(
         appliance.wattage,
-        appliance.dailyUsageHours
+        appliance.dailyUsageHours,
+        room.size,
+        appliance.type
       );
     }
   }

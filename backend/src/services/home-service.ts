@@ -4,7 +4,7 @@ import { RoomModel } from '../models/room.model';
 import { ApplianceModel } from '../models/appliance.model';
 import { Home, Room, Appliance, RoomType, RoomSize } from '../types/home';
 import {
-  calculateApplianceMonthlyKwh,
+  calculateApplianceMonthlyKwhForRoom,
   calculateMonthlyCost,
 } from './evn-pricing-service';
 import { parseUsageHabits, UsageHabitInput } from './ai-service';
@@ -109,7 +109,12 @@ export async function addAppliances(
 
   const newApplianceDocs = appliances.map((input, index) => {
     const dailyUsageHours = effectiveHours[index] ?? input.dailyUsageHours;
-    const monthlyKwh = calculateApplianceMonthlyKwh(input.wattage, dailyUsageHours);
+    const monthlyKwh = calculateApplianceMonthlyKwhForRoom(
+      input.wattage,
+      dailyUsageHours,
+      room.size,
+      input.type
+    );
 
     return {
       applianceId: uuidv4(),
@@ -232,7 +237,13 @@ export async function updateAppliance(
     throw new ApplianceNotFoundError(applianceId);
   }
 
+  const room = await RoomModel.findOne({ roomId: existing.roomId, homeId }).lean();
+  if (!room) {
+    throw new RoomNotFoundError(existing.roomId);
+  }
+
   const newWattage = updates.wattage ?? existing.wattage;
+  const newType = updates.type ?? existing.type;
   const newUsageHabit = updates.usageHabit ?? existing.usageHabit ?? '';
   const sliderDailyHours = updates.dailyUsageHours ?? existing.dailyUsageHours;
 
@@ -253,7 +264,12 @@ export async function updateAppliance(
     newDailyUsageHours = parsed ?? sliderDailyHours;
   }
 
-  const monthlyKwh = calculateApplianceMonthlyKwh(newWattage, newDailyUsageHours);
+  const monthlyKwh = calculateApplianceMonthlyKwhForRoom(
+    newWattage,
+    newDailyUsageHours,
+    room.size,
+    newType
+  );
 
   const otherAppliances = await ApplianceModel.find({
     homeId,
@@ -381,6 +397,11 @@ export async function updateRoom(
   roomId: string,
   updates: Partial<RoomInput>
 ): Promise<Room> {
+  const existing = await RoomModel.findOne({ roomId, homeId }).lean();
+  if (!existing) {
+    throw new RoomNotFoundError(roomId);
+  }
+
   const updated = await RoomModel.findOneAndUpdate(
     { roomId, homeId },
     updates,
@@ -389,6 +410,13 @@ export async function updateRoom(
 
   if (!updated) {
     throw new RoomNotFoundError(roomId);
+  }
+
+  const sizeChanged =
+    updates.size !== undefined && updates.size !== existing.size;
+
+  if (sizeChanged) {
+    await recomputeRoomApplianceCosts(homeId, roomId, updated.size);
   }
 
   const appliances = await ApplianceModel.find({ roomId, homeId }).lean();
@@ -415,6 +443,57 @@ export async function updateRoom(
       monthlyCost: doc.monthlyCost,
     }))
   );
+}
+
+async function recomputeRoomApplianceCosts(
+  homeId: string,
+  roomId: string,
+  newSize: RoomSize
+): Promise<void> {
+  const roomAppliances = await ApplianceModel.find({ homeId, roomId }).lean();
+  if (roomAppliances.length === 0) {
+    return;
+  }
+
+  const roomApplianceUpdates = roomAppliances.map((a) => ({
+    applianceId: a.applianceId,
+    newMonthlyKwh: calculateApplianceMonthlyKwhForRoom(
+      a.wattage,
+      a.dailyUsageHours,
+      newSize,
+      a.type
+    ),
+  }));
+
+  const updatedKwhById = new Map(
+    roomApplianceUpdates.map((u) => [u.applianceId, u.newMonthlyKwh])
+  );
+
+  const allAppliances = await ApplianceModel.find({ homeId }).lean();
+  const householdTotalKwh = allAppliances.reduce((sum, a) => {
+    const updatedKwh = updatedKwhById.get(a.applianceId);
+    return sum + (updatedKwh ?? a.monthlyKwh);
+  }, ZERO_KWH);
+
+  const householdTotalCost = calculateMonthlyCost(householdTotalKwh);
+
+  const bulkOps = allAppliances.map((a) => {
+    const updatedKwh = updatedKwhById.get(a.applianceId);
+    const monthlyKwh = updatedKwh ?? a.monthlyKwh;
+    const monthlyCost =
+      householdTotalKwh > ZERO_KWH
+        ? Math.round((monthlyKwh / householdTotalKwh) * householdTotalCost)
+        : ZERO_COST;
+
+    return {
+      updateOne: {
+        filter: { applianceId: a.applianceId, homeId },
+        update: { $set: { monthlyKwh, monthlyCost } },
+      },
+    };
+  });
+
+  await ApplianceModel.bulkWrite(bulkOps);
 }
 
 export async function deleteRoom(

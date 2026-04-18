@@ -32,9 +32,26 @@ const IOT_ACTION_KEYWORDS = [
   "rút điện", "tắt trước", "tắt máy", "lên lịch", "tiết kiệm", "cắt giảm", "thói quen",
 ];
 
+const CRUD_INTENT_KEYWORDS = [
+  "tạo phòng", "thêm phòng", "phòng mới",
+  "thêm thiết bị", "sửa thiết bị", "xóa thiết bị", "cập nhật thiết bị",
+  "create room", "add room", "new room",
+  "add appliance", "update appliance", "delete appliance", "remove appliance",
+];
+
+const ACTION_TAG_OPEN_TOKEN = "<action>";
+
 function hasIotActionContent(content: string): boolean {
   const lower = content.toLowerCase();
   return IOT_ACTION_KEYWORDS.some((kw) => lower.includes(kw));
+}
+
+function isCrudIntentContent(rawContent: string, visibleContent: string): boolean {
+  if (rawContent.includes(ACTION_TAG_OPEN_TOKEN)) {
+    return true;
+  }
+  const lower = visibleContent.toLowerCase();
+  return CRUD_INTENT_KEYWORDS.some((kw) => lower.includes(kw));
 }
 
 interface EmptyStateProps {
@@ -64,6 +81,62 @@ function EmptyState({ t }: EmptyStateProps) {
 }
 
 const ROOM_NOT_FOUND_PLACEHOLDER = "{name}";
+const SUCCESS_ROOM_PLACEHOLDER = "{room}";
+const SUCCESS_SIZE_PLACEHOLDER = "{size}";
+const SUCCESS_APPLIANCE_PLACEHOLDER = "{appliance}";
+const SUCCESS_COUNT_PLACEHOLDER = "{count}";
+
+function createSystemMessageId(): string {
+  return `system-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+}
+
+function buildApplySuccessMessage(action: ChatAction, t: Translations): string {
+  if (action.operation === "createRoom") {
+    const template =
+      action.appliances.length > 0
+        ? t.CHAT_ACTION_SUCCESS_CREATE_ROOM_WITH_APPLIANCES
+        : t.CHAT_ACTION_SUCCESS_CREATE_ROOM;
+    return template
+      .replace(SUCCESS_ROOM_PLACEHOLDER, action.room.name)
+      .replace(SUCCESS_SIZE_PLACEHOLDER, t.ROOM_SIZE_LABELS[action.room.size])
+      .replace(SUCCESS_COUNT_PLACEHOLDER, String(action.appliances.length));
+  }
+  if (action.operation === "add") {
+    return t.CHAT_ACTION_SUCCESS_ADD
+      .replace(SUCCESS_APPLIANCE_PLACEHOLDER, action.appliance.name)
+      .replace(SUCCESS_ROOM_PLACEHOLDER, action.roomName);
+  }
+  if (action.operation === "update") {
+    return t.CHAT_ACTION_SUCCESS_UPDATE
+      .replace(SUCCESS_APPLIANCE_PLACEHOLDER, action.applianceName)
+      .replace(SUCCESS_ROOM_PLACEHOLDER, action.roomName);
+  }
+  return t.CHAT_ACTION_SUCCESS_DELETE
+    .replace(SUCCESS_APPLIANCE_PLACEHOLDER, action.applianceName)
+    .replace(SUCCESS_ROOM_PLACEHOLDER, action.roomName);
+}
+
+function buildApplyCancelMessage(action: ChatAction, t: Translations): string {
+  if (action.operation === "createRoom") {
+    return t.CHAT_ACTION_CANCELLED_CREATE_ROOM.replace(
+      SUCCESS_ROOM_PLACEHOLDER,
+      action.room.name
+    );
+  }
+  if (action.operation === "add") {
+    return t.CHAT_ACTION_CANCELLED_ADD
+      .replace(SUCCESS_APPLIANCE_PLACEHOLDER, action.appliance.name)
+      .replace(SUCCESS_ROOM_PLACEHOLDER, action.roomName);
+  }
+  if (action.operation === "update") {
+    return t.CHAT_ACTION_CANCELLED_UPDATE
+      .replace(SUCCESS_APPLIANCE_PLACEHOLDER, action.applianceName)
+      .replace(SUCCESS_ROOM_PLACEHOLDER, action.roomName);
+  }
+  return t.CHAT_ACTION_CANCELLED_DELETE
+    .replace(SUCCESS_APPLIANCE_PLACEHOLDER, action.applianceName)
+    .replace(SUCCESS_ROOM_PLACEHOLDER, action.roomName);
+}
 
 export default function ChatPage() {
   const t = useT();
@@ -115,6 +188,12 @@ export default function ChatPage() {
       const result = await applyChatAction(homeId, action);
       if (result.success) {
         setActionStatus((prev) => ({ ...prev, [messageId]: { state: "applied" } }));
+        const confirmation: ChatMessage = {
+          id: createSystemMessageId(),
+          role: ROLE_ASSISTANT,
+          content: buildApplySuccessMessage(action, t),
+        };
+        setMessages((prev) => [...prev, confirmation]);
         return;
       }
       const message = formatApplyError(result.errorKey, result.detail, t);
@@ -123,12 +202,21 @@ export default function ChatPage() {
         [messageId]: { state: "failed", message },
       }));
     },
-    [homeId, t]
+    [homeId, setMessages, t]
   );
 
-  const handleCancel = useCallback((messageId: string) => {
-    setActionStatus((prev) => ({ ...prev, [messageId]: { state: "cancelled" } }));
-  }, []);
+  const handleCancel = useCallback(
+    (messageId: string, action: ChatAction) => {
+      setActionStatus((prev) => ({ ...prev, [messageId]: { state: "cancelled" } }));
+      const notice: ChatMessage = {
+        id: createSystemMessageId(),
+        role: ROLE_ASSISTANT,
+        content: buildApplyCancelMessage(action, t),
+      };
+      setMessages((prev) => [...prev, notice]);
+    },
+    [setMessages, t]
+  );
 
   if (!homeId) {
     return <EmptyState t={t} />;
@@ -182,7 +270,7 @@ interface MessageRowProps {
   isLastStreaming: boolean;
   status: ActionStatus;
   onApply: (messageId: string, action: ChatAction) => void;
-  onCancel: (messageId: string) => void;
+  onCancel: (messageId: string, action: ChatAction) => void;
 }
 
 function MessageRow({ msg, isLastStreaming, status, onApply, onCancel }: MessageRowProps) {
@@ -200,6 +288,7 @@ function MessageRow({ msg, isLastStreaming, status, onApply, onCancel }: Message
     msg.role === ROLE_ASSISTANT &&
     !isLastStreaming &&
     action === null &&
+    !isCrudIntentContent(msg.content, visibleContent) &&
     hasIotActionContent(visibleContent);
 
   return (
@@ -209,21 +298,24 @@ function MessageRow({ msg, isLastStreaming, status, onApply, onCancel }: Message
         content={visibleContent}
         isStreaming={isLastStreaming}
       />
-      {msg.role === ROLE_ASSISTANT && action !== null && !isLastStreaming && (
-        <ChatActionCard
-          action={action}
-          status={status}
-          onApply={() => onApply(msg.id, action)}
-          onCancel={() => onCancel(msg.id)}
-        />
-      )}
+      {msg.role === ROLE_ASSISTANT &&
+        action !== null &&
+        !isLastStreaming &&
+        status.state !== "cancelled" && (
+          <ChatActionCard
+            action={action}
+            status={status}
+            onApply={() => onApply(msg.id, action)}
+            onCancel={() => onCancel(msg.id, action)}
+          />
+        )}
       {showIotCard && <IotActionCard />}
     </div>
   );
 }
 
 function formatApplyError(
-  errorKey: "ROOM_NOT_FOUND" | "APPLIANCE_NOT_FOUND" | "API_ERROR",
+  errorKey: "ROOM_NOT_FOUND" | "APPLIANCE_NOT_FOUND" | "ROOM_ALREADY_EXISTS" | "API_ERROR",
   detail: string,
   t: Translations
 ): string {
@@ -232,6 +324,9 @@ function formatApplyError(
   }
   if (errorKey === "APPLIANCE_NOT_FOUND") {
     return t.CHAT_ACTION_APPLIANCE_NOT_FOUND.replace(ROOM_NOT_FOUND_PLACEHOLDER, detail);
+  }
+  if (errorKey === "ROOM_ALREADY_EXISTS") {
+    return t.CHAT_ACTION_ROOM_ALREADY_EXISTS.replace(ROOM_NOT_FOUND_PLACEHOLDER, detail);
   }
   return detail;
 }

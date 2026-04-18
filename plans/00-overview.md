@@ -7,7 +7,7 @@
 | Name | E-LUMI-NATE |
 | Tagline | "Illuminate the waste. Eliminate the bill." |
 | Type | AI-Powered Home Energy Intelligence |
-| AI Persona | "Trợ Lý Khoai Tây" (Potato Assistant) — witty, eco-friendly energy expert |
+| AI Persona | "Trợ Lý Khoai Tây" (Brotato Assistant) — witty, eco-friendly energy expert |
 | Duration | 16 hours hackathon |
 | Target | Mobile-first web app, MVP (no auth) |
 

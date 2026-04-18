@@ -80,7 +80,7 @@ const MAX_CHAT_HISTORY_MESSAGES = 20;
 
 ```typescript
 export const RECOMMENDATION_SYSTEM_PROMPT = `
-Ban la "Trợ Lý Khoai Tây" (Potato Assistant), mot chuyen gia nang luong hai huoc va than thien cho ho gia dinh Viet Nam.
+Ban la "Trợ Lý Khoai Tây" (Brotato Assistant), mot chuyen gia nang luong hai huoc va than thien cho ho gia dinh Viet Nam.
 
 NHIEM VU:
 Phan tich du lieu tieu thu dien cua mot ho gia dinh va dua ra khuyen nghi ca nhan hoa.
@@ -174,7 +174,7 @@ export async function generateRecommendations(homeData: Home): Promise<Recommend
 
 ```typescript
 export const CHAT_ASSISTANT_SYSTEM_PROMPT = `
-Ban la "Trợ Lý Khoai Tây" (Potato Assistant), mot tro ly nang luong than thien va hai huoc song trong ung dung E-LUMI-NATE.
+Ban la "Trợ Lý Khoai Tây" (Brotato Assistant), mot tro ly nang luong than thien va hai huoc song trong ung dung E-LUMI-NATE.
 
 TINH CACH:
 - Than thien, hai huoc, dung ngon ngu Viet Nam thoai mai

@@ -1,6 +1,6 @@
 import { getHome } from './home-service';
 import {
-  calculateApplianceMonthlyKwh,
+  calculateApplianceMonthlyKwhForRoom,
   calculateMonthlyCost,
 } from './evn-pricing-service';
 import {
@@ -13,7 +13,7 @@ import {
   ApplianceSimulationResult,
   ImpactLevel,
 } from '../types/simulator';
-import { Appliance } from '../types/home';
+import { Appliance, RoomSize } from '../types/home';
 
 const MONTHS_PER_YEAR = 12;
 const TWO_DECIMAL_PRECISION = 100;
@@ -133,6 +133,13 @@ export async function calculateSimulation(
     adjustmentMap.set(adj.applianceId, adj);
   }
 
+  const sizeByApplianceId = new Map<string, RoomSize>();
+  for (const room of home.rooms) {
+    for (const appliance of room.appliances) {
+      sizeByApplianceId.set(appliance.applianceId, room.size);
+    }
+  }
+
   const allAppliances: Appliance[] = home.rooms.flatMap(
     (room) => room.appliances
   );
@@ -143,18 +150,26 @@ export async function calculateSimulation(
 
   for (const appliance of allAppliances) {
     const adjustment = adjustmentMap.get(appliance.applianceId);
+    const size = sizeByApplianceId.get(appliance.applianceId);
+    if (!size) {
+      continue;
+    }
 
-    const originalKwh = calculateApplianceMonthlyKwh(
+    const originalKwh = calculateApplianceMonthlyKwhForRoom(
       appliance.wattage,
-      appliance.dailyUsageHours
+      appliance.dailyUsageHours,
+      size,
+      appliance.type
     );
 
     const adjustedWattage = resolveWattage(appliance, adjustment);
     const adjustedDailyHours = resolveDailyHours(appliance, adjustment);
 
-    const simulatedKwh = calculateApplianceMonthlyKwh(
+    const simulatedKwh = calculateApplianceMonthlyKwhForRoom(
       adjustedWattage,
-      adjustedDailyHours
+      adjustedDailyHours,
+      size,
+      appliance.type
     );
 
     originalTotalKwh += originalKwh;

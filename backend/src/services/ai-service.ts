@@ -5,7 +5,11 @@ import { calculateMonthlyCost } from './evn-pricing-service';
 import { RECOMMENDATION_SYSTEM_PROMPT, RECOMMENDATION_RETRY_PROMPT } from '../prompts/recommendation';
 import { CHAT_ASSISTANT_SYSTEM_PROMPT } from '../prompts/chat-assistant';
 import { APPLIANCE_ESTIMATOR_PROMPT } from '../prompts/appliance-estimator';
-import { IMAGE_RECOGNIZER_PROMPT } from '../prompts/image-recognizer';
+import {
+  getImageRecognizerSystemPrompt,
+  getImageRecognizerUserPrompt,
+  ImageRecognizerLanguage,
+} from '../prompts/image-recognizer';
 import { USAGE_HABIT_PARSER_PROMPT } from '../prompts/usage-habit-parser';
 import { HABIT_ANALYZER_PROMPT } from '../prompts/habit-analyzer';
 import {
@@ -418,13 +422,14 @@ interface RawImageRecognitionResult {
 
 export async function recognizeAppliance(
   imageBase64: string,
-  mediaType: SupportedMediaType
+  mediaType: SupportedMediaType,
+  language: ImageRecognizerLanguage = 'vi'
 ): Promise<ImageRecognitionResult> {
   try {
     const response = await getClient().messages.create({
       model: MODEL_SONNET,
       max_tokens: MAX_TOKENS_IMAGE_RECOGNITION,
-      system: IMAGE_RECOGNIZER_PROMPT,
+      system: getImageRecognizerSystemPrompt(language),
       messages: [
         {
           role: 'user',
@@ -439,7 +444,7 @@ export async function recognizeAppliance(
             },
             {
               type: 'text',
-              text: 'Hay nhan dien thiet bi dien trong hinh anh nay.',
+              text: getImageRecognizerUserPrompt(language),
             },
           ],
         },

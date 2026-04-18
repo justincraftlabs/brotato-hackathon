@@ -46,6 +46,7 @@ import { analyzeHabit, estimateAppliance } from "@/lib/api";
 import type { HabitAnalysis } from "@/lib/types";
 import { useT } from "@/hooks/use-t";
 import { useLanguage } from "@/contexts/language-context";
+import type { Translations } from "@/lib/translations";
 import { useImageCapture } from "@/hooks/useImageCapture";
 import { cn } from "@/lib/cn";
 import {
@@ -109,10 +110,13 @@ const INITIAL_FORM_STATE: FormState = {
 
 type ConfidenceLevel = "high" | "medium" | "low";
 
-function getConfidenceLabel(confidence: ConfidenceLevel): string {
-  if (confidence === CONFIDENCE_LEVEL_HIGH) return IMAGE_LABELS.CONFIDENCE_HIGH;
-  if (confidence === CONFIDENCE_LEVEL_MEDIUM) return IMAGE_LABELS.CONFIDENCE_MEDIUM;
-  return IMAGE_LABELS.CONFIDENCE_LOW;
+function getConfidenceLabel(
+  confidence: ConfidenceLevel,
+  t: Translations
+): string {
+  if (confidence === CONFIDENCE_LEVEL_HIGH) return t.IMAGE_CONFIDENCE_HIGH;
+  if (confidence === CONFIDENCE_LEVEL_MEDIUM) return t.IMAGE_CONFIDENCE_MEDIUM;
+  return t.IMAGE_CONFIDENCE_LOW;
 }
 
 function getConfidenceColor(confidence: ConfidenceLevel): string {
@@ -558,7 +562,7 @@ export function ApplianceFormStep({
                       size="icon"
                       className="shrink-0"
                       onClick={() => cameraInputRef.current?.click()}
-                      aria-label={IMAGE_LABELS.CAMERA_BUTTON}
+                      aria-label={t.IMAGE_CAMERA_BUTTON}
                     >
                       <Camera className="h-4 w-4 text-primary" />
                     </Button>
@@ -589,7 +593,7 @@ export function ApplianceFormStep({
                               <div className="absolute inset-0 flex items-center justify-center bg-black/50">
                                 <Loader2 className="h-6 w-6 animate-spin text-primary" />
                                 <span className="ml-2 text-xs text-white">
-                                  {IMAGE_LABELS.PROCESSING}
+                                  {t.IMAGE_PROCESSING}
                                 </span>
                               </div>
                             )}
@@ -608,7 +612,7 @@ export function ApplianceFormStep({
                                   getConfidenceColor(recognitionResult.confidence)
                                 )}
                               >
-                                {getConfidenceLabel(recognitionResult.confidence)}
+                                {getConfidenceLabel(recognitionResult.confidence, t)}
                               </Badge>
                             </div>
                             <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground">
@@ -618,12 +622,12 @@ export function ApplianceFormStep({
                               </span>
                               {recognitionResult.brand && (
                                 <span>
-                                  {IMAGE_LABELS.BRAND_LABEL}: {recognitionResult.brand}
+                                  {t.IMAGE_BRAND_LABEL}: {recognitionResult.brand}
                                 </span>
                               )}
                               {recognitionResult.model && (
                                 <span>
-                                  {IMAGE_LABELS.MODEL_LABEL}: {recognitionResult.model}
+                                  {t.IMAGE_MODEL_LABEL}: {recognitionResult.model}
                                 </span>
                               )}
                             </div>
@@ -637,7 +641,7 @@ export function ApplianceFormStep({
                                 disabled={isUsingResult}
                               >
                                 <RotateCcw className="mr-1 h-3 w-3" />
-                                {IMAGE_LABELS.RETRY}
+                                {t.IMAGE_RETRY}
                               </Button>
                               <Button
                                 type="button"
@@ -649,10 +653,10 @@ export function ApplianceFormStep({
                                 {isUsingResult ? (
                                   <>
                                     <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
-                                    {IMAGE_LABELS.PROCESSING}
+                                    {t.IMAGE_PROCESSING}
                                   </>
                                 ) : (
-                                  IMAGE_LABELS.USE_RESULT
+                                  t.IMAGE_USE_RESULT
                                 )}
                               </Button>
                             </div>
@@ -669,7 +673,7 @@ export function ApplianceFormStep({
                               onClick={handleRetryCapture}
                             >
                               <RotateCcw className="mr-1 h-3 w-3" />
-                              {IMAGE_LABELS.RETRY}
+                              {t.IMAGE_RETRY}
                             </Button>
                           </div>
                         )}

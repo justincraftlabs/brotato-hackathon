@@ -281,7 +281,10 @@ router.post(
 
       const mediaType = mimetype as SupportedMediaType;
 
-      const result = await recognizeAppliance(imageBase64, mediaType);
+      const rawLanguage = typeof req.body?.language === 'string' ? req.body.language : 'vi';
+      const language: 'vi' | 'en' = rawLanguage === 'en' ? 'en' : 'vi';
+
+      const result = await recognizeAppliance(imageBase64, mediaType, language);
 
       const response: ApiSuccessResponse<ImageRecognitionResult> = {
         success: true,

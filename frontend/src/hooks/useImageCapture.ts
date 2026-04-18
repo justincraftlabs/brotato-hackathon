@@ -2,8 +2,9 @@
 
 import { useCallback, useState } from "react";
 
+import { useLanguage } from "@/contexts/language-context";
+import { useT } from "@/hooks/use-t";
 import { recognizeAppliance } from "@/lib/api";
-import { IMAGE_LABELS } from "@/lib/image-constants";
 import { base64ToFile, resizeImageToBase64 } from "@/lib/image";
 import type { ImageRecognitionResult } from "@/lib/types";
 
@@ -17,37 +18,42 @@ interface UseImageCaptureReturn {
 }
 
 export function useImageCapture(): UseImageCaptureReturn {
+  const { lang } = useLanguage();
+  const t = useT();
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
   const [recognitionResult, setRecognitionResult] =
     useState<ImageRecognitionResult | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleFileSelect = useCallback(async (file: File) => {
-    setError(null);
-    setRecognitionResult(null);
-    setIsProcessing(true);
+  const handleFileSelect = useCallback(
+    async (file: File) => {
+      setError(null);
+      setRecognitionResult(null);
+      setIsProcessing(true);
 
-    try {
-      const base64 = await resizeImageToBase64(file);
-      setCapturedImage(base64);
+      try {
+        const base64 = await resizeImageToBase64(file);
+        setCapturedImage(base64);
 
-      const compressedFile = base64ToFile(base64);
-      const result = await recognizeAppliance(compressedFile);
+        const compressedFile = base64ToFile(base64);
+        const result = await recognizeAppliance(compressedFile, lang);
 
-      if (!result.success) {
-        setError(result.error);
+        if (!result.success) {
+          setError(result.error);
+          setIsProcessing(false);
+          return;
+        }
+
+        setRecognitionResult(result.data);
+      } catch {
+        setError(t.IMAGE_ERROR_PROCESSING);
+      } finally {
         setIsProcessing(false);
-        return;
       }
-
-      setRecognitionResult(result.data);
-    } catch {
-      setError(IMAGE_LABELS.ERROR_PROCESSING);
-    } finally {
-      setIsProcessing(false);
-    }
-  }, []);
+    },
+    [lang, t]
+  );
 
   const clear = useCallback(() => {
     setCapturedImage(null);

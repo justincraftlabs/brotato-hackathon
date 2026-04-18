@@ -3,7 +3,7 @@
 > "Illuminate the waste. Eliminate the bill."
 
 16-hour hackathon. Mobile-first web app. No auth. MVP only.
-AI persona: **"Trợ Lý Khoai Tây"** (Potato Assistant) — witty, eco-friendly energy expert speaking Vietnamese.
+AI persona: **"Trợ Lý Khoai Tây"** (Brotato Assistant) — witty, eco-friendly energy expert speaking Vietnamese.
 
 ## Quick Start
 

@@ -1,11 +1,15 @@
 "use client";
 
-import { CheckCircle2, Loader2, Pencil, Plus, Trash2, XCircle } from "lucide-react";
+import { CheckCircle2, Home as HomeIcon, Loader2, Pencil, Plus, Trash2, XCircle } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useT } from "@/hooks/use-t";
-import type { ChatAction, ChatActionApplianceUpdates } from "@/lib/chat-action";
+import type {
+  ChatAction,
+  ChatActionApplianceInput,
+  ChatActionApplianceUpdates,
+} from "@/lib/chat-action";
 import { cn } from "@/lib/utils";
 
 export type ActionStatus =
@@ -25,6 +29,7 @@ interface ChatActionCardProps {
 const ADD_OPERATION = "add";
 const UPDATE_OPERATION = "update";
 const DELETE_OPERATION = "delete";
+const CREATE_ROOM_OPERATION = "createRoom";
 
 export function ChatActionCard({ action, status, onApply, onCancel }: ChatActionCardProps) {
   const t = useT();
@@ -47,19 +52,24 @@ export function ChatActionCard({ action, status, onApply, onCancel }: ChatAction
         </div>
 
         <dl className="grid grid-cols-[80px_1fr] gap-x-3 gap-y-1 text-xs">
-          <dt className="text-muted-foreground">{t.CHAT_ACTION_ROOM_LABEL}</dt>
-          <dd className="font-medium">{action.roomName}</dd>
-
-          {action.operation === ADD_OPERATION && (
-            <AddDetails action={action} t={t} />
-          )}
-          {action.operation === UPDATE_OPERATION && (
-            <UpdateDetails action={action} t={t} />
-          )}
-          {action.operation === DELETE_OPERATION && (
+          {action.operation === CREATE_ROOM_OPERATION ? (
+            <CreateRoomDetails action={action} t={t} />
+          ) : (
             <>
-              <dt className="text-muted-foreground">{t.CHAT_ACTION_APPLIANCE_LABEL}</dt>
-              <dd className="font-medium">{action.applianceName}</dd>
+              <dt className="text-muted-foreground">{t.CHAT_ACTION_ROOM_LABEL}</dt>
+              <dd className="font-medium">{action.roomName}</dd>
+              {action.operation === ADD_OPERATION && (
+                <AddDetails action={action} t={t} />
+              )}
+              {action.operation === UPDATE_OPERATION && (
+                <UpdateDetails action={action} t={t} />
+              )}
+              {action.operation === DELETE_OPERATION && (
+                <>
+                  <dt className="text-muted-foreground">{t.CHAT_ACTION_APPLIANCE_LABEL}</dt>
+                  <dd className="font-medium">{action.applianceName}</dd>
+                </>
+              )}
             </>
           )}
         </dl>
@@ -87,7 +97,61 @@ interface AddDetailsProps {
 }
 
 function AddDetails({ action, t }: AddDetailsProps) {
-  const { appliance } = action;
+  return <ApplianceFields appliance={action.appliance} t={t} />;
+}
+
+interface CreateRoomDetailsProps {
+  action: Extract<ChatAction, { operation: "createRoom" }>;
+  t: ReturnType<typeof useT>;
+}
+
+function CreateRoomDetails({ action, t }: CreateRoomDetailsProps) {
+  const { room, appliances } = action;
+  const roomTypeLabel = t.ROOM_TYPE_LABELS[room.type];
+  const roomSizeLabel = t.ROOM_SIZE_LABELS[room.size];
+  return (
+    <>
+      <dt className="text-muted-foreground">{t.CHAT_ACTION_ROOM_LABEL}</dt>
+      <dd className="font-medium">{room.name}</dd>
+      <dt className="text-muted-foreground">{t.CHAT_ACTION_TYPE_LABEL}</dt>
+      <dd className="font-medium">{roomTypeLabel}</dd>
+      <dt className="text-muted-foreground">{t.CHAT_ACTION_ROOM_SIZE_LABEL}</dt>
+      <dd className="font-medium">{roomSizeLabel}</dd>
+      {appliances.length > 0 && (
+        <>
+          <dt className="col-span-2 mt-1 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/60">
+            {t.CHAT_ACTION_APPLIANCES_HEADING}
+          </dt>
+          {appliances.map((appliance, index) => (
+            <ApplianceRow key={`${appliance.name}-${index}`} appliance={appliance} t={t} />
+          ))}
+        </>
+      )}
+    </>
+  );
+}
+
+interface ApplianceRowProps {
+  appliance: ChatActionApplianceInput;
+  t: ReturnType<typeof useT>;
+}
+
+function ApplianceRow({ appliance, t }: ApplianceRowProps) {
+  return (
+    <dd className="col-span-2 rounded-md bg-background/40 p-2">
+      <div className="grid grid-cols-[80px_1fr] gap-x-3 gap-y-1 text-xs">
+        <ApplianceFields appliance={appliance} t={t} />
+      </div>
+    </dd>
+  );
+}
+
+interface ApplianceFieldsProps {
+  appliance: ChatActionApplianceInput;
+  t: ReturnType<typeof useT>;
+}
+
+function ApplianceFields({ appliance, t }: ApplianceFieldsProps) {
   return (
     <>
       <dt className="text-muted-foreground">{t.CHAT_ACTION_APPLIANCE_LABEL}</dt>
@@ -261,12 +325,14 @@ function StatusRow({
 }
 
 function getOperationIcon(action: ChatAction) {
+  if (action.operation === CREATE_ROOM_OPERATION) return HomeIcon;
   if (action.operation === ADD_OPERATION) return Plus;
   if (action.operation === UPDATE_OPERATION) return Pencil;
   return Trash2;
 }
 
 function getOperationBadge(action: ChatAction, t: ReturnType<typeof useT>): string {
+  if (action.operation === CREATE_ROOM_OPERATION) return t.CHAT_ACTION_CREATE_ROOM_BADGE;
   if (action.operation === ADD_OPERATION) return t.CHAT_ACTION_ADD_BADGE;
   if (action.operation === UPDATE_OPERATION) return t.CHAT_ACTION_UPDATE_BADGE;
   return t.CHAT_ACTION_DELETE_BADGE;

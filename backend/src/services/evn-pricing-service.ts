@@ -1,14 +1,48 @@
 import { EVN_TIERS, FIRST_TIER_INDEX, EvnTier } from '../constants/evn-tiers';
+import {
+  AREA_FACTOR_MAX,
+  AREA_FACTOR_MIN,
+  AREA_SENSITIVE_APPLIANCE_TYPES,
+  BASELINE_ROOM_AREA_M2,
+  ROOM_SIZE_AREA_M2,
+} from '../constants/room-sizes';
+import { RoomSize } from '../types/home';
 import { EvnTierInfo } from '../types/energy';
 
 const WATTS_PER_KW = 1000;
 const DAYS_PER_MONTH = 30;
+const NEUTRAL_FACTOR = 1;
 
 export function calculateApplianceMonthlyKwh(
   wattage: number,
   dailyHours: number
 ): number {
   return (wattage / WATTS_PER_KW) * dailyHours * DAYS_PER_MONTH;
+}
+
+export function calculateSizeFactor(
+  size: RoomSize,
+  applianceType: string
+): number {
+  if (!AREA_SENSITIVE_APPLIANCE_TYPES.has(applianceType)) {
+    return NEUTRAL_FACTOR;
+  }
+  if (BASELINE_ROOM_AREA_M2 <= 0) {
+    return NEUTRAL_FACTOR;
+  }
+  const areaM2 = ROOM_SIZE_AREA_M2[size];
+  const raw = areaM2 / BASELINE_ROOM_AREA_M2;
+  return Math.max(AREA_FACTOR_MIN, Math.min(AREA_FACTOR_MAX, raw));
+}
+
+export function calculateApplianceMonthlyKwhForRoom(
+  wattage: number,
+  dailyHours: number,
+  size: RoomSize,
+  applianceType: string
+): number {
+  const factor = calculateSizeFactor(size, applianceType);
+  return calculateApplianceMonthlyKwh(wattage * factor, dailyHours);
 }
 
 export function calculateMonthlyCost(totalKwh: number): number {
