@@ -1,6 +1,6 @@
 "use client";
 
-import { LayoutDashboard, Lightbulb, MessageCircle, Settings } from "lucide-react";
+import { Bell, LayoutDashboard, Lightbulb, MessageCircle, Settings } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ComponentType } from "react";
@@ -23,6 +23,7 @@ export function BottomNav() {
     { href: NAV_ROUTES.DASHBOARD, label: t.NAV_OVERVIEW, icon: LayoutDashboard },
     { href: NAV_ROUTES.ASSISTANT, label: t.NAV_ASSISTANT, icon: MessageCircle },
     { href: NAV_ROUTES.TIPS, label: t.NAV_TIPS, icon: Lightbulb },
+    { href: NAV_ROUTES.SCHEDULES, label: t.NAV_SCHEDULES, icon: Bell },
     { href: NAV_ROUTES.SETUP, label: t.NAV_SETUP, icon: Settings },
   ];
 
