@@ -427,9 +427,9 @@ export function ApplianceFormStep({
                   <>
                     {/* Desktop table header */}
                     <div className="hidden md:grid md:grid-cols-[1fr_72px_88px_100px_116px_72px] items-center gap-3 border-b border-border/30 px-4 pb-2 text-xs font-medium text-muted-foreground/60">
-                      <span>Thiết bị</span>
-                      <span>Công suất</span>
-                      <span>Giờ/ngày</span>
+                      <span>{t.LABEL_APPLIANCE}</span>
+                      <span>{t.LABEL_WATTAGE_SHORT}</span>
+                      <span>{t.LABEL_HOURS_PER_DAY}</span>
                       <span>{t.LABEL_MONTHLY_KWH}</span>
                       <span>{t.LABEL_MONTHLY_COST}</span>
                       <span />
@@ -544,7 +544,7 @@ export function ApplianceFormStep({
                           setForm({ ...form, name: e.target.value })
                         }
                         onBlur={handleNameBlur}
-                        placeholder="VD: Điều hòa Daikin"
+                        placeholder={t.PLACEHOLDER_APPLIANCE_NAME}
                       />
                       {isEstimating && (
                         <Loader2 className="absolute right-3 top-2.5 h-4 w-4 animate-spin text-muted-foreground" />
@@ -765,7 +765,7 @@ export function ApplianceFormStep({
                         setForm({ ...form, usageHabit: e.target.value })
                       }
                       onBlur={handleHabitBlur}
-                      placeholder="VD: Bật từ 9h tối đến 6h sáng"
+                      placeholder={t.PLACEHOLDER_USAGE_HABIT}
                       className="pr-8"
                     />
                     {isFetchingHabit && (

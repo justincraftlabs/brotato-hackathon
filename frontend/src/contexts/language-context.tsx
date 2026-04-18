@@ -5,7 +5,7 @@ import { createContext, useCallback, useContext, useEffect, useState } from "rea
 import type { Language } from "@/lib/translations";
 
 const LANGUAGE_STORAGE_KEY = "lang";
-const DEFAULT_LANGUAGE: Language = "vi";
+const DEFAULT_LANGUAGE: Language = "en";
 const VALID_LANGUAGES: Language[] = ["en", "vi"];
 
 interface LanguageContextValue {

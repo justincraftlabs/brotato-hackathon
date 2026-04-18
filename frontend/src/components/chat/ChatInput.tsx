@@ -3,7 +3,6 @@
 import { SendHorizontal } from "lucide-react";
 import { type FormEvent, type KeyboardEvent, useRef } from "react";
 
-import { VoiceInputButton } from "@/components/setup/VoiceInputButton";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useT } from "@/hooks/use-t";
@@ -50,11 +49,6 @@ export function ChatInput({ value, onChange, onSend, disabled }: ChatInputProps)
       onSubmit={handleSubmit}
       className="glass-strong flex items-center gap-2 border-t border-border/40 px-3 py-3"
     >
-      <VoiceInputButton
-        onTranscript={(text) => {
-          onSend(text);
-        }}
-      />
       <Input
         ref={inputRef}
         value={value}

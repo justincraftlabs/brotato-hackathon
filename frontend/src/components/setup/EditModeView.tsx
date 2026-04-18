@@ -168,7 +168,7 @@ function RoomCard({ room, onSelect, onEdit, onDelete, t }: RoomCardProps) {
         {hasAppliances && (
           <div className="mt-3 grid grid-cols-3 gap-2 border-t border-border/30 pt-3">
             <div className="flex flex-col">
-              <span className="text-[10px] text-muted-foreground">Điện/tháng</span>
+              <span className="text-[10px] text-muted-foreground">{t.LABEL_MONTHLY_ELECTRICITY}</span>
               <span className="text-xs font-semibold text-primary">{formatKwh(totalKwh)}</span>
             </div>
             <div className="flex flex-col">
@@ -176,7 +176,7 @@ function RoomCard({ room, onSelect, onEdit, onDelete, t }: RoomCardProps) {
               <span className="text-xs font-semibold">{totalCo2Kg.toFixed(1)} kg</span>
             </div>
             <div className="flex flex-col">
-              <span className="text-[10px] text-muted-foreground">Điện chờ</span>
+              <span className="text-[10px] text-muted-foreground">{t.LABEL_STANDBY_POWER}</span>
               <span className="text-xs font-semibold text-amber-500">{formatKwh(totalStandbyKwh)}</span>
             </div>
           </div>
@@ -706,10 +706,10 @@ export function EditModeView({ homeId }: EditModeViewProps) {
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
           {(
             [
-              { label: "Số phòng", value: String(editState.home.rooms.length), sub: "phòng" },
-              { label: "Điện/tháng", value: formatKwh(homeTotalKwh), sub: "tiêu thụ" },
-              { label: "CO₂/tháng", value: `${homeTotalCo2.toFixed(1)} kg`, sub: "phát thải" },
-              { label: "Điện chờ", value: formatKwh(homeTotalStandby), sub: "standby" },
+              { label: t.LABEL_ROOM_COUNT_TITLE, value: String(editState.home.rooms.length), sub: t.LABEL_SUB_ROOMS },
+              { label: t.LABEL_MONTHLY_ELECTRICITY, value: formatKwh(homeTotalKwh), sub: t.LABEL_SUB_CONSUMPTION },
+              { label: t.LABEL_MONTHLY_CO2, value: `${homeTotalCo2.toFixed(1)} kg`, sub: t.LABEL_SUB_EMISSION },
+              { label: t.LABEL_STANDBY_POWER, value: formatKwh(homeTotalStandby), sub: t.LABEL_SUB_STANDBY },
             ] as const
           ).map(({ label, value, sub }) => (
             <div key={label} className="glass rounded-xl p-3">
@@ -724,12 +724,12 @@ export function EditModeView({ homeId }: EditModeViewProps) {
         <div className="hidden md:flex md:flex-col md:gap-2">
           {/* Table header */}
           <div className="grid grid-cols-[1fr_110px_80px_106px_80px_96px_72px] items-center gap-3 border-b border-border/30 px-4 pb-2 text-xs font-medium text-muted-foreground/60">
-            <span>Phòng</span>
-            <span>Kích thước</span>
-            <span>Thiết bị</span>
-            <span>kWh/tháng</span>
+            <span>{t.LABEL_ROOM}</span>
+            <span>{t.LABEL_ROOM_SIZE}</span>
+            <span>{t.LABEL_APPLIANCE}</span>
+            <span>{t.LABEL_MONTHLY_KWH}</span>
             <span>CO₂</span>
-            <span>Điện chờ</span>
+            <span>{t.LABEL_STANDBY_POWER}</span>
             <span />
           </div>
 
