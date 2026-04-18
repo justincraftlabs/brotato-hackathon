@@ -6,7 +6,7 @@
 
 ## Legend
 
-- ✅ automated — green CI job covers it
+- ✅ automated — covered by a local test suite (`npm test` / `npx playwright test`)
 - 🟡 partial — automated check exists but doesn't fully cover the AC
 - ⏳ manual — verified via manual QA / demo script; no automated gate yet
 - ❌ gap — no evidence; needs to be addressed

@@ -106,8 +106,9 @@
 >   or manual demo. See `specs/verification-matrix.md`.
 > - Every prompt was **iterated** — the chat-assistant went through three
 >   versions before the action-block behavior stabilized.
-> - Every pull request goes through five CI jobs — typecheck, test,
->   `npm audit`, gitleaks, and CodeQL.
+> - Pre-deploy verification is run **locally** — `npm test` for both
+>   workspaces, `npx playwright test`, `npm audit`, and an OWASP Top 10
+>   sweep. See `specs/security-review.md`.
 > - And we publish our **AI provenance** — which artefacts were AI-drafted,
 >   which were human-edited, which AI suggestions we *rejected*, and why."
 
@@ -135,7 +136,7 @@
 
 > "E-LUMI-NATE turns Vietnamese households from electricity-bill victims
 > into informed customers. Sixteen hours, one human, four Claude agents,
-> ten specs, sixty-two tests, five CI jobs, one retrospective.
+> ten specs, sixty-two tests, one security review, one retrospective.
 >
 > Illuminate the waste. Eliminate the bill. **Cảm ơn** — questions?"
 

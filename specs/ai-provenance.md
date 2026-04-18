@@ -66,13 +66,15 @@
 | `frontend/src/**/*.test.{ts,tsx}` | ⚙️ | Test shape from Claude; human added RTL role queries. |
 | `frontend/e2e/*.spec.ts` | ⚙️ | Playwright selectors drafted by Claude; human validated against running UI. |
 
-## CI / Infra
+## Infra / Local verification
+
+No GitHub Actions by design for this repo — verification is local-only.
 
 | Artefact | Provenance | Review notes |
 |---|---|---|
-| `.github/workflows/ci.yml` | ⚙️ | Claude scaffolded the 5 initial jobs; human added the matrix strategy for `security-audit` and the `continue-on-error` tradeoff. |
 | `docker-compose.yml` | 🤖 | MongoDB-only, trivial. |
 | `backend/jest.config.js` / `frontend/jest.config.js` | 🤖 | Standard presets. |
+| `frontend/playwright.config.ts` | 🤖 | Chromium + Pixel 5 mobile profile. |
 
 ## Prompt iteration log
 
@@ -102,4 +104,4 @@ Slide 8 of the OSD deck: "Agents draft, humans govern." Below are suggestions Cl
 
 1. Every row marked ⚙️ or 🔁 has at least one human in the commit author or co-author. Check `git log --follow <path>`.
 2. The "Rejected AI suggestions" are actual decisions made during this hackathon — not fabricated retrospectively. Cross-reference with `RETROSPECTIVE.md`.
-3. For ✅/❌ rows in `specs/verification-matrix.md`, every Evidence Path points at a test that actually exists and runs in CI.
+3. For ✅/❌ rows in `specs/verification-matrix.md`, every Evidence Path points at a test that actually exists and passes locally (`cd backend && npm test`, `cd frontend && npm test`, `cd frontend && npx playwright test`).

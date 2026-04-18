@@ -21,7 +21,7 @@ Each agent owned a set of files that only it wrote to. The human reviewed every 
 - **Hour 8–12** — Integration. Landing + chat + simulator glued together. First end-to-end demo: setup → dashboard → chat worked.
 - **Hour 12–14** — Schedules (F7) + SSE + Slack added. Lots of race conditions on SSE route ordering.
 - **Hour 14–16** — Polish: glassmorphism, animations, vi/en toggle, test coverage, verification matrix.
-- **Hour 16+** (extended) — OSD rubric alignment pass: REQ/AC IDs, CI pipeline, security review, this retrospective.
+- **Hour 16+** (extended) — OSD rubric alignment pass: REQ/AC IDs, security review, AI provenance doc, demo script, this retrospective.
 
 ## What worked
 
@@ -36,7 +36,7 @@ Each agent owned a set of files that only it wrote to. The human reviewed every 
 
 1. **"Vibe-spec" temptation.** The first draft of `specs/*/` were good narratives but lacked testable acceptance criteria. We had to do a second pass adding REQ/AC IDs + RFC 2119 keywords. Lesson: define acceptance before writing code, not after.
 2. **ESLint skipped during builds.** We shipped with `ignoreDuringBuilds: true` in `next.config.mjs` because early lint debt was blocking us. It accumulated more debt. When we finally fixed it, five real issues were lurking (unused imports, unnecessary React Hook deps). Lesson: never turn off the mechanical gates to "ship faster" — you'll pay interest on the debt.
-3. **`useSearchParams()` prerender error.** `/tips` uses `useSearchParams` without a `<Suspense>` boundary. The issue was hidden because `npm run build` wasn't part of CI — only lint/typecheck/test were. Claude suggested `export const dynamic = "force-dynamic"` as a fix; it does not actually fix the issue. Still open as a follow-up.
+3. **`useSearchParams()` prerender error.** `/tips` uses `useSearchParams` without a `<Suspense>` boundary. We only ran `npm run build` occasionally during development, so the error went unnoticed until late. Claude suggested `export const dynamic = "force-dynamic"` as a fix; it does not actually fix the issue. Still open as a follow-up.
 4. **Spec/code divergence on top-consumers count.** Spec said "top 5"; code returned top 10; UI sliced to 5. Nobody noticed until we wrote AC-DASH-003. Lesson: specs need a verification matrix from day one — divergence is invisible without it.
 5. **Evn-pricing unit test had a TypeScript error for days.** `calculateSizeFactor('lighting', 'lighting')` passed `'lighting'` where `RoomSize` was expected. The test never compiled, so the evn-pricing suite silently didn't run. This slipped because the parent `npm test` reported 10 passed, 1 failed — and we glossed over the failure as "flaky". Lesson: never ignore a failing test suite even if you think it's unrelated.
 6. **AI suggesting scope creep.** Claude proposed switching from Mongoose to Prisma mid-hackathon. Rejected — but it was a genuine time sink to evaluate. Lesson: the cost of *evaluating* a suggestion is real; default to "not now" unless the payoff is demo-visible.
@@ -45,7 +45,7 @@ Each agent owned a set of files that only it wrote to. The human reviewed every 
 ## What we'd change
 
 1. **Verification matrix on day one.** Before writing a single line of code. Every feature PR has a "which REQ/AC does this verify?" line.
-2. **CI build job from the start.** `npm run build` as a mandatory green check. Prerender issues surface within minutes, not days.
+2. **`npm run build` in the pre-commit loop from hour zero.** Even without CI, running it on every milestone would have surfaced the prerender issue on day one.
 3. **Prompt versioning baked into the file.** Every prompt file gets a `// v3 — 2026-04-18 — added action-block rules (reason: v2 hallucinated IoT devices)` header, so the commit graph doesn't have to be archaeology.
 4. **Reject AI's scope-expanding suggestions faster.** Time-box suggestion evaluation to 5 minutes. If it's not demo-visible in 5, defer to post-hackathon.
 5. **Export internal helpers for testability.** `calculateResizedDimensions` was internal for a day too long. If a pure function exists, it gets exported — tests are part of its API surface.
@@ -69,4 +69,4 @@ Each agent owned a set of files that only it wrote to. The human reviewed every 
 
 We built the MVP. It works. The OSD rubric made us do homework we'd normally skip (formal specs, verification matrix, security review, provenance). That homework caught 5 real issues we wouldn't otherwise have seen.
 
-Would we do it all again? Yes — but with the matrix on day one and the CI build job from hour zero.
+Would we do it all again? Yes — but with the verification matrix on day one and `npm run build` in the pre-commit loop from hour zero.

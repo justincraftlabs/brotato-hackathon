@@ -20,9 +20,9 @@
 | A03 | Injection | ✅ | Every route validates with `zod` at the boundary (see [middleware/validate.ts](../backend/src/middleware/validate.ts)). Mongoose parameterizes queries — no string concatenation. |
 | A04 | Insecure Design | ✅ | Thin routes / fat services pattern; prompts isolated in `backend/src/prompts/`; frontend never calls Claude directly. |
 | A05 | Security Misconfiguration | 🟡 | `cors()` defaults are permissive. Tighten `origin` before production. `helmet` not installed — add before deploy. |
-| A06 | Vulnerable Components | ✅ | CI `security-audit` job runs `npm audit --audit-level=high` on both workspaces. Dev deps excluded (`--omit=dev`). Review weekly. |
+| A06 | Vulnerable Components | 🟡 | Run `npm audit --audit-level=high --omit=dev` locally in both workspaces before deploy. No automated gate on this repo. |
 | A07 | Identification & Auth Failures | ⚠ Accepted tradeoff | No auth by design for MVP — same as A01. |
-| A08 | Software & Data Integrity | ✅ | `package-lock.json` committed; CI uses `npm ci` (fails on drift). No postinstall scripts in dependencies reviewed. |
+| A08 | Software & Data Integrity | ✅ | `package-lock.json` committed; any deploy pipeline should use `npm ci` (fails on drift). No postinstall scripts in dependencies reviewed. |
 | A09 | Logging & Monitoring | 🟡 | `console.error` only. Structured logging (pino / winston) deferred. Acceptable for hackathon; required before prod. |
 | A10 | SSRF | ✅ | `recognizeAppliance` accepts base64 image blobs — not URLs. No outbound fetch accepts user-supplied targets. |
 
@@ -42,11 +42,16 @@
 | Client storage | `homeId` in `localStorage` | ⚠ | Accepted tradeoff: acts as the MVP's "session"; XSS would leak it. No auth tokens stored, so blast radius is "read that one home's data". |
 | Camera / mic permissions | Requested only on user gesture | ✅ | Voice/image UI triggers permission prompts inside `onClick` handlers, not on page load. |
 
-## Automated gates (CI)
+## Recommended pre-deploy gates (manual today)
 
-- `security-audit` (matrix: backend + frontend) — `npm audit --audit-level=high --omit=dev`. Soft-fail during hackathon (`continue-on-error: true`); switch to hard-fail post-deploy.
-- `secret-scan` — `gitleaks` on every PR with full history
-- `codeql` — GitHub native static analysis for JS/TS vulns
+No automated CI is configured for this repo by design. Run these locally
+before any deploy:
+
+- `npm audit --audit-level=high --omit=dev` in **both** `backend/` and `frontend/` workspaces.
+- `gitleaks detect --source .` (or equivalent) for secret scanning across full history.
+- A JS/TS static analyzer (CodeQL, Semgrep, or ESLint `@typescript-eslint/strict` presets).
+
+If CI is enabled later, these become the three canonical security jobs.
 
 ## AI-assisted review notes
 
@@ -59,5 +64,5 @@
 2. Replace permissive MVP UUID-as-token with real authentication (OAuth / magic link).
 3. Add structured logging + request IDs.
 4. Rotate `ANTHROPIC_API_KEY` to a workspace-scoped key.
-5. Flip `security-audit` `continue-on-error` to hard-fail.
+5. Wire the three recommended gates above into CI (or a pre-deploy script) and hard-fail on violations.
 6. Add rate limiting (`express-rate-limit`) on `/api/ai/*` to cap Claude spend.
