@@ -11,10 +11,32 @@ const inter = Inter({
   variable: "--font-sans",
 });
 
+const APP_NAME = "E-LUMI-NATE";
+const APP_DESCRIPTION =
+  "Illuminate the waste. Eliminate the bill. AI-powered home energy intelligence for Vietnamese households.";
+const LOGO_PATH = "/logo.png";
+
 export const metadata: Metadata = {
-  title: "E-LUMI-NATE",
-  description:
-    "Ung dung phan tich va toi uu hoa nang luong cho gia dinh Viet Nam. Giam hoa don dien, bao ve moi truong.",
+  title: APP_NAME,
+  description: APP_DESCRIPTION,
+  icons: {
+    icon: LOGO_PATH,
+    shortcut: LOGO_PATH,
+    apple: LOGO_PATH,
+  },
+  openGraph: {
+    title: APP_NAME,
+    description: APP_DESCRIPTION,
+    siteName: APP_NAME,
+    images: [{ url: LOGO_PATH, alt: APP_NAME }],
+    type: "website",
+  },
+  twitter: {
+    card: "summary",
+    title: APP_NAME,
+    description: APP_DESCRIPTION,
+    images: [LOGO_PATH],
+  },
 };
 
 export default function RootLayout({
