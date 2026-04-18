@@ -290,6 +290,7 @@ For implementation details beyond what's here, see `plans/`:
 - [specs/energy/](specs/energy/) — F2 Energy Dashboard, EVN pricing, CO2
 - [specs/chat/](specs/chat/) — F3 AI Chat (Trợ Lý Khoai Tây) + Recommendations
 - [specs/simulator/](specs/simulator/) — F4 Green Heatmap Simulator
+- [specs/testing/](specs/testing/) — Unit + E2E testing strategy (Jest, supertest, RTL, Playwright)
 
 ## Gotchas
 
