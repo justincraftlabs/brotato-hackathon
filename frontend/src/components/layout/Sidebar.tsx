@@ -32,7 +32,7 @@ const THEME_LIGHT = "light";
 const SIDEBAR_STORAGE_KEY = "sidebar-expanded";
 const SIDEBAR_EXPANDED_WIDTH = 240;
 const SIDEBAR_MINI_WIDTH = 68;
-const LOGO_SIZE = 32;
+const LOGO_SIZE = 28;
 
 const SIDEBAR_SPRING: Parameters<typeof motion.aside>[0]["transition"] = {
   type: "spring",
@@ -82,8 +82,8 @@ const NAV_ITEMS: NavItemDef[] = [
   { href: NAV_ROUTES.DASHBOARD, labelKey: "NAV_OVERVIEW", icon: LayoutDashboard },
   { href: NAV_ROUTES.ASSISTANT, labelKey: "NAV_ASSISTANT", icon: MessageCircle },
   { href: NAV_ROUTES.TIPS, labelKey: "NAV_TIPS", icon: Lightbulb },
-  { href: NAV_ROUTES.SETUP, labelKey: "NAV_SETUP", icon: Settings },
   { href: NAV_ROUTES.SCHEDULES, labelKey: "NAV_SCHEDULES", icon: Bell },
+  { href: NAV_ROUTES.SETUP, labelKey: "NAV_SETUP", icon: Settings },
 ];
 
 export function Sidebar() {
@@ -144,7 +144,7 @@ export function Sidebar() {
             alt="E-LUMI-NATE"
             width={LOGO_SIZE}
             height={LOGO_SIZE}
-            className="shrink-0 rounded-full ring-2 ring-primary/30"
+            className="shrink-0 rounded-full object-cover"
           />
           <AnimatePresence initial={false}>
             {expanded && (
