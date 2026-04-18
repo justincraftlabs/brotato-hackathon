@@ -536,6 +536,15 @@ export const TRANSLATIONS = {
   IOT_SUGGESTION_PRESENCE_DETAIL: { vi: "Cảm biến hiện diện tự ngắt điện ngay khi bạn ra ngoài, không cần nhớ tắt tay.", en: "Presence sensor auto-cuts power when you leave — no need to remember." },
   IOT_APPLY_ALL_REQUIREMENT: { vi: "Áp dụng hàng loạt yêu cầu tích hợp IoT Gateway với tất cả thiết bị Smart Plug trong nhà.", en: "Batch application requires IoT Gateway integration with all Smart Plug devices at home." },
   IOT_APPLY_ALL_INTERIM_TIP: { vi: "💡 Trong khi chờ Phase 2: thực hiện thủ công từng gợi ý để đạt mức tiết kiệm tương đương ngay hôm nay!", en: "💡 While waiting for Phase 2: manually follow each tip for equivalent savings today!" },
+  IOT_APPLY_ALL_TITLE: { vi: "Áp dụng tất cả {n} automation", en: "Apply all {n} automations" },
+  IOT_DIALOG_EST_SAVINGS_PER_MONTH: { vi: "Tiết kiệm ước tính/tháng", en: "Estimated savings/month" },
+  IOT_DIALOG_COMING_IN_PHASE2: { vi: "Sẽ có trong Phase 2", en: "Coming in Phase 2" },
+  IOT_DIALOG_INTERIM_SHORT_TIP: { vi: "💡 Trong khi chờ: làm theo gợi ý thủ công từ AI để rút phích hoặc bật/tắt đúng giờ — tiết kiệm tương đương!", en: "💡 For now: follow manual AI tips to unplug or switch on schedule — equivalent savings!" },
+  IOT_PHASE2_SMART_PLUG_SUB: { vi: "Điều khiển từ xa", en: "Remote control" },
+  IOT_PHASE2_SCHEDULE_SUB: { vi: "Tự động bật/tắt", en: "Auto on/off" },
+  IOT_PHASE2_MONITOR_LABEL: { vi: "Theo dõi", en: "Monitor" },
+  IOT_PHASE2_MONITOR_SUB: { vi: "Thời gian thực", en: "Real-time" },
+  IOT_CARD_SAVINGS_PER_MONTH_SUFFIX: { vi: "/tháng", en: "/month" },
 
   // EfficiencyGauge
   EFFICIENCY_INFO_TITLE: { vi: "Chỉ số Eco Score", en: "Eco Score" },

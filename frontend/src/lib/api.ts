@@ -319,11 +319,12 @@ export async function deleteRoom(
 
 export async function getSavingsSuggestions(
   homeId: string,
-  forceRefresh = false
+  forceRefresh = false,
+  language: "vi" | "en" = "vi"
 ): Promise<ApiResponse<SavingsSuggestionsResult>> {
   return request<SavingsSuggestionsResult>("/api/ai/savings-suggestions", {
     method: "POST",
-    body: JSON.stringify({ homeId, forceRefresh }),
+    body: JSON.stringify({ homeId, forceRefresh, language }),
   });
 }
 

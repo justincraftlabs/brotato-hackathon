@@ -9,6 +9,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { RoomAccordionItem } from "@/components/savings/RoomAccordionItem";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { useT } from "@/hooks/use-t";
+import { useLanguage } from "@/contexts/language-context";
 import { getSavingsSuggestions } from "@/lib/api";
 import { LOCAL_STORAGE_HOME_ID_KEY, NAV_ROUTES } from "@/lib/constants";
 import { formatKwh, formatVnd } from "@/lib/format";
@@ -84,21 +85,32 @@ function TotalSavingsCard({ data, t }: TotalSavingsCardProps) {
 
 export default function SuggestionsPage() {
   const t = useT();
+  const { lang } = useLanguage();
   const [homeId] = useLocalStorage(LOCAL_STORAGE_HOME_ID_KEY);
   const [pageState, setPageState] = useState<PageState>(INITIAL_STATE);
 
-  const fetchSuggestions = useCallback(async (id: string, forceRefresh: boolean) => {
-    setPageState({ status: "loading" });
+  const fetchSuggestions = useCallback(
+    async (id: string, forceRefresh: boolean) => {
+      setPageState({ status: "loading" });
 
-    const result = await getSavingsSuggestions(id, forceRefresh);
+      const result = await getSavingsSuggestions(id, forceRefresh, lang);
 
-    if (!result.success) {
-      setPageState({ status: "error", message: result.error });
+      if (!result.success) {
+        setPageState({ status: "error", message: result.error });
+        return;
+      }
+
+      setPageState({ status: "success", data: result.data });
+    },
+    [lang]
+  );
+
+  useEffect(() => {
+    if (!homeId) {
       return;
     }
-
-    setPageState({ status: "success", data: result.data });
-  }, []);
+    setPageState(INITIAL_STATE);
+  }, [homeId, lang]);
 
   useEffect(() => {
     if (!homeId) {
