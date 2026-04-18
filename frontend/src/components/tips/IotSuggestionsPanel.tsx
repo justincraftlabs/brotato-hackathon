@@ -19,9 +19,11 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useT } from "@/hooks/use-t";
 import { cn } from "@/lib/cn";
 import { calculateMonthlyCost } from "@/lib/calculations";
 import { formatKwh, formatVnd } from "@/lib/format";
+import type { Translations } from "@/lib/translations";
 import type { Home } from "@/lib/types";
 
 /* ---------- Types ---------- */
@@ -48,44 +50,48 @@ interface ActionMeta {
 
 /* ---------- Constants ---------- */
 
-const ACTION_META: Record<IotActionType, ActionMeta> = {
-  smart_plug: {
-    icon: Zap,
-    label: "Smart Plug",
-    iconClass: "text-primary",
-    bgClass: "bg-primary/15",
-  },
-  schedule: {
-    icon: Clock,
-    label: "Lên lịch",
-    iconClass: "text-blue-400",
-    bgClass: "bg-blue-400/15",
-  },
-  temperature: {
-    icon: Thermometer,
-    label: "Điều nhiệt",
-    iconClass: "text-orange-400",
-    bgClass: "bg-orange-400/15",
-  },
-  sleep: {
-    icon: Moon,
-    label: "Chế độ ngủ",
-    iconClass: "text-purple-400",
-    bgClass: "bg-purple-400/15",
-  },
-  presence: {
-    icon: MapPin,
-    label: "Hiện diện",
-    iconClass: "text-teal-400",
-    bgClass: "bg-teal-400/15",
-  },
-};
+function buildActionMeta(t: Translations): Record<IotActionType, ActionMeta> {
+  return {
+    smart_plug: {
+      icon: Zap,
+      label: t.IOT_ACTION_META_SMART_PLUG,
+      iconClass: "text-primary",
+      bgClass: "bg-primary/15",
+    },
+    schedule: {
+      icon: Clock,
+      label: t.IOT_ACTION_META_SCHEDULE,
+      iconClass: "text-blue-400",
+      bgClass: "bg-blue-400/15",
+    },
+    temperature: {
+      icon: Thermometer,
+      label: t.IOT_ACTION_META_TEMPERATURE,
+      iconClass: "text-orange-400",
+      bgClass: "bg-orange-400/15",
+    },
+    sleep: {
+      icon: Moon,
+      label: t.IOT_ACTION_META_SLEEP,
+      iconClass: "text-purple-400",
+      bgClass: "bg-purple-400/15",
+    },
+    presence: {
+      icon: MapPin,
+      label: t.IOT_ACTION_META_PRESENCE,
+      iconClass: "text-teal-400",
+      bgClass: "bg-teal-400/15",
+    },
+  };
+}
 
-const PHASE2_FEATURE_ITEMS = [
-  { icon: Zap, label: "Smart Plug", sub: "Điều khiển từ xa", colorClass: "text-primary", bgClass: "bg-primary/10" },
-  { icon: Clock, label: "Lên lịch", sub: "Tự động bật/tắt", colorClass: "text-blue-400", bgClass: "bg-blue-400/10" },
-  { icon: Wifi, label: "Theo dõi", sub: "Thời gian thực", colorClass: "text-teal-400", bgClass: "bg-teal-400/10" },
-] as const;
+function buildPhase2FeatureItems(t: Translations) {
+  return [
+    { icon: Zap, label: t.IOT_ACTION_META_SMART_PLUG, sub: t.IOT_PHASE2_SMART_PLUG_SUB, colorClass: "text-primary", bgClass: "bg-primary/10" },
+    { icon: Clock, label: t.IOT_ACTION_META_SCHEDULE, sub: t.IOT_PHASE2_SCHEDULE_SUB, colorClass: "text-blue-400", bgClass: "bg-blue-400/10" },
+    { icon: Wifi, label: t.IOT_PHASE2_MONITOR_LABEL, sub: t.IOT_PHASE2_MONITOR_SUB, colorClass: "text-teal-400", bgClass: "bg-teal-400/10" },
+  ] as const;
+}
 
 const AC_TYPE_KEYWORDS = ["air_conditioner", "cooling", "ac"];
 const HEATER_TYPE_KEYWORDS = ["heater", "heating", "water_heater"];
@@ -105,7 +111,10 @@ function matchesType(type: string, keywords: string[]): boolean {
   return keywords.some((k) => type.toLowerCase().includes(k));
 }
 
-function deriveIotSuggestions(home: Home): IotSuggestion[] {
+const STANDBY_WATTAGE_PLACEHOLDER = "{W}";
+const AUTOMATION_COUNT_PLACEHOLDER = "{n}";
+
+function deriveIotSuggestions(home: Home, t: Translations): IotSuggestion[] {
   const suggestions: IotSuggestion[] = [];
 
   for (const room of home.rooms) {
@@ -121,8 +130,11 @@ function deriveIotSuggestions(home: Home): IotSuggestion[] {
           type: "smart_plug",
           applianceName: appliance.name,
           roomName: roomLabel,
-          actionTitle: "Ngắt standby tự động",
-          actionDetail: `Smart plug tắt nguồn sau 30 phút không hoạt động, loại bỏ ${appliance.standbyWattage}W điện vô hình liên tục.`,
+          actionTitle: t.IOT_SUGGESTION_STANDBY_TITLE,
+          actionDetail: t.IOT_SUGGESTION_STANDBY_DETAIL.replace(
+            STANDBY_WATTAGE_PLACEHOLDER,
+            String(appliance.standbyWattage)
+          ),
           savingsKwh,
           savingsVnd: calculateMonthlyCost(savingsKwh),
         });
@@ -136,9 +148,8 @@ function deriveIotSuggestions(home: Home): IotSuggestion[] {
           type: "temperature",
           applianceName: appliance.name,
           roomName: roomLabel,
-          actionTitle: "Điều nhiệt thông minh",
-          actionDetail:
-            "Tự tăng lên 27°C khi không có người, hạ về 24°C trước 30 phút bạn về nhà.",
+          actionTitle: t.IOT_SUGGESTION_AC_TITLE,
+          actionDetail: t.IOT_SUGGESTION_AC_DETAIL,
           savingsKwh,
           savingsVnd: calculateMonthlyCost(savingsKwh),
         });
@@ -152,9 +163,8 @@ function deriveIotSuggestions(home: Home): IotSuggestion[] {
           type: "schedule",
           applianceName: appliance.name,
           roomName: roomLabel,
-          actionTitle: "Lên lịch giờ thấp điểm",
-          actionDetail:
-            "Tự bật lúc 22:00–6:00 khi giá điện EVN thấp, tiết kiệm đáng kể mỗi tháng.",
+          actionTitle: t.IOT_SUGGESTION_HEATER_TITLE,
+          actionDetail: t.IOT_SUGGESTION_HEATER_DETAIL,
           savingsKwh,
           savingsVnd: calculateMonthlyCost(savingsKwh),
         });
@@ -168,9 +178,8 @@ function deriveIotSuggestions(home: Home): IotSuggestion[] {
           type: "sleep",
           applianceName: appliance.name,
           roomName: roomLabel,
-          actionTitle: "Chế độ ngủ tự động",
-          actionDetail:
-            "Tự tắt lúc 23:30, ngăn thiết bị chạy suốt đêm khi bạn đã ngủ.",
+          actionTitle: t.IOT_SUGGESTION_SLEEP_TITLE,
+          actionDetail: t.IOT_SUGGESTION_SLEEP_DETAIL,
           savingsKwh,
           savingsVnd: calculateMonthlyCost(savingsKwh),
         });
@@ -188,9 +197,8 @@ function deriveIotSuggestions(home: Home): IotSuggestion[] {
           type: "presence",
           applianceName: appliance.name,
           roomName: roomLabel,
-          actionTitle: "Tắt khi rời khỏi nhà",
-          actionDetail:
-            "Cảm biến hiện diện tự ngắt điện ngay khi bạn ra ngoài, không cần nhớ tắt tay.",
+          actionTitle: t.IOT_SUGGESTION_PRESENCE_TITLE,
+          actionDetail: t.IOT_SUGGESTION_PRESENCE_DETAIL,
           savingsKwh,
           savingsVnd: calculateMonthlyCost(savingsKwh),
         });
@@ -208,10 +216,11 @@ function deriveIotSuggestions(home: Home): IotSuggestion[] {
 interface IotCardProps {
   suggestion: IotSuggestion;
   onAction: (s: IotSuggestion) => void;
+  t: Translations;
 }
 
-function IotCard({ suggestion, onAction }: IotCardProps) {
-  const meta = ACTION_META[suggestion.type];
+function IotCard({ suggestion, onAction, t }: IotCardProps) {
+  const meta = buildActionMeta(t)[suggestion.type];
   const Icon = meta.icon;
 
   return (
@@ -248,7 +257,7 @@ function IotCard({ suggestion, onAction }: IotCardProps) {
             <p className="text-xs text-primary font-medium">
               ~{formatVnd(suggestion.savingsVnd)}
               <span className="font-normal text-muted-foreground">
-                {" "}· {formatKwh(suggestion.savingsKwh)}/tháng
+                {" "}· {formatKwh(suggestion.savingsKwh)}{t.IOT_CARD_SAVINGS_PER_MONTH_SUFFIX}
               </span>
             </p>
             <button
@@ -256,7 +265,7 @@ function IotCard({ suggestion, onAction }: IotCardProps) {
               onClick={() => onAction(suggestion)}
               className="shrink-0 rounded-xl border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-semibold text-primary transition-colors hover:bg-primary/20"
             >
-              Áp dụng →
+              {t.IOT_CARD_APPLY_BUTTON}
             </button>
           </div>
         </div>
@@ -268,11 +277,15 @@ function IotCard({ suggestion, onAction }: IotCardProps) {
 function Phase2Dialog({
   suggestion,
   onClose,
+  t,
 }: {
   suggestion: IotSuggestion | null;
   onClose: () => void;
+  t: Translations;
 }) {
-  const meta = suggestion ? ACTION_META[suggestion.type] : null;
+  const actionMeta = buildActionMeta(t);
+  const phase2Items = buildPhase2FeatureItems(t);
+  const meta = suggestion ? actionMeta[suggestion.type] : null;
   const ActionIcon = meta?.icon ?? Wifi;
 
   return (
@@ -284,7 +297,7 @@ function Phase2Dialog({
 
           {/* Phase badge */}
           <span className="mb-3 inline-flex items-center gap-1.5 rounded-full border border-amber-400/30 bg-amber-400/10 px-2.5 py-1 text-[10px] font-semibold text-amber-400">
-            🚧 Tính năng IoT — Phase 2
+            {t.IOT_DIALOG_PHASE_HEADER}
           </span>
 
           {/* Icon + title row */}
@@ -309,7 +322,7 @@ function Phase2Dialog({
             <div className="mt-4 flex items-center gap-3 rounded-xl border border-primary/25 bg-primary/10 px-3 py-2.5">
               <Zap className="h-4 w-4 shrink-0 text-primary" />
               <div>
-                <p className="text-[10px] text-muted-foreground">Tiết kiệm ước tính/tháng</p>
+                <p className="text-[10px] text-muted-foreground">{t.IOT_DIALOG_EST_SAVINGS_PER_MONTH}</p>
                 <p className="text-sm font-bold text-primary">
                   ~{formatVnd(suggestion.savingsVnd)}
                   <span className="ml-1 text-xs font-normal text-muted-foreground">
@@ -325,10 +338,10 @@ function Phase2Dialog({
           {/* Phase 2 features */}
           <div>
             <p className="mb-2 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/60">
-              Sẽ có trong Phase 2
+              {t.IOT_DIALOG_COMING_IN_PHASE2}
             </p>
             <div className="flex gap-2">
-              {PHASE2_FEATURE_ITEMS.map(({ icon: FIcon, label, sub, colorClass, bgClass }) => (
+              {phase2Items.map(({ icon: FIcon, label, sub, colorClass, bgClass }) => (
                 <div
                   key={label}
                   className={cn(
@@ -351,15 +364,14 @@ function Phase2Dialog({
           {/* Interim tip */}
           <div className="rounded-xl border border-amber-400/15 bg-amber-400/5 px-3.5 py-3">
             <p className="text-[10px] leading-relaxed text-muted-foreground">
-              💡 Trong khi chờ: làm theo gợi ý thủ công từ AI để rút phích hoặc
-              bật/tắt đúng giờ — tiết kiệm tương đương!
+              {t.IOT_DIALOG_INTERIM_SHORT_TIP}
             </p>
           </div>
         </div>
 
         <div className="flex justify-end border-t border-border/30 px-4 py-3">
           <Button size="sm" className="btn-primary-gradient rounded-xl px-5" onClick={onClose}>
-            Đã hiểu
+            {t.IOT_DIALOG_GOT_IT}
           </Button>
         </div>
       </DialogContent>
@@ -371,11 +383,14 @@ function ApplyAllDialog({
   open,
   suggestions,
   onClose,
+  t,
 }: {
   open: boolean;
   suggestions: IotSuggestion[];
   onClose: () => void;
+  t: Translations;
 }) {
+  const actionMeta = buildActionMeta(t);
   const totalVnd = suggestions.reduce((sum, s) => sum + s.savingsVnd, 0);
   const totalKwh = suggestions.reduce((sum, s) => sum + s.savingsKwh, 0);
 
@@ -387,7 +402,7 @@ function ApplyAllDialog({
           <div className="pointer-events-none absolute -right-8 -top-8 h-32 w-32 rounded-full bg-primary/10 blur-2xl" />
 
           <span className="mb-3 inline-flex items-center gap-1.5 rounded-full border border-amber-400/30 bg-amber-400/10 px-2.5 py-1 text-[10px] font-semibold text-amber-400">
-            🚧 Tính năng IoT — Phase 2
+            {t.IOT_DIALOG_PHASE_HEADER}
           </span>
 
           <div className="flex items-start gap-3">
@@ -396,10 +411,13 @@ function ApplyAllDialog({
             </div>
             <div className="min-w-0">
               <DialogTitle className="text-base font-bold leading-snug">
-                Áp dụng tất cả {suggestions.length} automation
+                {t.IOT_APPLY_ALL_TITLE.replace(
+                  AUTOMATION_COUNT_PLACEHOLDER,
+                  String(suggestions.length)
+                )}
               </DialogTitle>
               <DialogDescription className="mt-0.5 text-sm font-medium text-foreground/70">
-                Điều khiển thiết bị thông minh
+                {t.IOT_PANEL_SUBTITLE}
               </DialogDescription>
             </div>
           </div>
@@ -408,7 +426,7 @@ function ApplyAllDialog({
           <div className="mt-4 flex items-center gap-3 rounded-xl border border-primary/25 bg-primary/10 px-3 py-2.5">
             <Zap className="h-4 w-4 shrink-0 text-primary" />
             <div>
-              <p className="text-[10px] text-muted-foreground">Tiết kiệm ước tính/tháng</p>
+              <p className="text-[10px] text-muted-foreground">{t.IOT_DIALOG_EST_SAVINGS_PER_MONTH}</p>
               <p className="text-sm font-bold text-primary">
                 ~{formatVnd(totalVnd)}
                 <span className="ml-1 text-xs font-normal text-muted-foreground">
@@ -425,11 +443,11 @@ function ApplyAllDialog({
             {/* Suggestion list */}
             <div>
               <p className="mb-2 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/60">
-                Sẽ có trong Phase 2
+                {t.IOT_DIALOG_COMING_IN_PHASE2}
               </p>
               <div className="overflow-hidden rounded-xl border border-border/40 divide-y divide-border/40">
                 {suggestions.map((s) => {
-                  const meta = ACTION_META[s.type];
+                  const meta = actionMeta[s.type];
                   const Icon = meta.icon;
                   return (
                     <div key={s.id} className="flex items-center gap-3 px-3 py-2.5">
@@ -456,8 +474,7 @@ function ApplyAllDialog({
             {/* Tip */}
             <div className="rounded-xl border border-amber-400/15 bg-amber-400/5 px-3.5 py-3">
               <p className="text-[10px] leading-relaxed text-muted-foreground">
-                💡 Trong khi chờ Phase 2: thực hiện thủ công từng gợi ý để đạt
-                mức tiết kiệm tương đương ngay hôm nay!
+                {t.IOT_APPLY_ALL_INTERIM_TIP}
               </p>
             </div>
           </div>
@@ -466,7 +483,7 @@ function ApplyAllDialog({
         {/* Footer */}
         <div className="shrink-0 flex justify-end border-t border-border/30 px-4 py-3">
           <Button size="sm" className="btn-primary-gradient rounded-xl px-5" onClick={onClose}>
-            Đã hiểu
+            {t.IOT_DIALOG_GOT_IT}
           </Button>
         </div>
       </DialogContent>
@@ -512,10 +529,11 @@ interface IotSuggestionsPanelProps {
 }
 
 export function IotSuggestionsPanel({ home, loading }: IotSuggestionsPanelProps) {
+  const t = useT();
   const [activeAction, setActiveAction] = useState<IotSuggestion | null>(null);
   const [applyAllOpen, setApplyAllOpen] = useState(false);
 
-  const suggestions = home ? deriveIotSuggestions(home) : [];
+  const suggestions = home ? deriveIotSuggestions(home, t) : [];
   const totalSavingsVnd = suggestions.reduce((sum, s) => sum + s.savingsVnd, 0);
 
   return (
@@ -529,9 +547,9 @@ export function IotSuggestionsPanel({ home, loading }: IotSuggestionsPanelProps)
                 <Wifi className="h-4 w-4 text-primary" />
               </div>
               <div>
-                <p className="text-sm font-semibold">Tự động hóa IoT</p>
+                <p className="text-sm font-semibold">{t.IOT_PANEL_TITLE}</p>
                 <p className="text-xs text-muted-foreground">
-                  Điều khiển thiết bị thông minh
+                  {t.IOT_PANEL_SUBTITLE}
                 </p>
               </div>
             </div>
@@ -544,7 +562,7 @@ export function IotSuggestionsPanel({ home, loading }: IotSuggestionsPanelProps)
             <div className="mt-3 border-t border-border/40 pt-3">
               <div className="flex items-end justify-between gap-2">
                 <div>
-                  <p className="text-xs text-muted-foreground">Tiết kiệm thêm ước tính</p>
+                  <p className="text-xs text-muted-foreground">{t.IOT_PANEL_EST_SAVINGS}</p>
                   <p className="text-xl font-bold text-primary">
                     ~{formatVnd(totalSavingsVnd)}
                     <span className="text-sm font-normal text-muted-foreground">
@@ -552,7 +570,7 @@ export function IotSuggestionsPanel({ home, loading }: IotSuggestionsPanelProps)
                     </span>
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    với {suggestions.length} automation
+                    {suggestions.length} {t.IOT_PANEL_AUTOMATION_COUNT}
                   </p>
                 </div>
                 <button
@@ -560,7 +578,7 @@ export function IotSuggestionsPanel({ home, loading }: IotSuggestionsPanelProps)
                   onClick={() => setApplyAllOpen(true)}
                   className="shrink-0 rounded-xl border border-primary/40 bg-primary/15 px-3 py-1.5 text-xs font-semibold text-primary transition-colors hover:bg-primary/25"
                 >
-                  Áp dụng tất cả
+                  {t.IOT_PANEL_APPLY_ALL}
                 </button>
               </div>
             </div>
@@ -575,7 +593,7 @@ export function IotSuggestionsPanel({ home, loading }: IotSuggestionsPanelProps)
           <div className="glass rounded-2xl border border-border/50 p-6 text-center">
             <Wifi className="mx-auto h-8 w-8 text-muted-foreground/40" />
             <p className="mt-2 text-sm text-muted-foreground">
-              Thiết lập nhà để xem gợi ý IoT
+              {t.IOT_PANEL_NO_HOME}
             </p>
           </div>
         )}
@@ -585,7 +603,7 @@ export function IotSuggestionsPanel({ home, loading }: IotSuggestionsPanelProps)
           <div className="glass rounded-2xl border border-border/50 p-6 text-center">
             <Wifi className="mx-auto h-8 w-8 text-muted-foreground/40" />
             <p className="mt-2 text-sm text-muted-foreground">
-              Không tìm thấy cơ hội tự động hóa phù hợp
+              {t.IOT_PANEL_NO_SUGGESTIONS}
             </p>
           </div>
         )}
@@ -593,18 +611,20 @@ export function IotSuggestionsPanel({ home, loading }: IotSuggestionsPanelProps)
         {/* Suggestion cards */}
         {!loading &&
           suggestions.map((s) => (
-            <IotCard key={s.id} suggestion={s} onAction={setActiveAction} />
+            <IotCard key={s.id} suggestion={s} onAction={setActiveAction} t={t} />
           ))}
       </div>
 
       <Phase2Dialog
         suggestion={activeAction}
         onClose={() => setActiveAction(null)}
+        t={t}
       />
       <ApplyAllDialog
         open={applyAllOpen}
         suggestions={suggestions}
         onClose={() => setApplyAllOpen(false)}
+        t={t}
       />
     </>
   );

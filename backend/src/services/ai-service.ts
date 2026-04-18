@@ -8,7 +8,11 @@ import { APPLIANCE_ESTIMATOR_PROMPT } from '../prompts/appliance-estimator';
 import { IMAGE_RECOGNIZER_PROMPT } from '../prompts/image-recognizer';
 import { USAGE_HABIT_PARSER_PROMPT } from '../prompts/usage-habit-parser';
 import { HABIT_ANALYZER_PROMPT } from '../prompts/habit-analyzer';
-import { SAVINGS_SUGGESTIONS_SYSTEM_PROMPT, SAVINGS_SUGGESTIONS_RETRY_PROMPT } from '../prompts/savings-suggestions';
+import {
+  getSavingsSuggestionsSystemPrompt,
+  getSavingsSuggestionsRetryPrompt,
+  SuggestionsLanguage,
+} from '../prompts/savings-suggestions';
 
 let _client: Anthropic | null = null;
 
@@ -226,12 +230,16 @@ export async function generateRecommendations(
 }
 
 export async function generateSavingsSuggestions(
-  homeData: Home
+  homeData: Home,
+  language: SuggestionsLanguage = 'vi'
 ): Promise<SavingsSuggestionsResult> {
+  const systemPrompt = getSavingsSuggestionsSystemPrompt(language);
+  const retryPrompt = getSavingsSuggestionsRetryPrompt(language);
+
   const response = await getClient().messages.create({
     model: MODEL_SONNET,
     max_tokens: MAX_TOKENS_RECOMMENDATIONS,
-    system: [{ type: 'text', text: SAVINGS_SUGGESTIONS_SYSTEM_PROMPT, cache_control: { type: 'ephemeral' } }],
+    system: [{ type: 'text', text: systemPrompt, cache_control: { type: 'ephemeral' } }],
     messages: [
       {
         role: 'user',
@@ -248,7 +256,7 @@ export async function generateSavingsSuggestions(
     const retryResponse = await getClient().messages.create({
       model: MODEL_SONNET,
       max_tokens: MAX_TOKENS_RECOMMENDATIONS,
-      system: [{ type: 'text', text: SAVINGS_SUGGESTIONS_SYSTEM_PROMPT, cache_control: { type: 'ephemeral' } }],
+      system: [{ type: 'text', text: systemPrompt, cache_control: { type: 'ephemeral' } }],
       messages: [
         {
           role: 'user',
@@ -260,7 +268,7 @@ export async function generateSavingsSuggestions(
         },
         {
           role: 'user',
-          content: SAVINGS_SUGGESTIONS_RETRY_PROMPT,
+          content: retryPrompt,
         },
       ],
     });

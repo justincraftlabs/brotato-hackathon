@@ -1,9 +1,11 @@
 import mongoose, { Schema, Document } from 'mongoose';
 import { SavingsSuggestionsResult } from '../types/ai';
 
+export type SavingsSuggestionsCache = Partial<Record<'vi' | 'en', SavingsSuggestionsResult>>;
+
 export interface HomeDocument extends Document {
   homeId: string;
-  savingsSuggestions?: SavingsSuggestionsResult;
+  savingsSuggestionsByLang?: SavingsSuggestionsCache;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -11,7 +13,7 @@ export interface HomeDocument extends Document {
 const homeSchema = new Schema(
   {
     homeId: { type: String, required: true, unique: true },
-    savingsSuggestions: { type: Schema.Types.Mixed, required: false },
+    savingsSuggestionsByLang: { type: Schema.Types.Mixed, required: false },
   },
   { timestamps: true }
 );

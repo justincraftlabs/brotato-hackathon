@@ -17,6 +17,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { useT } from "@/hooks/use-t";
+import { useLanguage } from "@/contexts/language-context";
 import { getHome, getSavingsSuggestions } from "@/lib/api";
 import {
   calculateCo2,
@@ -312,7 +313,7 @@ function TipsTabContent({
         <div className="flex items-center gap-2">
           <Activity className="h-4 w-4 text-primary" />
           <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-            Tự động hóa IoT
+            {t.IOT_PANEL_TITLE}
           </h2>
         </div>
         <IotSuggestionsPanel home={homeData} loading={iotLoading} />
@@ -443,6 +444,7 @@ function SimulatorTabContent({
 
 export default function TipsPage() {
   const t = useT();
+  const { lang } = useLanguage();
   const router = useRouter();
   const [homeId] = useLocalStorage(LOCAL_STORAGE_HOME_ID_KEY);
   const { clearAll } = useSchedules();
@@ -466,15 +468,18 @@ export default function TipsPage() {
     useState<SuggestionsState>(INITIAL_SUGGESTIONS);
   const [homeState, setHomeState] = useState<HomeState>(INITIAL_HOME);
 
-  const fetchSuggestions = useCallback(async (id: string, forceRefresh: boolean) => {
-    setSuggestionsState({ status: "loading" });
-    const result = await getSavingsSuggestions(id, forceRefresh);
-    if (!result.success) {
-      setSuggestionsState({ status: "error", message: result.error });
-      return;
-    }
-    setSuggestionsState({ status: "success", data: result.data });
-  }, []);
+  const fetchSuggestions = useCallback(
+    async (id: string, forceRefresh: boolean) => {
+      setSuggestionsState({ status: "loading" });
+      const result = await getSavingsSuggestions(id, forceRefresh, lang);
+      if (!result.success) {
+        setSuggestionsState({ status: "error", message: result.error });
+        return;
+      }
+      setSuggestionsState({ status: "success", data: result.data });
+    },
+    [lang]
+  );
 
   const fetchHome = useCallback(async (id: string) => {
     setHomeState({ status: "loading" });

@@ -52,6 +52,7 @@ const estimateApplianceSchema = z.object({
 const savingsSuggestionsSchema = z.object({
   homeId: z.string(),
   forceRefresh: z.boolean().optional().default(false),
+  language: z.enum(['vi', 'en']).optional().default('vi'),
 });
 
 type RecommendationsBody = z.infer<typeof recommendationsSchema>;
@@ -304,7 +305,7 @@ router.post(
   validate(savingsSuggestionsSchema),
   async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const { homeId, forceRefresh } = req.body as SavingsSuggestionsBody;
+      const { homeId, forceRefresh, language } = req.body as SavingsSuggestionsBody;
 
       const homeDoc = await HomeModel.findOne({ homeId }).lean();
 
@@ -317,10 +318,11 @@ router.post(
         return;
       }
 
-      if (homeDoc.savingsSuggestions && !forceRefresh) {
+      const cached = homeDoc.savingsSuggestionsByLang?.[language];
+      if (cached && !forceRefresh) {
         const response: ApiSuccessResponse<SavingsSuggestionsResult> = {
           success: true,
-          data: homeDoc.savingsSuggestions,
+          data: cached,
         };
         res.status(HTTP_OK).json(response);
         return;
@@ -337,9 +339,12 @@ router.post(
         return;
       }
 
-      const result = await generateSavingsSuggestions(home);
+      const result = await generateSavingsSuggestions(home, language);
 
-      await HomeModel.updateOne({ homeId }, { savingsSuggestions: result });
+      await HomeModel.updateOne(
+        { homeId },
+        { $set: { [`savingsSuggestionsByLang.${language}`]: result } }
+      );
 
       const response: ApiSuccessResponse<SavingsSuggestionsResult> = {
         success: true,
