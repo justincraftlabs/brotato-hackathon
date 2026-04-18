@@ -14,12 +14,6 @@ import {
 import { useT } from "@/hooks/use-t";
 import { cn } from "@/lib/utils";
 
-const PHASE2_FEATURES = [
-  { icon: Zap, label: "Smart Plug", sub: "Điều khiển từ xa", colorClass: "text-primary", bgClass: "bg-primary/10" },
-  { icon: Clock, label: "Lên lịch", sub: "Tự động bật/tắt", colorClass: "text-blue-400", bgClass: "bg-blue-400/10" },
-  { icon: Wifi, label: "Theo dõi", sub: "Thời gian thực", colorClass: "text-teal-400", bgClass: "bg-teal-400/10" },
-] as const;
-
 interface IotAction {
   icon: ReactNode;
   label: string;
@@ -33,6 +27,12 @@ interface IotActionCardProps {
 export function IotActionCard({ className }: IotActionCardProps) {
   const t = useT();
   const [selectedAction, setSelectedAction] = useState<IotAction | null>(null);
+
+  const PHASE2_FEATURES = [
+    { icon: Zap, label: t.IOT_ACTION_META_SMART_PLUG, sub: t.IOT_PHASE2_SMART_PLUG_SUB, colorClass: "text-primary", bgClass: "bg-primary/10" },
+    { icon: Clock, label: t.IOT_ACTION_META_SCHEDULE, sub: t.IOT_PHASE2_SCHEDULE_SUB, colorClass: "text-blue-400", bgClass: "bg-blue-400/10" },
+    { icon: Wifi, label: t.IOT_PHASE2_MONITOR_LABEL, sub: t.IOT_PHASE2_MONITOR_SUB, colorClass: "text-teal-400", bgClass: "bg-teal-400/10" },
+  ] as const;
 
   const IOT_ACTIONS: IotAction[] = [
     {
@@ -119,7 +119,7 @@ export function IotActionCard({ className }: IotActionCardProps) {
           <div className="flex flex-col gap-3 px-5 py-4">
             <div>
               <p className="mb-2 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/60">
-                Sẽ có trong Phase 2
+                {t.IOT_DIALOG_COMING_IN_PHASE2}
               </p>
               <div className="flex gap-2">
                 {PHASE2_FEATURES.map(({ icon: FIcon, label, sub, colorClass, bgClass }) => (

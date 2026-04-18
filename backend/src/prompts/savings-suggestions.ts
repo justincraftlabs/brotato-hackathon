@@ -5,7 +5,7 @@ const SAVINGS_SUGGESTIONS_SYSTEM_PROMPT_VI = `Ban la "Trợ Lý Khoai Tây", chu
 NHIEM VU: Phan tich tung phong va tung thiet bi, dua ra goi y tiet kiem dien nang cu the, thuc te.
 
 QUY TAC PHAN TICH:
-1. Moi phong can co mot "summary" ngan (1-2 cau) tom tat tinh trang tieu thu va tiem nang tiet kiem
+1. Moi phong can co mot "summary" ngan (2-3 cau) tom tat tinh trang tieu thu va tiem nang tiet kiem
 2. Moi thiet bi can co mot "tip" cu the nguoi dung co the lam NGAY - khong chung chung
 3. Uoc tinh tiet kiem theo kWh va VND/thang dua tren bieu gia EVN bac thang
 4. Neu thiet bi khong du thong tin de goi y, bo qua (de mang devices trong)
@@ -24,7 +24,7 @@ OUTPUT FORMAT (JSON thuan, KHONG markdown, KHONG giai thich):
     {
       "roomName": "ten phong",
       "roomType": "loai phong (living_room, bedroom, kitchen, ...)",
-      "summary": "1-2 cau tieng Viet ve phong nay",
+      "summary": "2-3 cau tieng Viet ve phong nay",
       "totalSavingsKwh": 0,
       "totalSavingsVnd": 0,
       "devices": [
@@ -47,7 +47,7 @@ const SAVINGS_SUGGESTIONS_SYSTEM_PROMPT_EN = `You are "Potato Assistant", a witt
 TASK: Analyze every room and every appliance, then give concrete, actionable electricity-saving tips.
 
 ANALYSIS RULES:
-1. Each room needs a short "summary" (1-2 sentences) describing current consumption and savings potential.
+1. Each room needs a short "summary" (2-3 sentences) describing current consumption and savings potential.
 2. Each device needs one specific "tip" the user can do RIGHT NOW — no vague advice.
 3. Estimate savings in kWh and VND per month using Vietnam's EVN tiered pricing.
 4. If a device has insufficient info, skip it (leave devices array empty).
@@ -68,7 +68,7 @@ OUTPUT FORMAT (plain JSON, NO markdown, NO explanation):
     {
       "roomName": "room name (translated to English if original is Vietnamese)",
       "roomType": "room type (living_room, bedroom, kitchen, ...)",
-      "summary": "1-2 English sentences about this room",
+      "summary": "2-3 English sentences about this room",
       "totalSavingsKwh": 0,
       "totalSavingsVnd": 0,
       "devices": [
@@ -90,14 +90,18 @@ const SAVINGS_SUGGESTIONS_RETRY_PROMPT_VI = `Hay tra ve DUNG FORMAT JSON thuan (
 
 const SAVINGS_SUGGESTIONS_RETRY_PROMPT_EN = `Please return plain JSON ONLY (NO markdown, NO \`\`\`json). Return a single JSON object with fields: rooms, grandTotalSavingsKwh, grandTotalSavingsVnd.`;
 
-export function getSavingsSuggestionsSystemPrompt(lang: SuggestionsLanguage): string {
+export function getSavingsSuggestionsSystemPrompt(
+  lang: SuggestionsLanguage,
+): string {
   if (lang === 'en') {
     return SAVINGS_SUGGESTIONS_SYSTEM_PROMPT_EN;
   }
   return SAVINGS_SUGGESTIONS_SYSTEM_PROMPT_VI;
 }
 
-export function getSavingsSuggestionsRetryPrompt(lang: SuggestionsLanguage): string {
+export function getSavingsSuggestionsRetryPrompt(
+  lang: SuggestionsLanguage,
+): string {
   if (lang === 'en') {
     return SAVINGS_SUGGESTIONS_RETRY_PROMPT_EN;
   }
@@ -105,5 +109,7 @@ export function getSavingsSuggestionsRetryPrompt(lang: SuggestionsLanguage): str
 }
 
 // Backwards-compatible re-exports (default to Vietnamese) for any stale imports.
-export const SAVINGS_SUGGESTIONS_SYSTEM_PROMPT = SAVINGS_SUGGESTIONS_SYSTEM_PROMPT_VI;
-export const SAVINGS_SUGGESTIONS_RETRY_PROMPT = SAVINGS_SUGGESTIONS_RETRY_PROMPT_VI;
+export const SAVINGS_SUGGESTIONS_SYSTEM_PROMPT =
+  SAVINGS_SUGGESTIONS_SYSTEM_PROMPT_VI;
+export const SAVINGS_SUGGESTIONS_RETRY_PROMPT =
+  SAVINGS_SUGGESTIONS_RETRY_PROMPT_VI;
