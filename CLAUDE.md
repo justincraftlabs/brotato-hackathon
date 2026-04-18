@@ -291,6 +291,7 @@ For implementation details beyond what's here, see `plans/`:
 - [specs/chat/](specs/chat/) — F3 AI Chat (Trợ Lý Khoai Tây) + Recommendations
 - [specs/simulator/](specs/simulator/) — F4 Green Heatmap Simulator
 - [specs/testing/](specs/testing/) — Unit + E2E testing strategy (Jest, supertest, RTL, Playwright)
+- [specs/verification-matrix.md](specs/verification-matrix.md) — REQ → AC → method → evidence trace for every spec
 
 ## Gotchas
 
